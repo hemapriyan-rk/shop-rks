@@ -48,14 +48,14 @@ export default function App() {
             <Route path="/admin/bank-config" element={<BankConfig />} />
             <Route path="/admin/transactions" element={<AdminTransactions />} />
             <Route path="/admin/expenses" element={<AdminExpenses />} />
+            <Route path="/logs" element={<LogsPage />} />
+            <Route path="/admin/expense-categories" element={<ManageExpenseCategories />} />
           </Route>
 
           {/* Super Admin only */}
           <Route element={<ProtectedRoute allowedRoles={['SUPER_ADMIN']} />}>
             <Route path="/users" element={<UsersPage />} />
-            <Route path="/logs" element={<LogsPage />} />
             <Route path="/admin/system" element={<ServerManagement />} />
-            <Route path="/admin/expense-categories" element={<ManageExpenseCategories />} />
           </Route>
 
           <Route path="/maintenance" element={<MaintenancePage />} />

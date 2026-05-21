@@ -7,9 +7,9 @@ const router = Router();
 // Everyone can view categories (for the dropdown)
 router.get('/', authenticate, controller.getCategories);
 
-// Only Super Admin can manage categories
-router.post('/', authenticate, requireRole('SUPER_ADMIN'), controller.createCategory);
-router.patch('/:id', authenticate, requireRole('SUPER_ADMIN'), controller.updateCategory);
-router.delete('/:id', authenticate, requireRole('SUPER_ADMIN'), controller.deleteCategory);
+// Admin and Super Admin can manage categories
+router.post('/', authenticate, requireRole('ADMIN', 'SUPER_ADMIN'), controller.createCategory);
+router.patch('/:id', authenticate, requireRole('ADMIN', 'SUPER_ADMIN'), controller.updateCategory);
+router.delete('/:id', authenticate, requireRole('ADMIN', 'SUPER_ADMIN'), controller.deleteCategory);
 
 export default router;

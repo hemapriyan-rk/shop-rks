@@ -34,11 +34,11 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     { icon: '📂', labelKey: 'nav.allTransactions', path: '/admin/transactions' },
     { icon: '📑', labelKey: 'nav.allExpenses', path: '/admin/expenses' },
     { icon: '🏷', labelKey: 'nav.expenseCats', path: '/admin/expense-categories' },
+    { icon: '📜', labelKey: 'nav.auditLogs', path: '/logs' },
   ];
 
   const superNav: NavItem[] = [
     { icon: '👥', labelKey: 'nav.users', path: '/users' },
-    { icon: '📜', labelKey: 'nav.auditLogs', path: '/logs' },
     { icon: '🖥', labelKey: 'nav.serverMgmt', path: '/admin/system' },
   ];
 
