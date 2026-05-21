@@ -17,6 +17,7 @@ export default function NewTransaction() {
   const [isSearchOpen, setIsSearchOpen] = useState(true);
   const [quantity, setQuantity] = useState<number | ''>(1);
   const [unitPrice, setUnitPrice] = useState<number | ''>('');
+  const [paymentMethod, setPaymentMethod] = useState<'CASH' | 'ONLINE' | ''>('');
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -47,6 +48,7 @@ export default function NewTransaction() {
     setSelected(s);
     setQuantity(1);
     setUnitPrice(Number(s.price));
+    setPaymentMethod(''); // Reset choice
     setIsSearchOpen(false);
     setTimeout(() => qtyRef.current?.focus(), 50);
   };
@@ -56,6 +58,7 @@ export default function NewTransaction() {
     if (!selected) { setError(t('newTx.errorSelect' as any)); return; }
     if (quantity === '' || quantity < 1) { setError(t('newTx.errorQuantity' as any)); return; }
     if (unitPrice === '' || unitPrice < 0) { setError(t('newTx.errorPrice' as any)); return; }
+    if (!paymentMethod) { setError('Please choose a payment method (Cash or Online)'); return; }
     
     setError('');
     setSubmitting(true);
@@ -64,6 +67,7 @@ export default function NewTransaction() {
         serviceId: selected.id, 
         quantity: Number(quantity), 
         unitPrice: Number(unitPrice),
+        paymentMethod,
         notes: notes || undefined 
       });
       setSuccess(`✓ ${selected.name} × ${quantity} recorded — ₹${(Number(unitPrice) * Number(quantity)).toFixed(2)}`);
@@ -175,7 +179,31 @@ export default function NewTransaction() {
             </div>
           )}
 
-          <button type="submit" className="btn btn-primary btn-lg btn-full" disabled={!selected || submitting}>
+          {selected && (
+            <div className="card" style={{ marginBottom: 24 }}>
+              <label className="form-label mb-16" style={{ fontSize: 16 }}>Payment Method</label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                <div 
+                  className={`service-item ${paymentMethod === 'CASH' ? 'selected' : ''}`} 
+                  style={{ textAlign: 'center', padding: '16px', cursor: 'pointer' }}
+                  onClick={() => setPaymentMethod('CASH')}
+                >
+                  <div style={{ fontSize: 24, marginBottom: 8 }}>💵</div>
+                  <div style={{ fontWeight: 700 }}>Cash</div>
+                </div>
+                <div 
+                  className={`service-item ${paymentMethod === 'ONLINE' ? 'selected' : ''}`} 
+                  style={{ textAlign: 'center', padding: '16px', cursor: 'pointer' }}
+                  onClick={() => setPaymentMethod('ONLINE')}
+                >
+                  <div style={{ fontSize: 24, marginBottom: 8 }}>💳</div>
+                  <div style={{ fontWeight: 700 }}>Online</div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <button type="submit" className="btn btn-primary btn-lg btn-full" disabled={!selected || !paymentMethod || submitting}>
             {submitting ? <><span className="spinner" style={{ width: 16, height: 16 }} /> {t('newTx.saving' as any)}</> : `${t('newTx.saveBtn' as any)}${selected ? ` — ₹${total.toFixed(2)}` : ''}`}
           </button>
         </form>

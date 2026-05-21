@@ -29,6 +29,7 @@ export interface Transaction {
   quantity: number;
   unitPrice: number;
   totalPrice: number;
+  paymentMethod: 'CASH' | 'ONLINE';
   notes?: string;
   createdAt: string;
   updatedAt: string;
@@ -76,6 +77,8 @@ export interface Log {
 export interface DailyAnalytics {
   date: string;
   income: number;
+  cashIncome: number;
+  onlineIncome: number;
   expenses: number;
   profit: number;
   transactionCount: number;
@@ -89,16 +92,20 @@ export interface MonthlyAnalytics {
   year: number;
   month: number;
   income: number;
+  cashIncome: number;
+  onlineIncome: number;
   expenses: number;
   profit: number;
   transactionCount: number;
   expenseCount: number;
-  daily: Array<{ date: string; income: number; expenses: number; profit: number; count: number }>;
+  daily: Array<{ date: string; income: number; cashIncome: number; onlineIncome: number; expenses: number; profit: number; count: number }>;
 }
 
 export interface TodaySummary {
   date: string;
   income: number;
+  cashIncome: number;
+  onlineIncome: number;
   expenses: number;
   profit: number;
   transactionCount: number;
@@ -130,5 +137,5 @@ export interface ApiResponse<T> {
   data?: T;
   error?: string;
   message?: string;
-  meta?: { total?: number; page?: number; limit?: number; date?: string };
+  meta?: { total?: number; page?: number; limit?: number; date?: string; totalSum?: number };
 }

@@ -16,8 +16,9 @@ export async function getTodaySummary(req: Request, res: Response, next: NextFun
     const isAdmin = isAdminOrAbove(req.user!.role);
     const userId = isAdmin ? undefined : req.user!.userId;
 
-    const [txAgg, expAgg, txCount, pendingExpenses] = await Promise.all([
-      prisma.transaction.aggregate({
+    const [txGroups, expAgg, pendingExpenses] = await Promise.all([
+      prisma.transaction.groupBy({
+        by: ['paymentMethod'],
         where: { createdAt: { gte: start, lte: end }, ...(userId && { userId }) },
         _sum: { totalPrice: true },
         _count: true,
@@ -31,21 +32,28 @@ export async function getTodaySummary(req: Request, res: Response, next: NextFun
         _sum: { amount: true },
         _count: true,
       }),
-      prisma.transaction.count({
-        where: { createdAt: { gte: start, lte: end }, ...(userId && { userId }) },
-      }),
       isAdmin ? prisma.expense.count({
         where: { createdAt: { gte: start, lte: end }, status: 'PENDING' },
       }) : Promise.resolve(0),
     ]);
 
-    const income = Number(txAgg._sum.totalPrice ?? 0);
+    let income = 0, cashIncome = 0, onlineIncome = 0, txCount = 0;
+    for (const g of txGroups) {
+      const sum = Number(g._sum.totalPrice ?? 0);
+      income += sum;
+      txCount += g._count;
+      if (g.paymentMethod === 'CASH') cashIncome += sum;
+      if (g.paymentMethod === 'ONLINE') onlineIncome += sum;
+    }
+
     const expenses = Number(expAgg._sum.amount ?? 0);
     const profit = income - expenses;
 
     sendSuccess(res, {
       date: today,
       income,
+      cashIncome,
+      onlineIncome,
       expenses,
       profit,
       transactionCount: txCount,
@@ -60,8 +68,9 @@ export async function getDailyAnalytics(req: Request, res: Response, next: NextF
     const targetDate = (req.query.date as string) || toISTDateString();
     const { start, end } = getISTDayBounds(targetDate);
 
-    const [txAgg, expAgg, topServices, userBreakdown] = await Promise.all([
-      prisma.transaction.aggregate({
+    const [txGroups, expAgg, topServices, userBreakdown] = await Promise.all([
+      prisma.transaction.groupBy({
+        by: ['paymentMethod'],
         where: { createdAt: { gte: start, lte: end } },
         _sum: { totalPrice: true },
         _count: true,
@@ -113,15 +122,25 @@ export async function getDailyAnalytics(req: Request, res: Response, next: NextF
       _sum: { amount: true },
     });
 
-    const income = Number(txAgg._sum.totalPrice ?? 0);
+    let income = 0, cashIncome = 0, onlineIncome = 0, txCount = 0;
+    for (const g of txGroups) {
+      const sum = Number(g._sum.totalPrice ?? 0);
+      income += sum;
+      txCount += g._count;
+      if (g.paymentMethod === 'CASH') cashIncome += sum;
+      if (g.paymentMethod === 'ONLINE') onlineIncome += sum;
+    }
+
     const expenses = Number(expAgg._sum.amount ?? 0);
 
     sendSuccess(res, {
       date: targetDate,
       income,
+      cashIncome,
+      onlineIncome,
       expenses,
       profit: income - expenses,
-      transactionCount: txAgg._count,
+      transactionCount: txCount,
       expenseCount: expAgg._count,
       topServices: topServices.map(s => ({
         service: serviceMap[s.serviceId],
@@ -149,8 +168,9 @@ export async function getMonthlyAnalytics(req: Request, res: Response, next: Nex
 
     const { start, end } = getISTMonthBounds(year, month);
 
-    const [txAgg, expAgg] = await Promise.all([
-      prisma.transaction.aggregate({
+    const [txGroups, expAgg] = await Promise.all([
+      prisma.transaction.groupBy({
+        by: ['paymentMethod'],
         where: { createdAt: { gte: start, lte: end } },
         _sum: { totalPrice: true },
         _count: true,
@@ -164,11 +184,13 @@ export async function getMonthlyAnalytics(req: Request, res: Response, next: Nex
 
     // Build daily breakdown for chart
     const dailyTransactions = await prisma.$queryRaw<Array<{
-      day: string; income: string; count: bigint;
+      day: string; income: string; cash_income: string; online_income: string; count: bigint;
     }>>`
       SELECT 
         to_char(created_at AT TIME ZONE 'Asia/Kolkata', 'YYYY-MM-DD') as day,
         SUM(total_price)::text as income,
+        SUM(CASE WHEN payment_method = 'CASH' THEN total_price ELSE 0 END)::text as cash_income,
+        SUM(CASE WHEN payment_method = 'ONLINE' THEN total_price ELSE 0 END)::text as online_income,
         COUNT(*)::bigint as count
       FROM transactions
       WHERE created_at >= ${start} AND created_at <= ${end}
@@ -190,28 +212,43 @@ export async function getMonthlyAnalytics(req: Request, res: Response, next: Nex
     `;
 
     // Merge into daily data map
-    const dayMap: Record<string, { income: number; expenses: number; profit: number; count: number }> = {};
+    const dayMap: Record<string, { income: number; cashIncome: number; onlineIncome: number; expenses: number; profit: number; count: number }> = {};
     for (const row of dailyTransactions) {
-      dayMap[row.day] = { income: parseFloat(row.income), expenses: 0, profit: 0, count: Number(row.count) };
+      dayMap[row.day] = { 
+        income: parseFloat(row.income), 
+        cashIncome: parseFloat(row.cash_income || '0'),
+        onlineIncome: parseFloat(row.online_income || '0'),
+        expenses: 0, profit: 0, count: Number(row.count) 
+      };
     }
     for (const row of dailyExpenses) {
-      if (!dayMap[row.day]) dayMap[row.day] = { income: 0, expenses: 0, profit: 0, count: 0 };
+      if (!dayMap[row.day]) dayMap[row.day] = { income: 0, cashIncome: 0, onlineIncome: 0, expenses: 0, profit: 0, count: 0 };
       dayMap[row.day].expenses = parseFloat(row.total);
     }
     for (const day of Object.keys(dayMap)) {
       dayMap[day].profit = dayMap[day].income - dayMap[day].expenses;
     }
 
-    const income = Number(txAgg._sum.totalPrice ?? 0);
+    let income = 0, cashIncome = 0, onlineIncome = 0, txCount = 0;
+    for (const g of txGroups) {
+      const sum = Number(g._sum.totalPrice ?? 0);
+      income += sum;
+      txCount += g._count;
+      if (g.paymentMethod === 'CASH') cashIncome += sum;
+      if (g.paymentMethod === 'ONLINE') onlineIncome += sum;
+    }
+
     const expenses = Number(expAgg._sum.amount ?? 0);
 
     sendSuccess(res, {
       year,
       month,
       income,
+      cashIncome,
+      onlineIncome,
       expenses,
       profit: income - expenses,
-      transactionCount: txAgg._count,
+      transactionCount: txCount,
       expenseCount: expAgg._count,
       daily: Object.entries(dayMap)
         .map(([date, data]) => ({ date, ...data }))

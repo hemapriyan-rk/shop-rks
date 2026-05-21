@@ -10,14 +10,14 @@ import {
 
 const TX_SELECT = {
   id: true, quantity: true, unitPrice: true, totalPrice: true,
-  notes: true, createdAt: true, updatedAt: true,
+  paymentMethod: true, notes: true, createdAt: true, updatedAt: true,
   user: { select: { id: true, name: true, username: true } },
   service: { select: { id: true, name: true, category: true } },
 };
 
 export async function getTransactions(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { date, userId: queryUserId, page = '1', limit = '50' } = req.query;
+    const { date, userId: queryUserId, paymentMethod, page = '1', limit = '50' } = req.query;
     const pageNum = Math.max(1, parseInt(page as string));
     const limitNum = Math.min(100, Math.max(1, parseInt(limit as string)));
     const skip = (pageNum - 1) * limitNum;
@@ -35,12 +35,13 @@ export async function getTransactions(req: Request, res: Response, next: NextFun
       dateFilter = { createdAt: { gte: start, lte: end } };
     }
 
-    const where = {
+    const where: any = {
       ...(filterUserId && { userId: filterUserId }),
       ...dateFilter,
+      ...(paymentMethod && { paymentMethod }),
     };
 
-    const [transactions, total] = await Promise.all([
+    const [transactions, total, sumAgg] = await Promise.all([
       prisma.transaction.findMany({
         where,
         select: TX_SELECT,
@@ -49,16 +50,18 @@ export async function getTransactions(req: Request, res: Response, next: NextFun
         take: limitNum,
       }),
       prisma.transaction.count({ where }),
+      prisma.transaction.aggregate({ where, _sum: { totalPrice: true } })
     ]);
 
-    sendSuccess(res, transactions, 200, { total, page: pageNum, limit: limitNum, date: targetDate });
+    const totalSum = Number(sumAgg._sum.totalPrice ?? 0);
+    sendSuccess(res, transactions, 200, { total, page: pageNum, limit: limitNum, date: targetDate, totalSum });
   } catch (err) { next(err); }
 }
 
 export async function createTransaction(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { serviceId, quantity, notes, unitPrice: customUnitPrice } = req.body as {
-      serviceId: string; quantity: number; notes?: string; unitPrice?: number;
+    const { serviceId, quantity, notes, unitPrice: customUnitPrice, paymentMethod } = req.body as {
+      serviceId: string; quantity: number; notes?: string; unitPrice?: number; paymentMethod: 'CASH' | 'ONLINE';
     };
 
     const service = await prisma.service.findUnique({ where: { id: serviceId } });
@@ -81,6 +84,7 @@ export async function createTransaction(req: Request, res: Response, next: NextF
           quantity,
           unitPrice,
           totalPrice,
+          paymentMethod,
           notes,
         },
         select: TX_SELECT,

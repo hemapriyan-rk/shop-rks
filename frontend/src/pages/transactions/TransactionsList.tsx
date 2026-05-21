@@ -14,22 +14,23 @@ export default function TransactionsList() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [date, setDate] = useState(new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' }));
+  const [paymentMethod, setPaymentMethod] = useState('');
   const [total, setTotal] = useState(0);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [error, setError] = useState('');
 
   const load = () => {
     setLoading(true);
-    transactionsApi.list({ date })
+    transactionsApi.list({ date, ...(paymentMethod && { paymentMethod }) })
       .then(r => {
         const data = r.data.data ?? [];
         setTransactions(data);
-        setTotal(data.reduce((s, t) => s + Number(t.totalPrice), 0));
+        setTotal(r.data.meta?.totalSum ?? data.reduce((s: number, t: any) => s + Number(t.totalPrice), 0));
       })
       .finally(() => setLoading(false));
   };
 
-  useEffect(() => { load(); }, [date]);
+  useEffect(() => { load(); }, [date, paymentMethod]);
 
   const handleDelete = async (id: string) => {
     try {
@@ -48,11 +49,16 @@ export default function TransactionsList() {
           <div className="page-header-title">Transactions</div>
           <div className="page-header-sub">Service income entries</div>
         </div>
-        <div className="page-actions">
+        <div className="page-actions" style={{ display: 'flex', gap: 12 }}>
+          <select className="form-select" value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)}>
+            <option value="">All Methods</option>
+            <option value="CASH">Cash Only</option>
+            <option value="ONLINE">Online Only</option>
+          </select>
           {isAdmin ? (
             <input type="date" className="form-input" style={{ width: 160 }} value={date} onChange={e => setDate(e.target.value)} max={new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' })} />
           ) : (
-            <div className="badge badge-blue">Today: {date}</div>
+            <div className="badge badge-blue" style={{ padding: '8px 12px' }}>Today: {date}</div>
           )}
         </div>
       </div>
@@ -70,7 +76,7 @@ export default function TransactionsList() {
         <div className="table-wrapper">
           <table>
             <thead><tr>
-              <th>Service</th><th>Category</th><th>Qty</th><th>Unit Price</th><th>Total</th>
+              <th>Service</th><th>Category</th><th>Method</th><th>Qty</th><th>Unit Price</th><th>Total</th>
               <th>By</th><th>Time</th><th>Actions</th>
             </tr></thead>
             <tbody>
@@ -78,8 +84,11 @@ export default function TransactionsList() {
                 const editable = isToday(t.createdAt);
                 return (
                   <tr key={t.id}>
-                    <td style={{ fontWeight: 600 }}>{t.service.name}</td>
-                    <td><span className="badge badge-purple">{t.service.category}</span></td>
+                    <td style={{ fontWeight: 600 }}>{t.service?.name}</td>
+                    <td><span className="badge badge-purple">{t.service?.category}</span></td>
+                    <td title={t.paymentMethod}>
+                      {t.paymentMethod === 'ONLINE' ? '💳 Online' : '💵 Cash'}
+                    </td>
                     <td>{t.quantity}</td>
                     <td>₹{Number(t.unitPrice).toFixed(2)}</td>
                     <td style={{ fontWeight: 700, color: 'var(--green)' }}>₹{Number(t.totalPrice).toFixed(2)}</td>

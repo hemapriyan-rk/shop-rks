@@ -35,9 +35,9 @@ export const servicesApi = {
 
 // ── Transactions ──────────────────────────────────────────────────
 export const transactionsApi = {
-  list: (params?: { date?: string; userId?: string; page?: number; limit?: number }) =>
+  list: (params?: { date?: string; userId?: string; page?: number; limit?: number; paymentMethod?: string }) =>
     api.get<ApiResponse<Transaction[]>>('/transactions', { params }),
-  create: (data: { serviceId: string; quantity: number; unitPrice?: number; notes?: string }) =>
+  create: (data: { serviceId: string; quantity: number; unitPrice?: number; paymentMethod: string; notes?: string }) =>
     api.post<ApiResponse<Transaction>>('/transactions', data),
   update: (id: string, data: { updatedAt: string; quantity?: number; notes?: string }) =>
     api.patch<ApiResponse<Transaction>>(`/transactions/${id}`, data),

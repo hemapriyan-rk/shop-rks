@@ -33,6 +33,17 @@ export default function AnalyticsPage() {
     </div>
   );
 
+  const SplitStatCard = ({ label, total, val1, label1, val2, label2, color }: any) => (
+    <div className="stat-card" style={{ '--stat-color': color } as React.CSSProperties}>
+      <div className="stat-label">{label}</div>
+      <div className="stat-value currency">{total.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 12, fontSize: 12, color: 'var(--text-muted)' }}>
+        <div>{label1}: <span style={{ color: '#fff', fontWeight: 600 }}>₹{val1.toLocaleString('en-IN')}</span></div>
+        <div>{label2}: <span style={{ color: '#fff', fontWeight: 600 }}>₹{val2.toLocaleString('en-IN')}</span></div>
+      </div>
+    </div>
+  );
+
   const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
   return (
@@ -70,7 +81,7 @@ export default function AnalyticsPage() {
       {!loading && tab === 'daily' && daily && (
         <>
           <div className="stat-grid">
-            <StatCard label="Income" value={daily.income} color="var(--green)" />
+            <SplitStatCard label="Income" total={daily.income} val1={daily.cashIncome} label1="Cash" val2={daily.onlineIncome} label2="Online" color="var(--green)" />
             <StatCard label="Expenses (Approved)" value={daily.expenses} color="var(--red)" />
             <StatCard label={`Profit ${daily.profit < 0 ? '(Loss)' : ''}`} value={daily.profit} color={daily.profit >= 0 ? 'var(--green)' : 'var(--red)'} />
             <div className="stat-card" style={{ '--stat-color': 'var(--blue)' } as React.CSSProperties}>
@@ -126,7 +137,7 @@ export default function AnalyticsPage() {
       {!loading && tab === 'monthly' && monthly && (
         <>
           <div className="stat-grid">
-            <StatCard label="Monthly Income" value={monthly.income} color="var(--green)" />
+            <SplitStatCard label="Monthly Income" total={monthly.income} val1={monthly.cashIncome} label1="Cash" val2={monthly.onlineIncome} label2="Online" color="var(--green)" />
             <StatCard label="Monthly Expenses" value={monthly.expenses} color="var(--red)" />
             <StatCard label="Monthly Profit" value={monthly.profit} color={monthly.profit >= 0 ? 'var(--green)' : 'var(--red)'} />
             <div className="stat-card" style={{ '--stat-color': 'var(--blue)' } as React.CSSProperties}>
@@ -145,7 +156,8 @@ export default function AnalyticsPage() {
                   <YAxis tick={{ fontSize: 11, fill: '#606080' }} tickFormatter={v => `₹${(v/1000).toFixed(0)}k`} />
                   <Tooltip formatter={(v: number) => [`₹${v.toLocaleString('en-IN')}`, '']} contentStyle={{ background: '#1A1A24', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8 }} labelStyle={{ color: '#A0A0B8' }} />
                   <Legend wrapperStyle={{ fontSize: 12 }} />
-                  <Bar dataKey="income" name="Income" fill="#22C55E" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="cashIncome" name="Cash Income" stackId="income" fill="#10B981" />
+                  <Bar dataKey="onlineIncome" name="Online Income" stackId="income" fill="#3B82F6" radius={[4, 4, 0, 0]} />
                   <Bar dataKey="expenses" name="Expenses" fill="#EF4444" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
