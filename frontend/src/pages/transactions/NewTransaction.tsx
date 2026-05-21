@@ -181,23 +181,23 @@ export default function NewTransaction() {
 
           {selected && (
             <div className="card" style={{ marginBottom: 24 }}>
-              <label className="form-label mb-16" style={{ fontSize: 16 }}>Payment Method</label>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-                <div 
-                  className={`service-item ${paymentMethod === 'CASH' ? 'selected' : ''}`} 
-                  style={{ textAlign: 'center', padding: '16px', cursor: 'pointer' }}
-                  onClick={() => setPaymentMethod('CASH')}
-                >
-                  <div style={{ fontSize: 24, marginBottom: 8 }}>💵</div>
-                  <div style={{ fontWeight: 700 }}>Cash</div>
-                </div>
-                <div 
-                  className={`service-item ${paymentMethod === 'ONLINE' ? 'selected' : ''}`} 
-                  style={{ textAlign: 'center', padding: '16px', cursor: 'pointer' }}
-                  onClick={() => setPaymentMethod('ONLINE')}
-                >
-                  <div style={{ fontSize: 24, marginBottom: 8 }}>💳</div>
-                  <div style={{ fontWeight: 700 }}>Online</div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <label className="form-label" style={{ margin: 0, fontSize: 16 }}>Payment Method</label>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button 
+                    type="button"
+                    className={`btn ${paymentMethod === 'CASH' ? 'btn-primary' : 'btn-ghost'}`} 
+                    onClick={() => setPaymentMethod('CASH')}
+                  >
+                    💵 Cash
+                  </button>
+                  <button 
+                    type="button"
+                    className={`btn ${paymentMethod === 'ONLINE' ? 'btn-primary' : 'btn-ghost'}`} 
+                    onClick={() => setPaymentMethod('ONLINE')}
+                  >
+                    💳 Online
+                  </button>
                 </div>
               </div>
             </div>

@@ -33,16 +33,7 @@ export default function AnalyticsPage() {
     </div>
   );
 
-  const SplitStatCard = ({ label, total, val1, label1, val2, label2, color }: any) => (
-    <div className="stat-card" style={{ '--stat-color': color } as React.CSSProperties}>
-      <div className="stat-label">{label}</div>
-      <div className="stat-value currency">{total.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 12, fontSize: 12, color: 'var(--text-muted)' }}>
-        <div>{label1}: <span style={{ color: '#fff', fontWeight: 600 }}>₹{val1.toLocaleString('en-IN')}</span></div>
-        <div>{label2}: <span style={{ color: '#fff', fontWeight: 600 }}>₹{val2.toLocaleString('en-IN')}</span></div>
-      </div>
-    </div>
-  );
+
 
   const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
@@ -81,7 +72,9 @@ export default function AnalyticsPage() {
       {!loading && tab === 'daily' && daily && (
         <>
           <div className="stat-grid">
-            <SplitStatCard label="Income" total={daily.income} val1={daily.cashIncome} label1="Cash" val2={daily.onlineIncome} label2="Online" color="var(--green)" />
+            <StatCard label="Total Income" value={daily.income} color="var(--green)" />
+            <StatCard label="Cash Income" value={daily.cashIncome} color="#10B981" />
+            <StatCard label="Online Income" value={daily.onlineIncome} color="#3B82F6" />
             <StatCard label="Expenses (Approved)" value={daily.expenses} color="var(--red)" />
             <StatCard label={`Profit ${daily.profit < 0 ? '(Loss)' : ''}`} value={daily.profit} color={daily.profit >= 0 ? 'var(--green)' : 'var(--red)'} />
             <div className="stat-card" style={{ '--stat-color': 'var(--blue)' } as React.CSSProperties}>
@@ -137,7 +130,9 @@ export default function AnalyticsPage() {
       {!loading && tab === 'monthly' && monthly && (
         <>
           <div className="stat-grid">
-            <SplitStatCard label="Monthly Income" total={monthly.income} val1={monthly.cashIncome} label1="Cash" val2={monthly.onlineIncome} label2="Online" color="var(--green)" />
+            <StatCard label="Monthly Income" value={monthly.income} color="var(--green)" />
+            <StatCard label="Monthly Cash" value={monthly.cashIncome} color="#10B981" />
+            <StatCard label="Monthly Online" value={monthly.onlineIncome} color="#3B82F6" />
             <StatCard label="Monthly Expenses" value={monthly.expenses} color="var(--red)" />
             <StatCard label="Monthly Profit" value={monthly.profit} color={monthly.profit >= 0 ? 'var(--green)' : 'var(--red)'} />
             <div className="stat-card" style={{ '--stat-color': 'var(--blue)' } as React.CSSProperties}>
