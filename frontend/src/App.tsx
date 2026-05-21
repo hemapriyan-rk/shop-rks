@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './routes/ProtectedRoute';
 
+import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import NewTransaction from './pages/transactions/NewTransaction';
@@ -28,7 +29,7 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/" element={<LandingPage />} />
 
           {/* All authenticated users */}
           <Route element={<ProtectedRoute />}>
