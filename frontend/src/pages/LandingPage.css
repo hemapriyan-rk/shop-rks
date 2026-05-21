@@ -104,7 +104,7 @@ h1, h2, h3, h4, h5, h6 {
 .landing-logo {
   display: flex;
   align-items: center;
-  height: 60px;
+  height: 80px;
 }
 
 .landing-logo img {
@@ -422,7 +422,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .footer-logo {
-  height: 60px;
+  height: 80px;
   margin-bottom: 16px;
 }
 

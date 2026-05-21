@@ -14,7 +14,6 @@ export default function LandingPage() {
           <nav className="landing-nav">
             <a href="#home" className="active">Home</a>
             <a href="#services">Services</a>
-            <a href="#pricing">Pricing</a>
             <a href="#features">About Us</a>
             <a href="#contact">Contact</a>
             <a href="#location">Location</a>
@@ -116,59 +115,26 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* WHY CHOOSE US & ACHIEVEMENTS */}
-      <section id="features" className="landing-container">
-        <div className="split-section">
-          <div style={{ paddingRight: '40px' }}>
-            <h2 className="split-title">WHY CHOOSE US?</h2>
-            <div className="features-grid">
-              <div className="feature-item">
-                <div className="feature-icon">⚡</div>
-                <div className="feature-content">
-                  <h4>FAST SERVICE</h4>
-                  <p>We value your time and deliver on time.</p>
-                </div>
-              </div>
-              <div className="feature-item">
-                <div className="feature-icon">💰</div>
-                <div className="feature-content">
-                  <h4>AFFORDABLE PRICE</h4>
-                  <p>Best quality services at reasonable prices.</p>
-                </div>
-              </div>
-              <div className="feature-item">
-                <div className="feature-icon">🛡️</div>
-                <div className="feature-content">
-                  <h4>RELIABLE & TRUSTED</h4>
-                  <p>Trusted by hundreds of happy customers.</p>
-                </div>
-              </div>
-              <div className="feature-item">
-                <div className="feature-icon">👥</div>
-                <div className="feature-content">
-                  <h4>EXPERIENCED STAFF</h4>
-                  <p>Skilled professionals always here to help you.</p>
-                </div>
-              </div>
-            </div>
+      {/* ABOUT US */}
+      <section id="features" className="landing-section" style={{ background: '#FFF8E7' }}>
+        <div className="landing-container">
+          <div className="section-header" style={{ marginBottom: 40 }}>
+            <div className="section-subtitle">About Us</div>
+            <h2 className="section-title">YOUR TRUSTED <span>SERVICE CENTER</span></h2>
           </div>
-          <div style={{ paddingLeft: '40px', borderLeft: '1px solid rgba(0,0,0,0.05)' }}>
-            <h2 className="split-title">OUR ACHIEVEMENTS</h2>
-            <div className="achievements-grid">
-              <div className="achievement-card">
-                <div className="achievement-icon">🖨️</div>
-                <div className="achievement-number">10K+</div>
-                <div className="achievement-label">Prints Done</div>
+          <div style={{ maxWidth: 800, margin: '0 auto', textAlign: 'center', fontSize: 16, color: '#555', lineHeight: 1.8 }}>
+            <p style={{ marginBottom: 32 }}>
+              Welcome to RKS Xerox and Computer Center! We are your premier one-stop destination for high-quality printing, scanning, lamination, and a wide array of online computer services. With years of experience and a commitment to customer satisfaction, we ensure fast, reliable, and affordable solutions for all your personal and business needs.
+            </p>
+            <div style={{ display: 'inline-block', textAlign: 'left', background: '#fff', padding: '32px 48px', borderRadius: 20, boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }}>
+              <h4 style={{ fontSize: 18, fontWeight: 800, color: '#111', marginBottom: 20, textAlign: 'center' }}>⏱️ Opening Hours</h4>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 48, marginBottom: 12 }}>
+                <span style={{ fontWeight: 600, color: '#111' }}>Monday - Saturday</span>
+                <span style={{ color: '#FFC107', fontWeight: 800 }}>8:30 AM - 8:00 PM</span>
               </div>
-              <div className="achievement-card">
-                <div className="achievement-icon">👥</div>
-                <div className="achievement-number">500+</div>
-                <div className="achievement-label">Happy Customers</div>
-              </div>
-              <div className="achievement-card">
-                <div className="achievement-icon">⭐</div>
-                <div className="achievement-number">5+</div>
-                <div className="achievement-label">Years Service</div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 48 }}>
+                <span style={{ fontWeight: 600, color: '#111' }}>Sunday</span>
+                <span style={{ color: '#FFC107', fontWeight: 800 }}>10:00 AM - 5:00 PM</span>
               </div>
             </div>
           </div>
@@ -191,7 +157,6 @@ export default function LandingPage() {
             <ul className="footer-links">
               <li><a href="#home">Home</a></li>
               <li><a href="#services">Services</a></li>
-              <li><a href="#pricing">Pricing</a></li>
               <li><a href="#features">About Us</a></li>
               <li><a href="#contact">Contact</a></li>
               <li><Link to="/login" style={{ color: '#FFC107', fontWeight: 600 }}>Staff Login</Link></li>
