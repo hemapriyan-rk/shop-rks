@@ -56,7 +56,8 @@ export async function createExpense(req: Request, res: Response, next: NextFunct
     if (bankId) {
       const bank = await prisma.bankAccount.findUnique({ where: { id: bankId } });
       if (!bank) { sendError(res, 'Selected bank account not found', 400); return; }
-      if (Number(bank.balance) < amount) {
+      // Skip balance check for Cash — Cash is a payment tag, not a tracked account
+      if (!bank.isCash && Number(bank.balance) < amount) {
         sendError(res, `Insufficient balance in ${bank.name}. Available: ₹${Number(bank.balance).toFixed(2)}`, 400);
         return;
       }
@@ -70,10 +71,14 @@ export async function createExpense(req: Request, res: Response, next: NextFunct
       });
 
       if (isAdmin && bankId) {
-        await tx.bankAccount.update({
-          where: { id: bankId },
-          data: { balance: { decrement: amount } },
-        });
+        // Only deduct from real bank accounts, not Cash
+        const bankForDeduct = await tx.bankAccount.findUnique({ where: { id: bankId } });
+        if (bankForDeduct && !bankForDeduct.isCash) {
+          await tx.bankAccount.update({
+            where: { id: bankId },
+            data: { balance: { decrement: amount } },
+          });
+        }
       }
 
       return expense;
@@ -164,7 +169,8 @@ export async function approveExpense(req: Request, res: Response, next: NextFunc
       }
       const bank = await prisma.bankAccount.findUnique({ where: { id: bankId } });
       if (!bank) { sendError(res, 'Selected bank account not found', 400); return; }
-      if (Number(bank.balance) < Number(existing.amount)) {
+      // Skip balance check for Cash — Cash is a payment tag, not a tracked account
+      if (!bank.isCash && Number(bank.balance) < Number(existing.amount)) {
         sendError(res, `Insufficient balance in ${bank.name}. Available: ₹${Number(bank.balance).toFixed(2)}`, 400);
         return;
       }
@@ -182,10 +188,14 @@ export async function approveExpense(req: Request, res: Response, next: NextFunc
       });
 
       if (status === 'APPROVED' && bankId) {
-        await tx.bankAccount.update({
-          where: { id: bankId },
-          data: { balance: { decrement: Number(existing.amount) } },
-        });
+        // Only deduct from real bank accounts, not Cash
+        const bankForDeduct = await tx.bankAccount.findUnique({ where: { id: bankId } });
+        if (bankForDeduct && !bankForDeduct.isCash) {
+          await tx.bankAccount.update({
+            where: { id: bankId },
+            data: { balance: { decrement: Number(existing.amount) } },
+          });
+        }
       }
 
       return updated;

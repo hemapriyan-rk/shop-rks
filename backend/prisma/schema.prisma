@@ -117,6 +117,7 @@ model BankAccount {
   id        String   @id @default(uuid())
   name      String   @unique
   balance   Decimal  @default(0) @db.Decimal(12, 2)
+  isCash    Boolean  @default(false) @map("is_cash")
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
 

@@ -61,10 +61,20 @@ export const expensesApi = {
 export const banksApi = {
   list: () => api.get<ApiResponse<BankAccount[]>>('/banks'),
   analytics: (params?: { date?: string; action?: string }) => api.get<ApiResponse<BankAccount[]>>('/banks/analytics', { params }),
+  create: (data: { name: string; balance?: number; isCash?: boolean }) =>
+    api.post<ApiResponse<BankAccount>>('/banks', data),
+  rename: (id: string, name: string) =>
+    api.patch<ApiResponse<BankAccount>>(`/banks/${id}/rename`, { name }),
   deposit: (id: string, amount: number, note?: string) =>
     api.patch<ApiResponse<BankAccount>>(`/banks/${id}/deposit`, { amount, note }),
+  adjust: (id: string, amount: number, note?: string) =>
+    api.patch<ApiResponse<BankAccount>>(`/banks/${id}/adjust`, { amount, note }),
   setBalance: (id: string, balance: number, note?: string) =>
     api.patch<ApiResponse<BankAccount>>(`/banks/${id}/balance`, { balance, note }),
+  hardReset: (id: string, note?: string) =>
+    api.patch<ApiResponse<BankAccount>>(`/banks/${id}/reset`, { note }),
+  delete: (id: string) =>
+    api.delete<ApiResponse<null>>(`/banks/${id}`),
 };
 
 // ── Analytics ─────────────────────────────────────────────────────

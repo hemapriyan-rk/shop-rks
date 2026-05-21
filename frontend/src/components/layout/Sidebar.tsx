@@ -30,6 +30,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     { icon: '📊', labelKey: 'nav.analytics', path: '/analytics' },
     { icon: '🛠', labelKey: 'nav.services', path: '/services' },
     { icon: '🏦', labelKey: 'nav.banks', path: '/banks' },
+    { icon: '⚙️', labelKey: 'nav.bankConfig', path: '/admin/bank-config' },
     { icon: '📂', labelKey: 'nav.allTransactions', path: '/admin/transactions' },
     { icon: '📑', labelKey: 'nav.allExpenses', path: '/admin/expenses' },
     { icon: '🏷', labelKey: 'nav.expenseCats', path: '/admin/expense-categories' },

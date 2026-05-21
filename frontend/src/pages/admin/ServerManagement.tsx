@@ -176,8 +176,8 @@ export default function ServerManagement() {
             </div>
             <div className="divider" style={{ margin: '12px 0' }} />
             <div className="flex-between">
-              <div className="text-xs text-muted">Active Containers</div>
-              <div className="font-bold">4 Services Running</div>
+              <div className="text-xs text-muted">Deployment</div>
+              <div className="font-bold" style={{ fontSize: 12 }}>Render · Single Container</div>
             </div>
           </div>
 

@@ -6,7 +6,11 @@ import { socketBroadcast } from '../../config/socket';
 
 export async function getConfig(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const config = await prisma.systemConfig.findUnique({ where: { id: 1 } });
+    const config = await prisma.systemConfig.upsert({
+      where: { id: 1 },
+      create: { id: 1, maintenanceMode: false, maintenanceMessage: 'Server is under maintenance. Please try again later.', version: '1.0.0' },
+      update: {},
+    });
     sendSuccess(res, config);
   } catch (err) { next(err); }
 }
@@ -15,9 +19,10 @@ export async function updateConfig(req: Request, res: Response, next: NextFuncti
   try {
     const { maintenanceMode, maintenanceMessage, serverMessage, broadcastToAll } = req.body;
     
-    const config = await prisma.systemConfig.update({
+    const config = await prisma.systemConfig.upsert({
       where: { id: 1 },
-      data: {
+      create: { id: 1, maintenanceMode: false, maintenanceMessage: 'Server is under maintenance. Please try again later.', version: '1.0.0' },
+      update: {
         ...(maintenanceMode !== undefined && { maintenanceMode }),
         ...(maintenanceMessage !== undefined && { maintenanceMessage }),
         ...(serverMessage !== undefined && { serverMessage })

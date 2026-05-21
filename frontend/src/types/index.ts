@@ -40,6 +40,7 @@ export interface BankAccount {
   id: string;
   name: string;
   balance: number;
+  isCash: boolean;
   createdAt: string;
   updatedAt: string;
   totalDeducted?: number;
