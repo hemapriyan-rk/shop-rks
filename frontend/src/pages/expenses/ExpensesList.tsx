@@ -26,12 +26,13 @@ export default function ExpensesList() {
 
   const load = () => {
     setLoading(true);
-    Promise.all([
-      expensesApi.list({ date }),
-      banksApi.list()
-    ]).then(([expRes, bankRes]) => {
+    const promises: Promise<any>[] = [expensesApi.list({ date })];
+    // Only admins can access the banks API
+    if (isAdmin) promises.push(banksApi.list());
+
+    Promise.all(promises).then(([expRes, bankRes]) => {
       setExpenses(expRes.data.data ?? []);
-      setBanks(bankRes.data.data ?? []);
+      if (bankRes) setBanks(bankRes.data.data ?? []);
     }).finally(() => setLoading(false));
   };
 
@@ -76,15 +77,22 @@ export default function ExpensesList() {
 
       <div className="card" style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
         <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{expenses.length} records — {pending.length} pending</span>
-        
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-          {banks.map(b => (
-            <div key={b.id} style={{ background: 'var(--bg-secondary)', padding: '6px 12px', borderRadius: 8, border: '1px solid var(--border-color)', textAlign: 'center', minWidth: 100 }}>
-              <div style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>{b.name}</div>
-              <div style={{ fontWeight: 800, fontSize: 14, color: 'var(--color-accent)' }}>₹{Number(b.balance).toLocaleString('en-IN')}</div>
-            </div>
-          ))}
-        </div>
+
+        {/* Bank balance summary — admin only, Cash balance hidden */}
+        {isAdmin && banks.length > 0 && (
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+            {banks.map(b => (
+              <div key={b.id} style={{ background: 'var(--bg-secondary)', padding: '6px 12px', borderRadius: 8, border: '1px solid var(--border-color)', textAlign: 'center', minWidth: 100 }}>
+                <div style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>{b.name}</div>
+                {b.isCash ? (
+                  <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--text-muted)' }}>Cash</div>
+                ) : (
+                  <div style={{ fontWeight: 800, fontSize: 14, color: 'var(--color-accent)' }}>₹{Number(b.balance).toLocaleString('en-IN')}</div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
 
         <div style={{ textAlign: 'right', paddingLeft: 16, borderLeft: '1px solid var(--border-color)' }}>
           <div style={{ color: 'var(--text-muted)', fontSize: 11, textTransform: 'uppercase' }}>Approved Total</div>

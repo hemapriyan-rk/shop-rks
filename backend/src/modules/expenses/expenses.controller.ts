@@ -20,8 +20,12 @@ export async function getExpenses(req: Request, res: Response, next: NextFunctio
     const isAdmin = isAdminOrAbove(req.user!.role);
     const filterUserId = isAdmin ? (queryUserId as string | undefined) : req.user!.userId;
 
-    const targetDate = (date as string) || toISTDateString();
+    // Regular users can ONLY view today's expenses — ignore any date param they pass
+    const targetDate = isAdmin
+      ? ((date as string) || toISTDateString())
+      : toISTDateString();
     const { start, end } = getISTDayBounds(targetDate);
+
 
     const expenses = await prisma.expense.findMany({
       where: {
@@ -56,8 +60,7 @@ export async function createExpense(req: Request, res: Response, next: NextFunct
     if (bankId) {
       const bank = await prisma.bankAccount.findUnique({ where: { id: bankId } });
       if (!bank) { sendError(res, 'Selected bank account not found', 400); return; }
-      // Skip balance check for Cash — Cash is a payment tag, not a tracked account
-      if (!bank.isCash && Number(bank.balance) < amount) {
+      if (Number(bank.balance) < amount) {
         sendError(res, `Insufficient balance in ${bank.name}. Available: ₹${Number(bank.balance).toFixed(2)}`, 400);
         return;
       }
@@ -71,14 +74,10 @@ export async function createExpense(req: Request, res: Response, next: NextFunct
       });
 
       if (isAdmin && bankId) {
-        // Only deduct from real bank accounts, not Cash
-        const bankForDeduct = await tx.bankAccount.findUnique({ where: { id: bankId } });
-        if (bankForDeduct && !bankForDeduct.isCash) {
-          await tx.bankAccount.update({
-            where: { id: bankId },
-            data: { balance: { decrement: amount } },
-          });
-        }
+        await tx.bankAccount.update({
+          where: { id: bankId },
+          data: { balance: { decrement: amount } },
+        });
       }
 
       return expense;
@@ -169,8 +168,7 @@ export async function approveExpense(req: Request, res: Response, next: NextFunc
       }
       const bank = await prisma.bankAccount.findUnique({ where: { id: bankId } });
       if (!bank) { sendError(res, 'Selected bank account not found', 400); return; }
-      // Skip balance check for Cash — Cash is a payment tag, not a tracked account
-      if (!bank.isCash && Number(bank.balance) < Number(existing.amount)) {
+      if (Number(bank.balance) < Number(existing.amount)) {
         sendError(res, `Insufficient balance in ${bank.name}. Available: ₹${Number(bank.balance).toFixed(2)}`, 400);
         return;
       }
@@ -188,14 +186,10 @@ export async function approveExpense(req: Request, res: Response, next: NextFunc
       });
 
       if (status === 'APPROVED' && bankId) {
-        // Only deduct from real bank accounts, not Cash
-        const bankForDeduct = await tx.bankAccount.findUnique({ where: { id: bankId } });
-        if (bankForDeduct && !bankForDeduct.isCash) {
-          await tx.bankAccount.update({
-            where: { id: bankId },
-            data: { balance: { decrement: Number(existing.amount) } },
-          });
-        }
+        await tx.bankAccount.update({
+          where: { id: bankId },
+          data: { balance: { decrement: Number(existing.amount) } },
+        });
       }
 
       return updated;

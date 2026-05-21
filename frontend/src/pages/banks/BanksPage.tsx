@@ -72,9 +72,6 @@ export default function BanksPage() {
     } finally { setSubmitting(false); }
   };
 
-  const realBanks = banks.filter(b => !b.isCash);
-  const cashAccount = banks.find(b => b.isCash);
-
   return (
     <Layout title="Bank Accounts">
       <div className="page-header">
@@ -101,24 +98,35 @@ export default function BanksPage() {
         <div className="page-loading"><div className="spinner spinner-lg" /></div>
       ) : (
         <>
-          {/* ── Real Bank Cards ── */}
-          <div className="grid grid-3" style={{ marginBottom: 24 }}>
-            {realBanks.map(bank => (
-              <div key={bank.id} className="card bank-card">
-                <div className="bank-card-icon">🏦</div>
+          {/* All accounts in one grid */}
+          <div className="grid grid-3" style={{ marginBottom: 32 }}>
+            {banks.map(bank => (
+              <div key={bank.id} className={`card bank-card ${bank.isCash ? 'cash-card' : ''}`}>
+                <div className="bank-card-icon">{bank.isCash ? '💵' : '🏦'}</div>
                 <div className="bank-card-name">{bank.name}</div>
-                <div className="bank-card-balance">
-                  ₹{Number(bank.balance).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-                </div>
+
+                {/* Balance: only show for real banks */}
+                {bank.isCash ? (
+                  <div className="cash-label">Cash Payment</div>
+                ) : (
+                  <div className="bank-card-balance">
+                    ₹{Number(bank.balance).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                  </div>
+                )}
+
                 <div className="bank-card-meta">
-                  <span>Total Deducted: ₹{Number(bank.totalDeducted || 0).toLocaleString('en-IN')}</span>
+                  {bank.isCash
+                    ? <span>Expenses: {bank._count?.expenses || 0}</span>
+                    : <span>Total Deducted: ₹{Number(bank.totalDeducted || 0).toLocaleString('en-IN')}</span>
+                  }
                 </div>
+
                 <div className="bank-card-actions">
                   <div style={{ display: 'flex', gap: 8 }}>
                     <button className="btn btn-primary btn-sm btn-full" onClick={() => setDepositModal(bank)}>Deposit</button>
                     <button className="btn btn-danger btn-sm btn-full" onClick={() => setWithdrawModal(bank)}>Deduct</button>
                   </div>
-                  {isSuperAdmin && (
+                  {isSuperAdmin && !bank.isCash && (
                     <button className="btn btn-ghost btn-sm btn-full mt-8" onClick={() => setBalanceModal(bank)}>
                       Set Absolute Balance
                     </button>
@@ -126,34 +134,24 @@ export default function BanksPage() {
                 </div>
               </div>
             ))}
-
-            {/* ── Cash Card ── */}
-            {cashAccount && (
-              <div className="card bank-card cash-card">
-                <div className="bank-card-icon">💵</div>
-                <div className="bank-card-name">{cashAccount.name}</div>
-                <div className="cash-badge">Cash Payment Method</div>
-                <div className="bank-card-meta" style={{ marginTop: 12 }}>
-                  <span>Expenses Recorded: {cashAccount._count?.expenses || 0}</span>
-                </div>
-                <div className="cash-note">
-                  Cash payments are tracked but balance is not managed here.
-                </div>
-              </div>
-            )}
           </div>
 
-          {/* ── Activity Section ── */}
+          {/* Activity section — only real banks show activity */}
           <div className="page-header-title" style={{ fontSize: 20, marginBottom: 16 }}>Recent Activity</div>
-          {realBanks.map(bank => (
+          {banks.map(bank => (
             <div key={`activity-${bank.id}`} className="card mb-32">
               <div className="bank-activity-header">
-                <span className="bank-name-tag">🏦 {bank.name}</span>
-                <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>{bank._count?.expenses || 0} total deductions</span>
+                <span className="bank-name-tag">
+                  {bank.isCash ? '💵' : '🏦'} {bank.name}
+                </span>
+                <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>
+                  {bank._count?.expenses || 0} total deductions
+                </span>
               </div>
+
               <div className="grid grid-2" style={{ gap: 24 }}>
                 <div>
-                  <div className="activity-section-title">💸 Recent Expenses Deducted</div>
+                  <div className="activity-section-title">💸 Recent Expenses</div>
                   {bank.expenses && bank.expenses.length > 0 ? (
                     <div className="table-wrapper">
                       <table className="table-compact">
@@ -171,6 +169,7 @@ export default function BanksPage() {
                     </div>
                   ) : <div className="empty-sub">No expenses yet.</div>}
                 </div>
+
                 <div>
                   <div className="activity-section-title">🔄 Deposits & Adjustments</div>
                   {bank.logs && bank.logs.length > 0 ? (
@@ -203,31 +202,6 @@ export default function BanksPage() {
               </div>
             </div>
           ))}
-
-          {/* Cash activity */}
-          {cashAccount && cashAccount.expenses && cashAccount.expenses.length > 0 && (
-            <div className="card mb-32">
-              <div className="bank-activity-header">
-                <span className="bank-name-tag" style={{ background: 'rgba(251,191,36,0.1)', color: '#d97706' }}>💵 Cash Payments</span>
-                <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>{cashAccount._count?.expenses || 0} total expenses</span>
-              </div>
-              <div className="table-wrapper">
-                <table className="table-compact">
-                  <thead><tr><th>Category</th><th>Amount</th><th>Note</th><th>Date</th></tr></thead>
-                  <tbody>
-                    {cashAccount.expenses.map(exp => (
-                      <tr key={exp.id}>
-                        <td>{exp.category}</td>
-                        <td style={{ color: 'var(--red)', fontWeight: 700 }}>₹{Number(exp.amount).toFixed(2)}</td>
-                        <td style={{ fontSize: 12, color: 'var(--text-muted)' }}>{exp.note || '—'}</td>
-                        <td style={{ fontSize: 11, color: 'var(--text-muted)' }}>{new Date(exp.createdAt).toLocaleDateString()}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
         </>
       )}
 
@@ -276,11 +250,11 @@ export default function BanksPage() {
                 <label className="form-label">Reason / Note</label>
                 <input className="form-input" placeholder="e.g. Petty cash, Bank charges..." value={note} onChange={e => setNote(e.target.value)} />
               </div>
-              <div className="alert alert-info">ℹ️ This will create a <strong>Miscellaneous</strong> expense record.</div>
+              <div className="alert alert-info">ℹ️ This creates a <strong>Miscellaneous</strong> expense record.</div>
             </div>
             <div className="modal-footer">
               <button className="btn btn-ghost" onClick={() => setWithdrawModal(null)}>Cancel</button>
-              <button className="btn btn-primary btn-danger" disabled={submitting || !amount} onClick={handleWithdraw}>
+              <button className="btn btn-danger" disabled={submitting || !amount} onClick={handleWithdraw}>
                 {submitting ? 'Processing...' : 'Confirm Deduction'}
               </button>
             </div>
@@ -288,7 +262,7 @@ export default function BanksPage() {
         </div>
       )}
 
-      {/* Set Balance Modal (SuperAdmin) */}
+      {/* Set Balance Modal (SuperAdmin, real banks only) */}
       {balanceModal && (
         <div className="modal-overlay" onClick={() => setBalanceModal(null)}>
           <div className="modal" onClick={e => e.stopPropagation()}>
@@ -297,7 +271,7 @@ export default function BanksPage() {
               <button className="btn btn-ghost btn-sm" onClick={() => setBalanceModal(null)}>✕</button>
             </div>
             <div className="modal-body">
-              <div className="alert alert-warning mb-16">⚠️ This will hard-set the balance. Use only for initial setup or reconciliation.</div>
+              <div className="alert alert-warning mb-16">⚠️ This will hard-set the balance. Use only for reconciliation.</div>
               <div className="form-group">
                 <label className="form-label">New Absolute Balance (₹)</label>
                 <input className="form-input" type="number" placeholder="0.00" value={amount} onChange={e => setAmount(e.target.value)} autoFocus />
@@ -320,20 +294,19 @@ export default function BanksPage() {
       <style>{`
         .bank-card { padding: 24px; text-align: center; transition: transform 0.2s; }
         .bank-card:hover { transform: translateY(-4px); }
-        .cash-card { border: 2px dashed #d97706; background: rgba(251,191,36,0.04); }
+        .cash-card { border: 2px dashed rgba(251,191,36,0.5); }
         .bank-card-icon { font-size: 32px; margin-bottom: 12px; }
         .bank-card-name { font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-size: 12px; margin-bottom: 8px; }
         .bank-card-balance { font-size: 28px; font-weight: 900; color: var(--color-accent); margin-bottom: 16px; }
+        .cash-label { font-size: 13px; font-weight: 700; color: #d97706; background: rgba(251,191,36,0.12); padding: 4px 14px; border-radius: 20px; display: inline-block; margin-bottom: 16px; }
         .bank-card-meta { font-size: 12px; color: var(--text-muted); margin-bottom: 20px; padding-top: 12px; border-top: 1px dashed var(--border-color); }
-        .cash-badge { display: inline-block; background: rgba(251,191,36,0.15); color: #d97706; font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
-        .cash-note { font-size: 11px; color: var(--text-muted); padding: 8px 12px; background: var(--bg-secondary); border-radius: 8px; margin-top: 8px; }
         .mt-8 { margin-top: 8px; }
+        .mb-32 { margin-bottom: 32px; }
         .bank-activity-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border-color); }
         .bank-name-tag { background: var(--bg-secondary); padding: 4px 12px; border-radius: 6px; font-weight: 800; font-size: 14px; color: var(--color-accent); }
         .activity-section-title { font-size: 13px; font-weight: 700; margin-bottom: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
         .table-compact th, .table-compact td { padding: 8px 12px; font-size: 13px; }
         .empty-sub { padding: 16px; text-align: center; color: var(--text-muted); font-size: 13px; background: var(--bg-secondary); border-radius: 8px; border: 1px dashed var(--border-color); }
-        .mb-32 { margin-bottom: 32px; }
       `}</style>
     </Layout>
   );

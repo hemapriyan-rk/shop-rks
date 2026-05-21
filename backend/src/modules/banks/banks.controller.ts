@@ -148,7 +148,6 @@ export async function depositToBank(req: Request, res: Response, next: NextFunct
 
     const bank = await prisma.bankAccount.findUnique({ where: { id } });
     if (!bank) { sendNotFound(res, 'Bank'); return; }
-    if (bank.isCash) { sendError(res, 'Cash account does not have a trackable balance', 400); return; }
 
     const updated = await withAuditLog(
       prisma, req.user!.userId, 'UPDATE', 'bank_accounts',
@@ -173,7 +172,6 @@ export async function adjustBalance(req: Request, res: Response, next: NextFunct
 
     const bank = await prisma.bankAccount.findUnique({ where: { id } });
     if (!bank) { sendNotFound(res, 'Bank'); return; }
-    if (bank.isCash) { sendError(res, 'Cash account does not have a trackable balance', 400); return; }
 
     const newBalance = Number(bank.balance) + amount;
     if (newBalance < 0) {
@@ -204,7 +202,6 @@ export async function setBalance(req: Request, res: Response, next: NextFunction
 
     const bank = await prisma.bankAccount.findUnique({ where: { id } });
     if (!bank) { sendNotFound(res, 'Bank'); return; }
-    if (bank.isCash) { sendError(res, 'Cash account does not have a trackable balance', 400); return; }
 
     if (balance < 0) {
       sendError(res, 'Balance cannot be negative', 400);
@@ -234,7 +231,6 @@ export async function hardResetBalance(req: Request, res: Response, next: NextFu
 
     const bank = await prisma.bankAccount.findUnique({ where: { id } });
     if (!bank) { sendNotFound(res, 'Bank'); return; }
-    if (bank.isCash) { sendError(res, 'Cash account does not have a trackable balance', 400); return; }
 
     const updated = await withAuditLog(
       prisma, req.user!.userId, 'UPDATE', 'bank_accounts',

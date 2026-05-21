@@ -117,8 +117,6 @@ export default function BankConfig() {
     } finally { setSubmitting(false); }
   };
 
-  const realBanks = banks.filter(b => !b.isCash);
-  const cashAccounts = banks.filter(b => b.isCash);
 
   return (
     <Layout title="Bank Configuration">
@@ -141,18 +139,22 @@ export default function BankConfig() {
         <div className="page-loading"><div className="spinner spinner-lg" /></div>
       ) : (
         <>
-          {/* ── Real Banks ── */}
-          <div className="cfg-section-title">🏦 Bank Accounts</div>
+          {/* All Banks + Cash unified */}
+          <div className="cfg-section-title">All Accounts</div>
           <div className="cfg-grid">
-            {realBanks.map(bank => (
-              <div key={bank.id} className="cfg-card">
+            {banks.map(bank => (
+              <div key={bank.id} className={`cfg-card ${bank.isCash ? 'cash-cfg-card' : ''}`}>
                 <div className="cfg-card-top">
-                  <div className="cfg-bank-icon">🏦</div>
+                  <div className="cfg-bank-icon">{bank.isCash ? '💵' : '🏦'}</div>
                   <div className="cfg-bank-info">
                     <div className="cfg-bank-name">{bank.name}</div>
-                    <div className="cfg-bank-balance">
-                      ₹{Number(bank.balance).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-                    </div>
+                    {bank.isCash ? (
+                      <div style={{ fontSize: 11, color: '#d97706', fontWeight: 700, marginTop: 4 }}>Cash Payment • No balance display</div>
+                    ) : (
+                      <div className="cfg-bank-balance">
+                        ₹{Number(bank.balance).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="cfg-actions">
@@ -167,12 +169,16 @@ export default function BankConfig() {
                       <button className="btn btn-ghost btn-sm" onClick={() => open('rename', bank)}>
                         ✏️ Rename
                       </button>
-                      <button className="btn btn-ghost btn-sm" onClick={() => open('setBalance', bank)}>
-                        📌 Set Absolute
-                      </button>
-                      <button className="btn btn-warning btn-sm" onClick={() => open('hardReset', bank)}>
-                        🔄 Hard Reset
-                      </button>
+                      {!bank.isCash && (
+                        <>
+                          <button className="btn btn-ghost btn-sm" onClick={() => open('setBalance', bank)}>
+                            📌 Set Absolute
+                          </button>
+                          <button className="btn btn-warning btn-sm" onClick={() => open('hardReset', bank)}>
+                            🔄 Hard Reset
+                          </button>
+                        </>
+                      )}
                       <button className="btn btn-danger btn-sm" onClick={() => open('delete', bank)}>
                         🗑 Delete
                       </button>
@@ -181,42 +187,10 @@ export default function BankConfig() {
                 </div>
               </div>
             ))}
-            {realBanks.length === 0 && (
+            {banks.length === 0 && (
               <div className="empty-sub" style={{ gridColumn: '1/-1' }}>No bank accounts yet.</div>
             )}
           </div>
-
-          {/* ── Cash Accounts ── */}
-          {cashAccounts.length > 0 && (
-            <>
-              <div className="cfg-section-title" style={{ marginTop: 32 }}>💵 Cash Accounts</div>
-              <div className="cfg-grid">
-                {cashAccounts.map(bank => (
-                  <div key={bank.id} className="cfg-card cash-cfg-card">
-                    <div className="cfg-card-top">
-                      <div className="cfg-bank-icon">💵</div>
-                      <div className="cfg-bank-info">
-                        <div className="cfg-bank-name">{bank.name}</div>
-                        <div style={{ fontSize: 11, color: '#d97706', fontWeight: 600, marginTop: 2 }}>
-                          Cash • No balance tracking
-                        </div>
-                      </div>
-                    </div>
-                    {isSuperAdmin && (
-                      <div className="cfg-actions">
-                        <button className="btn btn-ghost btn-sm" onClick={() => open('rename', bank)}>
-                          ✏️ Rename
-                        </button>
-                        <button className="btn btn-danger btn-sm" onClick={() => open('delete', bank)}>
-                          🗑 Delete
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
         </>
       )}
 
