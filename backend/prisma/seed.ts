@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 
 const prisma = new PrismaClient();
 
@@ -12,7 +13,8 @@ async function main() {
   });
 
   if (!superAdminExists) {
-    const hash = await bcrypt.hash('Admin@123', 12);
+    const adminPassword = process.env.ADMIN_PASSWORD || crypto.randomBytes(6).toString('hex');
+    const hash = await bcrypt.hash(adminPassword, 12);
     await prisma.user.create({
       data: {
         name: 'Super Admin',
@@ -22,7 +24,8 @@ async function main() {
         isActive: true,
       },
     });
-    console.log('✅ Super Admin created (username: admin, password: Admin@123)');
+    console.log(`✅ Super Admin created (username: admin, password: ${adminPassword})`);
+    console.log(`⚠️  PLEASE COPY AND SAVE THIS PASSWORD IMMEDITELY. IT WILL NOT BE SHOWN AGAIN.`);
   } else {
     console.log('⏭  Super Admin already exists — skipping.');
   }

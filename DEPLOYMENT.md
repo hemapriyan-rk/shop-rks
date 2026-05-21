@@ -160,7 +160,7 @@ Open `https://shop-rks.onrender.com` in a browser.
 ```bash
 curl https://shop-rks.onrender.com/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"username":"admin","password":"your-seed-password"}'
+  -d '{"username":"admin","password":"<your_generated_password>"}'
 ```
 
 ---

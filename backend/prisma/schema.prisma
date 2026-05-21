@@ -195,6 +195,16 @@ model SystemConfig {
   @@map("system_config")
 }
 
+model LoginAttempt {
+  ipAddress    String    @id @map("ip_address")
+  attempts     Int       @default(0)
+  pastBlocks   Int       @default(0) @map("past_blocks")
+  blockedUntil DateTime? @map("blocked_until") @db.Timestamptz
+  updatedAt    DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("login_attempts")
+}
+
 // ─────────────────────────────────────────────────────────
 // AUDIT LOGS
 // ─────────────────────────────────────────────────────────

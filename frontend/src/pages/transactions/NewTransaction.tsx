@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Layout from '../../components/layout/Layout';
 import { servicesApi, transactionsApi } from '../../api';
 import { useLanguage } from '../../context/LanguageContext';
+import { useAuth } from '../../context/AuthContext';
 import type { Service, ServiceCategory } from '../../types';
 
 const CATS: ServiceCategory[] = ['GOVT', 'PRINTING', 'CARDS', 'OTHER'];
@@ -10,6 +11,7 @@ const CAT_LABELS: Record<ServiceCategory, string> = { GOVT: '🏛 Govt', PRINTIN
 
 export default function NewTransaction() {
   const { t } = useLanguage();
+  const { isAdmin } = useAuth();
   const navigate = useNavigate();
   const [services, setServices] = useState<Service[]>([]);
   const [search, setSearch] = useState('');
@@ -291,21 +293,23 @@ export default function NewTransaction() {
           </div>
 
           {/* SHOP XEROX CARD */}
-          <div className="card" style={{ display: 'flex', flexDirection: 'column' }}>
-            <h4 style={{ marginBottom: 16 }}>SHOP-XEROX</h4>
-            <form onSubmit={handleShopXeroxSubmit} style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-              <div className="form-group">
-                <input className="form-input" placeholder="Amount (₹)" type="number" min={0} step="0.01" value={shopXeroxAmount} onChange={e => setShopXeroxAmount(e.target.value === '' ? '' : Math.max(0, parseFloat(e.target.value)))} required />
-              </div>
-              <div style={{ color: 'var(--text-muted)', fontSize: 13, marginBottom: 16, padding: 8, background: 'var(--bg-elevated)', borderRadius: 8 }}>
-                * No custom name required.<br />
-                * Payment method is auto-stored as SHOP_XEROX.
-              </div>
-              <button type="submit" className="btn btn-primary btn-full" disabled={!shopXeroxAmount || shopXeroxSubmitting} style={{ marginTop: 'auto' }}>
-                {shopXeroxSubmitting ? 'Saving...' : 'Save SHOP-XEROX'}
-              </button>
-            </form>
-          </div>
+          {isAdmin && (
+            <div className="card" style={{ display: 'flex', flexDirection: 'column' }}>
+              <h4 style={{ marginBottom: 16 }}>SHOP-XEROX</h4>
+              <form onSubmit={handleShopXeroxSubmit} style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+                <div className="form-group">
+                  <input className="form-input" placeholder="Amount (₹)" type="number" min={0} step="0.01" value={shopXeroxAmount} onChange={e => setShopXeroxAmount(e.target.value === '' ? '' : Math.max(0, parseFloat(e.target.value)))} required />
+                </div>
+                <div style={{ color: 'var(--text-muted)', fontSize: 13, marginBottom: 16, padding: 8, background: 'var(--bg-elevated)', borderRadius: 8 }}>
+                  * No custom name required.<br />
+                  * Payment method is auto-stored as SHOP_XEROX.
+                </div>
+                <button type="submit" className="btn btn-primary btn-full" disabled={!shopXeroxAmount || shopXeroxSubmitting} style={{ marginTop: 'auto' }}>
+                  {shopXeroxSubmitting ? 'Saving...' : 'Save SHOP-XEROX'}
+                </button>
+              </form>
+            </div>
+          )}
         </div>
 
       </div>

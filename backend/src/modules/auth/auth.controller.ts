@@ -8,12 +8,55 @@ import { sendSuccess, sendError, sendUnauthorized } from '../../utils/response';
 export async function login(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const { username, password } = req.body as { username: string; password: string };
+    const ip = req.ip || req.socket.remoteAddress || 'unknown';
+
+    let loginAttempt = await prisma.loginAttempt.findUnique({ where: { ipAddress: ip } });
+    if (loginAttempt) {
+      if (loginAttempt.pastBlocks >= 2) {
+        res.status(403).json({ success: false, error: 'Access permanently blocked from this device due to suspicious activity.' });
+        return;
+      }
+      if (loginAttempt.blockedUntil && new Date(loginAttempt.blockedUntil) > new Date()) {
+        const remaining = Math.ceil((new Date(loginAttempt.blockedUntil).getTime() - Date.now()) / (1000 * 60 * 60));
+        res.status(403).json({ success: false, error: `Too many failed attempts. Try again in ${remaining} hours.` });
+        return;
+      }
+      if (loginAttempt.blockedUntil && new Date(loginAttempt.blockedUntil) <= new Date()) {
+        loginAttempt = await prisma.loginAttempt.update({
+          where: { ipAddress: ip },
+          data: { attempts: 0, blockedUntil: null }
+        });
+      }
+    }
+
+    const handleFailedLogin = async () => {
+      const attempt = await prisma.loginAttempt.upsert({
+        where: { ipAddress: ip },
+        update: { attempts: { increment: 1 } },
+        create: { ipAddress: ip, attempts: 1 }
+      });
+      
+      if (attempt.attempts >= 5) {
+        if (attempt.pastBlocks >= 1) {
+          await prisma.loginAttempt.update({
+            where: { ipAddress: ip },
+            data: { pastBlocks: 2, blockedUntil: new Date(Date.now() + 100 * 365 * 24 * 60 * 60 * 1000) }
+          });
+        } else {
+          await prisma.loginAttempt.update({
+            where: { ipAddress: ip },
+            data: { pastBlocks: 1, blockedUntil: new Date(Date.now() + 24 * 60 * 60 * 1000) }
+          });
+        }
+      }
+    };
 
     const user = await prisma.user.findUnique({
       where: { username: username.toLowerCase().trim() },
     });
 
     if (!user || !user.isActive) {
+      await handleFailedLogin();
       sendUnauthorized(res, 'Invalid username or password');
       return;
     }
@@ -26,6 +69,7 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
 
     const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
     if (!isPasswordValid) {
+      await handleFailedLogin();
       sendUnauthorized(res, 'Invalid username or password');
       return;
     }
@@ -61,6 +105,11 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
     const token = jwt.sign(payload, env.JWT_SECRET, {
       expiresIn: env.JWT_EXPIRES_IN as `${number}${'s'|'m'|'h'|'d'}`,
     });
+
+    // Reset login attempts on success
+    if (loginAttempt) {
+      await prisma.loginAttempt.delete({ where: { ipAddress: ip } }).catch(() => {});
+    }
 
     sendSuccess(res, {
       token,
