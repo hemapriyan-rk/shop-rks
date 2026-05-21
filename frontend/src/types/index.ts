@@ -29,7 +29,7 @@ export interface Transaction {
   quantity: number;
   unitPrice: number;
   totalPrice: number;
-  paymentMethod: 'CASH' | 'ONLINE';
+  paymentMethod: 'CASH' | 'ONLINE' | 'OTHER' | 'SHOP_XEROX';
   notes?: string;
   createdAt: string;
   updatedAt: string;
@@ -79,6 +79,8 @@ export interface DailyAnalytics {
   income: number;
   cashIncome: number;
   onlineIncome: number;
+  otherIncome: number;
+  shopXeroxIncome: number;
   expenses: number;
   profit: number;
   transactionCount: number;
@@ -94,11 +96,13 @@ export interface MonthlyAnalytics {
   income: number;
   cashIncome: number;
   onlineIncome: number;
+  otherIncome: number;
+  shopXeroxIncome: number;
   expenses: number;
   profit: number;
   transactionCount: number;
   expenseCount: number;
-  daily: Array<{ date: string; income: number; cashIncome: number; onlineIncome: number; expenses: number; profit: number; count: number }>;
+  daily: Array<{ date: string; income: number; cashIncome: number; onlineIncome: number; otherIncome: number; shopXeroxIncome: number; expenses: number; profit: number; count: number }>;
 }
 
 export interface TodaySummary {
@@ -106,6 +110,8 @@ export interface TodaySummary {
   income: number;
   cashIncome: number;
   onlineIncome: number;
+  otherIncome: number;
+  shopXeroxIncome: number;
   expenses: number;
   profit: number;
   transactionCount: number;

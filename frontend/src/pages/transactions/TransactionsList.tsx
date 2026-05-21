@@ -54,6 +54,8 @@ export default function TransactionsList() {
             <option value="">All Methods</option>
             <option value="CASH">Cash Only</option>
             <option value="ONLINE">Online Only</option>
+            <option value="OTHER">Other Only</option>
+            <option value="SHOP_XEROX">Shop Xerox Only</option>
           </select>
           {isAdmin ? (
             <input type="date" className="form-input" style={{ width: 160 }} value={date} onChange={e => setDate(e.target.value)} max={new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' })} />
@@ -87,7 +89,9 @@ export default function TransactionsList() {
                     <td style={{ fontWeight: 600 }}>{t.service?.name}</td>
                     <td><span className="badge badge-purple">{t.service?.category}</span></td>
                     <td title={t.paymentMethod}>
-                      {t.paymentMethod === 'ONLINE' ? '💳 Online' : '💵 Cash'}
+                      {t.paymentMethod === 'ONLINE' ? '💳 Online' : 
+                       t.paymentMethod === 'CASH' ? '💵 Cash' : 
+                       t.paymentMethod === 'SHOP_XEROX' ? '🖨️ Shop Xerox' : '🔧 Other'}
                     </td>
                     <td>{t.quantity}</td>
                     <td>₹{Number(t.unitPrice).toFixed(2)}</td>

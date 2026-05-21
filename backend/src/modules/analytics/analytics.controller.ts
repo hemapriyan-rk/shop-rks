@@ -37,13 +37,15 @@ export async function getTodaySummary(req: Request, res: Response, next: NextFun
       }) : Promise.resolve(0),
     ]);
 
-    let income = 0, cashIncome = 0, onlineIncome = 0, txCount = 0;
+    let income = 0, cashIncome = 0, onlineIncome = 0, otherIncome = 0, shopXeroxIncome = 0, txCount = 0;
     for (const g of txGroups) {
       const sum = Number(g._sum.totalPrice ?? 0);
       income += sum;
       txCount += g._count;
       if (g.paymentMethod === 'CASH') cashIncome += sum;
       if (g.paymentMethod === 'ONLINE') onlineIncome += sum;
+      if (g.paymentMethod === 'OTHER') otherIncome += sum;
+      if (g.paymentMethod === 'SHOP_XEROX') shopXeroxIncome += sum;
     }
 
     const expenses = Number(expAgg._sum.amount ?? 0);
@@ -54,6 +56,8 @@ export async function getTodaySummary(req: Request, res: Response, next: NextFun
       income,
       cashIncome,
       onlineIncome,
+      otherIncome,
+      shopXeroxIncome,
       expenses,
       profit,
       transactionCount: txCount,
@@ -122,13 +126,15 @@ export async function getDailyAnalytics(req: Request, res: Response, next: NextF
       _sum: { amount: true },
     });
 
-    let income = 0, cashIncome = 0, onlineIncome = 0, txCount = 0;
+    let income = 0, cashIncome = 0, onlineIncome = 0, otherIncome = 0, shopXeroxIncome = 0, txCount = 0;
     for (const g of txGroups) {
       const sum = Number(g._sum.totalPrice ?? 0);
       income += sum;
       txCount += g._count;
       if (g.paymentMethod === 'CASH') cashIncome += sum;
       if (g.paymentMethod === 'ONLINE') onlineIncome += sum;
+      if (g.paymentMethod === 'OTHER') otherIncome += sum;
+      if (g.paymentMethod === 'SHOP_XEROX') shopXeroxIncome += sum;
     }
 
     const expenses = Number(expAgg._sum.amount ?? 0);
@@ -138,6 +144,8 @@ export async function getDailyAnalytics(req: Request, res: Response, next: NextF
       income,
       cashIncome,
       onlineIncome,
+      otherIncome,
+      shopXeroxIncome,
       expenses,
       profit: income - expenses,
       transactionCount: txCount,
@@ -191,6 +199,8 @@ export async function getMonthlyAnalytics(req: Request, res: Response, next: Nex
         SUM(total_price)::text as income,
         SUM(CASE WHEN payment_method = 'CASH' THEN total_price ELSE 0 END)::text as cash_income,
         SUM(CASE WHEN payment_method = 'ONLINE' THEN total_price ELSE 0 END)::text as online_income,
+        SUM(CASE WHEN payment_method = 'OTHER' THEN total_price ELSE 0 END)::text as other_income,
+        SUM(CASE WHEN payment_method = 'SHOP_XEROX' THEN total_price ELSE 0 END)::text as shop_xerox_income,
         COUNT(*)::bigint as count
       FROM transactions
       WHERE created_at >= ${start} AND created_at <= ${end}
@@ -212,30 +222,34 @@ export async function getMonthlyAnalytics(req: Request, res: Response, next: Nex
     `;
 
     // Merge into daily data map
-    const dayMap: Record<string, { income: number; cashIncome: number; onlineIncome: number; expenses: number; profit: number; count: number }> = {};
-    for (const row of dailyTransactions) {
+    const dayMap: Record<string, { income: number; cashIncome: number; onlineIncome: number; otherIncome: number; shopXeroxIncome: number; expenses: number; profit: number; count: number }> = {};
+    for (const row of dailyTransactions as any[]) {
       dayMap[row.day] = { 
         income: parseFloat(row.income), 
         cashIncome: parseFloat(row.cash_income || '0'),
         onlineIncome: parseFloat(row.online_income || '0'),
+        otherIncome: parseFloat(row.other_income || '0'),
+        shopXeroxIncome: parseFloat(row.shop_xerox_income || '0'),
         expenses: 0, profit: 0, count: Number(row.count) 
       };
     }
-    for (const row of dailyExpenses) {
-      if (!dayMap[row.day]) dayMap[row.day] = { income: 0, cashIncome: 0, onlineIncome: 0, expenses: 0, profit: 0, count: 0 };
+    for (const row of dailyExpenses as any[]) {
+      if (!dayMap[row.day]) dayMap[row.day] = { income: 0, cashIncome: 0, onlineIncome: 0, otherIncome: 0, shopXeroxIncome: 0, expenses: 0, profit: 0, count: 0 };
       dayMap[row.day].expenses = parseFloat(row.total);
     }
     for (const day of Object.keys(dayMap)) {
       dayMap[day].profit = dayMap[day].income - dayMap[day].expenses;
     }
 
-    let income = 0, cashIncome = 0, onlineIncome = 0, txCount = 0;
+    let income = 0, cashIncome = 0, onlineIncome = 0, otherIncome = 0, shopXeroxIncome = 0, txCount = 0;
     for (const g of txGroups) {
       const sum = Number(g._sum.totalPrice ?? 0);
       income += sum;
       txCount += g._count;
       if (g.paymentMethod === 'CASH') cashIncome += sum;
       if (g.paymentMethod === 'ONLINE') onlineIncome += sum;
+      if (g.paymentMethod === 'OTHER') otherIncome += sum;
+      if (g.paymentMethod === 'SHOP_XEROX') shopXeroxIncome += sum;
     }
 
     const expenses = Number(expAgg._sum.amount ?? 0);
@@ -246,6 +260,8 @@ export async function getMonthlyAnalytics(req: Request, res: Response, next: Nex
       income,
       cashIncome,
       onlineIncome,
+      otherIncome,
+      shopXeroxIncome,
       expenses,
       profit: income - expenses,
       transactionCount: txCount,

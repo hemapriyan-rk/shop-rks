@@ -31,6 +31,8 @@ enum ServiceCategory {
 enum PaymentMethod {
   CASH
   ONLINE
+  OTHER
+  SHOP_XEROX
 }
 
 enum AuditAction {

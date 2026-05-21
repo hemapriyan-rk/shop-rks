@@ -23,6 +23,17 @@ export default function NewTransaction() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  
+  // Quick Entry: Others
+  const [othersAmount, setOthersAmount] = useState<number | ''>('');
+  const [othersName, setOthersName] = useState('');
+  const [othersPayment, setOthersPayment] = useState<'CASH' | 'ONLINE' | 'OTHER' | ''>('');
+  const [othersSubmitting, setOthersSubmitting] = useState(false);
+
+  // Quick Entry: SHOP-XEROX
+  const [shopXeroxAmount, setShopXeroxAmount] = useState<number | ''>('');
+  const [shopXeroxSubmitting, setShopXeroxSubmitting] = useState(false);
+
   const searchRef = useRef<HTMLInputElement>(null);
   const qtyRef = useRef<HTMLInputElement>(null);
 
@@ -82,6 +93,52 @@ export default function NewTransaction() {
     } catch (err: any) {
       setError(err.response?.data?.error || 'Failed to save transaction');
     } finally { setSubmitting(false); }
+  };
+
+  const handleOthersSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!othersAmount || othersAmount <= 0) { setError('Please enter a valid amount'); return; }
+    if (!othersPayment) { setError('Please select a payment method'); return; }
+
+    setOthersSubmitting(true);
+    setError('');
+    try {
+      await transactionsApi.create({
+        serviceName: 'Others',
+        quantity: 1,
+        unitPrice: Number(othersAmount),
+        paymentMethod: othersPayment,
+        notes: othersName || undefined,
+      });
+      setSuccess(`✓ Others entry recorded — ₹${othersAmount}`);
+      setOthersAmount('');
+      setOthersName('');
+      setOthersPayment('');
+      setTimeout(() => setSuccess(''), 4000);
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to save Others entry');
+    } finally { setOthersSubmitting(false); }
+  };
+
+  const handleShopXeroxSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!shopXeroxAmount || shopXeroxAmount <= 0) { setError('Please enter a valid amount'); return; }
+
+    setShopXeroxSubmitting(true);
+    setError('');
+    try {
+      await transactionsApi.create({
+        serviceName: 'SHOP-XEROX',
+        quantity: 1,
+        unitPrice: Number(shopXeroxAmount),
+        paymentMethod: 'SHOP_XEROX',
+      });
+      setSuccess(`✓ Shop Xerox recorded — ₹${shopXeroxAmount}`);
+      setShopXeroxAmount('');
+      setTimeout(() => setSuccess(''), 4000);
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to save Shop Xerox entry');
+    } finally { setShopXeroxSubmitting(false); }
   };
 
   const total = selected && unitPrice !== '' ? Number(unitPrice) * (Number(quantity) || 0) : 0;
@@ -207,6 +264,50 @@ export default function NewTransaction() {
             {submitting ? <><span className="spinner" style={{ width: 16, height: 16 }} /> {t('newTx.saving' as any)}</> : `${t('newTx.saveBtn' as any)}${selected ? ` — ₹${total.toFixed(2)}` : ''}`}
           </button>
         </form>
+
+        <hr style={{ margin: '32px 0', borderColor: 'var(--border-color)' }} />
+        <h3 style={{ marginBottom: 16 }}>Quick Entries</h3>
+        
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
+          {/* OTHERS CARD */}
+          <div className="card" style={{ display: 'flex', flexDirection: 'column' }}>
+            <h4 style={{ marginBottom: 16 }}>Others</h4>
+            <form onSubmit={handleOthersSubmit} style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+              <div className="form-group">
+                <input className="form-input" placeholder="Amount (₹)" type="number" min={0} step="0.01" value={othersAmount} onChange={e => setOthersAmount(e.target.value === '' ? '' : Math.max(0, parseFloat(e.target.value)))} required />
+              </div>
+              <div className="form-group">
+                <input className="form-input" placeholder="Custom Name (optional)" value={othersName} onChange={e => setOthersName(e.target.value)} />
+              </div>
+              <div style={{ display: 'flex', gap: 4, marginBottom: 16 }}>
+                <button type="button" className={`btn btn-sm ${othersPayment === 'CASH' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setOthersPayment('CASH')}>Cash</button>
+                <button type="button" className={`btn btn-sm ${othersPayment === 'ONLINE' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setOthersPayment('ONLINE')}>Online</button>
+                <button type="button" className={`btn btn-sm ${othersPayment === 'OTHER' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setOthersPayment('OTHER')}>Other</button>
+              </div>
+              <button type="submit" className="btn btn-primary btn-full" disabled={!othersAmount || !othersPayment || othersSubmitting} style={{ marginTop: 'auto' }}>
+                {othersSubmitting ? 'Saving...' : 'Save Others'}
+              </button>
+            </form>
+          </div>
+
+          {/* SHOP XEROX CARD */}
+          <div className="card" style={{ display: 'flex', flexDirection: 'column' }}>
+            <h4 style={{ marginBottom: 16 }}>SHOP-XEROX</h4>
+            <form onSubmit={handleShopXeroxSubmit} style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+              <div className="form-group">
+                <input className="form-input" placeholder="Amount (₹)" type="number" min={0} step="0.01" value={shopXeroxAmount} onChange={e => setShopXeroxAmount(e.target.value === '' ? '' : Math.max(0, parseFloat(e.target.value)))} required />
+              </div>
+              <div style={{ color: 'var(--text-muted)', fontSize: 13, marginBottom: 16, padding: 8, background: 'var(--bg-elevated)', borderRadius: 8 }}>
+                * No custom name required.<br />
+                * Payment method is auto-stored as SHOP_XEROX.
+              </div>
+              <button type="submit" className="btn btn-primary btn-full" disabled={!shopXeroxAmount || shopXeroxSubmitting} style={{ marginTop: 'auto' }}>
+                {shopXeroxSubmitting ? 'Saving...' : 'Save SHOP-XEROX'}
+              </button>
+            </form>
+          </div>
+        </div>
+
       </div>
     </Layout>
   );

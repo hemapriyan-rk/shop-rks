@@ -60,11 +60,22 @@ export async function getTransactions(req: Request, res: Response, next: NextFun
 
 export async function createTransaction(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { serviceId, quantity, notes, unitPrice: customUnitPrice, paymentMethod } = req.body as {
-      serviceId: string; quantity: number; notes?: string; unitPrice?: number; paymentMethod: 'CASH' | 'ONLINE';
+    const { serviceId, serviceName, quantity, notes, unitPrice: customUnitPrice, paymentMethod } = req.body as {
+      serviceId?: string; serviceName?: string; quantity: number; notes?: string; unitPrice?: number; paymentMethod: 'CASH' | 'ONLINE' | 'OTHER' | 'SHOP_XEROX';
     };
 
-    const service = await prisma.service.findUnique({ where: { id: serviceId } });
+    let service;
+    if (serviceId) {
+      service = await prisma.service.findUnique({ where: { id: serviceId } });
+    } else if (serviceName) {
+      service = await prisma.service.findFirst({ where: { name: serviceName } });
+      if (!service) {
+        service = await prisma.service.create({
+          data: { name: serviceName, category: 'OTHER', price: customUnitPrice || 0, isActive: true }
+        });
+      }
+    }
+
     if (!service || !service.isActive) {
       sendNotFound(res, 'Service');
       return;
@@ -80,7 +91,7 @@ export async function createTransaction(req: Request, res: Response, next: NextF
       (tx) => tx.transaction.create({
         data: {
           userId: req.user!.userId,
-          serviceId,
+          serviceId: service.id,
           quantity,
           unitPrice,
           totalPrice,

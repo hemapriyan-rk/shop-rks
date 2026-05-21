@@ -88,9 +88,14 @@ export const updateServiceSchema = createServiceSchema.partial();
 // ─── Transaction schemas ────────────────────────────────────────────
 
 export const createTransactionSchema = z.object({
-  serviceId: z.string().uuid('Invalid service ID'),
+  serviceId: z.string().uuid('Invalid service ID').optional(),
+  serviceName: z.string().optional(),
   quantity: positiveInt,
   notes: z.string().max(500).optional(),
+  unitPrice: nonNegativeDecimal.optional(),
+  paymentMethod: z.enum(['CASH', 'ONLINE', 'OTHER', 'SHOP_XEROX']),
+}).refine(data => data.serviceId || data.serviceName, {
+  message: "Either serviceId or serviceName must be provided",
 });
 
 export const updateTransactionSchema = z.object({
