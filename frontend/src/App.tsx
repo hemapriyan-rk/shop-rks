@@ -29,7 +29,8 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/" element={<LandingPage />} />
+          <Route path="/open" element={<LandingPage />} />
+          <Route path="/" element={<Navigate to="/open" replace />} />
 
           {/* All authenticated users */}
           <Route element={<ProtectedRoute />}>

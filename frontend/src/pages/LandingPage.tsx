@@ -22,8 +22,8 @@ export default function LandingPage() {
             <a href="https://wa.me/918122778794" target="_blank" rel="noreferrer" className="landing-btn landing-btn-outline" style={{ color: '#25D366', borderColor: 'rgba(37,211,102,0.3)' }}>
               💬 WhatsApp
             </a>
-            <a href="tel:+918122778794" className="landing-btn landing-btn-yellow">
-              📞 Call Now
+            <a href="mailto:rksxerox@gmail.com" className="landing-btn landing-btn-outline" style={{ marginLeft: 8 }}>
+              ✉️ Email Us
             </a>
             <Link to="/login" className="landing-btn landing-btn-outline" style={{ marginLeft: 8 }}>
               Staff Login
@@ -50,8 +50,8 @@ export default function LandingPage() {
               <a href="https://wa.me/918122778794" target="_blank" rel="noreferrer" className="landing-btn landing-btn-green">
                 WhatsApp Now
               </a>
-              <a href="#contact" className="landing-btn landing-btn-yellow">
-                📍 Visit Our Shop
+              <a href="mailto:rksxerox@gmail.com" className="landing-btn landing-btn-outline" style={{ background: '#fff' }}>
+                ✉️ Email Us
               </a>
             </div>
           </div>
@@ -73,43 +73,43 @@ export default function LandingPage() {
           <div className="services-grid">
             <div className="service-card">
               <div className="service-icon">🖨️</div>
-              <h3 className="service-title">XEROX</h3>
-              <p className="service-desc">High quality black & white and color photocopy</p>
+              <h3 className="service-title">XEROX & PRINTING</h3>
+              <p className="service-desc">High quality B&W, Color, and Photo printing</p>
             </div>
             <div className="service-card">
-              <div className="service-icon">📄</div>
-              <h3 className="service-title">PRINTING</h3>
-              <p className="service-desc">Fast & high quality printing black & white & color</p>
+              <div className="service-icon">📜</div>
+              <h3 className="service-title">GOVT. CERTIFICATES</h3>
+              <p className="service-desc">Income, Community, Birth & e-Seva forms</p>
             </div>
             <div className="service-card">
-              <div className="service-icon">📠</div>
-              <h3 className="service-title">SCANNING</h3>
-              <p className="service-desc">High resolution scanning with multiple formats</p>
+              <div className="service-icon">💳</div>
+              <h3 className="service-title">AADHAAR & PAN</h3>
+              <p className="service-desc">Apply for new cards or corrections quickly</p>
             </div>
             <div className="service-card">
               <div className="service-icon">📋</div>
-              <h3 className="service-title">LAMINATION</h3>
-              <p className="service-desc">All types of lamination available here</p>
+              <h3 className="service-title">LAMINATION & BINDING</h3>
+              <p className="service-desc">Spiral binding and secure ID/A4 lamination</p>
             </div>
             <div className="service-card">
-              <div className="service-icon">🌐</div>
-              <h3 className="service-title">ONLINE FORMS</h3>
-              <p className="service-desc">All types of online forms filled here</p>
+              <div className="service-icon">🪪</div>
+              <h3 className="service-title">ID & VISITING CARDS</h3>
+              <p className="service-desc">Professional cards, Flex and Banner prints</p>
             </div>
             <div className="service-card">
               <div className="service-icon">⌨️</div>
               <h3 className="service-title">TYPING SERVICES</h3>
-              <p className="service-desc">Fast and accurate typing for all documents</p>
+              <p className="service-desc">Fast and accurate typing in English & Tamil</p>
             </div>
             <div className="service-card">
-              <div className="service-icon">📸</div>
-              <h3 className="service-title">PASSPORT PHOTOS</h3>
-              <p className="service-desc">Instant passport & stamp size photos</p>
+              <div className="service-icon">📠</div>
+              <h3 className="service-title">SCANNING & EMAILING</h3>
+              <p className="service-desc">High resolution scanning and document emailing</p>
             </div>
             <div className="service-card">
               <div className="service-icon">📶</div>
-              <h3 className="service-title">INTERNET SERVICES</h3>
-              <p className="service-desc">Internet browsing, email & more services</p>
+              <h3 className="service-title">INTERNET BROWSING</h3>
+              <p className="service-desc">High-speed internet browsing and online assistance</p>
             </div>
           </div>
         </div>
@@ -130,11 +130,11 @@ export default function LandingPage() {
               <h4 style={{ fontSize: 18, fontWeight: 800, color: '#111', marginBottom: 20, textAlign: 'center' }}>⏱️ Opening Hours</h4>
               <div style={{ display: 'flex', justifyContent: 'space-between', gap: 48, marginBottom: 12 }}>
                 <span style={{ fontWeight: 600, color: '#111' }}>Monday - Saturday</span>
-                <span style={{ color: '#FFC107', fontWeight: 800 }}>8:30 AM - 8:00 PM</span>
+                <span style={{ color: '#FFC107', fontWeight: 800 }}>8:00 AM - 7:00 PM</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', gap: 48 }}>
                 <span style={{ fontWeight: 600, color: '#111' }}>Sunday</span>
-                <span style={{ color: '#FFC107', fontWeight: 800 }}>10:00 AM - 5:00 PM</span>
+                <span style={{ color: '#FFC107', fontWeight: 800 }}>Closed</span>
               </div>
             </div>
           </div>
@@ -174,7 +174,7 @@ export default function LandingPage() {
             </div>
             <div className="contact-item">
               <div className="contact-icon">📍</div>
-              <div>Near Main Road,<br />Your City, State - 000000</div>
+              <div>Opposite Nandha College,<br />Saran, Perundurai - 638052</div>
             </div>
           </div>
           <div id="location">
@@ -189,8 +189,8 @@ export default function LandingPage() {
           <div className="landing-container">
             <div className="opening-hours">
               ⏱️ <strong>OPENING HOURS:</strong>
-              <span>Monday - Saturday</span> <span className="time-badge">8:30 AM - 8:00 PM</span> | 
-              <span>Sunday</span> <span className="time-badge">10:00 AM - 5:00 PM</span>
+              <span>Monday - Saturday</span> <span className="time-badge">8:00 AM - 7:00 PM</span> | 
+              <span>Sunday</span> <span className="time-badge">Closed</span>
             </div>
           </div>
         </div>
