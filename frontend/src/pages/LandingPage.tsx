@@ -174,7 +174,7 @@ export default function LandingPage() {
             </div>
             <div className="contact-item">
               <div className="contact-icon">📍</div>
-              <div>Opposite Nandha College,<br />Saran, Perundurai - 638052</div>
+              <div>RKS Xerox and Computer center,<br />opposite Taluk Office, Harur,<br />Tamil Nadu 636903</div>
             </div>
           </div>
           <div id="location">
