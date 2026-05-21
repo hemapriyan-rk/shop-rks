@@ -1,0 +1,106 @@
+import api from './client';
+import type { ApiResponse, User, Service, Transaction, Expense, Log, DailyAnalytics, MonthlyAnalytics, TodaySummary, BankAccount, Session, SystemConfig } from '../types';
+
+// ── Auth ────────────────────────────────────────────────────────
+export const authApi = {
+  login: (username: string, password: string) =>
+    api.post<ApiResponse<{ token: string; user: User }>>('/auth/login', { username, password }),
+  me: () => api.get<ApiResponse<User & { totalRevenue: number; todayStats: { transactions: number; revenue: number }; recentActivity: unknown[] }>>('/auth/me'),
+  logout: () => api.post<ApiResponse<null>>('/auth/logout'),
+  changePassword: (currentPassword: string, newPassword: string) =>
+    api.post<ApiResponse<null>>('/auth/change-password', { currentPassword, newPassword }),
+};
+
+// ── Users ───────────────────────────────────────────────────────
+export const usersApi = {
+  list: () => api.get<ApiResponse<User[]>>('/users'),
+  get: (id: string) => api.get<ApiResponse<User>>(`/users/${id}`),
+  create: (data: { name: string; username: string; password: string; role: string; isActive?: boolean }) =>
+    api.post<ApiResponse<User>>('/users', data),
+  update: (id: string, data: Partial<User> & { password?: string }) =>
+    api.patch<ApiResponse<User>>(`/users/${id}`, data),
+  delete: (id: string) => api.delete<ApiResponse<null>>(`/users/${id}`),
+};
+
+// ── Services ─────────────────────────────────────────────────────
+export const servicesApi = {
+  list: (params?: { category?: string; active?: boolean }) =>
+    api.get<ApiResponse<Service[]>>('/services', { params }),
+  create: (data: { name: string; category: string; price: number; isActive?: boolean }) =>
+    api.post<ApiResponse<Service>>('/services', data),
+  update: (id: string, data: Partial<Service>) =>
+    api.patch<ApiResponse<Service>>(`/services/${id}`, data),
+  delete: (id: string) => api.delete<ApiResponse<null>>(`/services/${id}`),
+};
+
+// ── Transactions ──────────────────────────────────────────────────
+export const transactionsApi = {
+  list: (params?: { date?: string; userId?: string; page?: number; limit?: number }) =>
+    api.get<ApiResponse<Transaction[]>>('/transactions', { params }),
+  create: (data: { serviceId: string; quantity: number; unitPrice?: number; notes?: string }) =>
+    api.post<ApiResponse<Transaction>>('/transactions', data),
+  update: (id: string, data: { updatedAt: string; quantity?: number; notes?: string }) =>
+    api.patch<ApiResponse<Transaction>>(`/transactions/${id}`, data),
+  delete: (id: string) => api.delete<ApiResponse<null>>(`/transactions/${id}`),
+};
+
+// ── Expenses ──────────────────────────────────────────────────────
+export const expensesApi = {
+  list: (params?: { date?: string; status?: string; userId?: string }) =>
+    api.get<ApiResponse<Expense[]>>('/expenses', { params }),
+  create: (data: { amount: number; category: string; note?: string; bankId?: string }) =>
+    api.post<ApiResponse<Expense>>('/expenses', data),
+  update: (id: string, data: { updatedAt: string; amount?: number; category?: string; note?: string }) =>
+    api.patch<ApiResponse<Expense>>(`/expenses/${id}`, data),
+  approve: (id: string, status: 'APPROVED' | 'REJECTED', bankId?: string) =>
+    api.patch<ApiResponse<Expense>>(`/expenses/${id}/approve`, { status, bankId }),
+  delete: (id: string) => api.delete<ApiResponse<null>>(`/expenses/${id}`),
+};
+
+// ── Banks ──────────────────────────────────────────────────────────
+export const banksApi = {
+  list: () => api.get<ApiResponse<BankAccount[]>>('/banks'),
+  analytics: (params?: { date?: string; action?: string }) => api.get<ApiResponse<BankAccount[]>>('/banks/analytics', { params }),
+  deposit: (id: string, amount: number, note?: string) =>
+    api.patch<ApiResponse<BankAccount>>(`/banks/${id}/deposit`, { amount, note }),
+  setBalance: (id: string, balance: number, note?: string) =>
+    api.patch<ApiResponse<BankAccount>>(`/banks/${id}/balance`, { balance, note }),
+};
+
+// ── Analytics ─────────────────────────────────────────────────────
+export const analyticsApi = {
+  todaySummary: () => api.get<ApiResponse<TodaySummary>>('/analytics/today-summary'),
+  daily: (date?: string) => api.get<ApiResponse<DailyAnalytics>>('/analytics/daily', { params: { date } }),
+  monthly: (year?: number, month?: number) =>
+    api.get<ApiResponse<MonthlyAnalytics>>('/analytics/monthly', { params: { year, month } }),
+};
+
+// ── Logs ──────────────────────────────────────────────────────────
+export const logsApi = {
+  list: (params?: { page?: number; limit?: number; userId?: string; action?: string; tableName?: string }) =>
+    api.get<ApiResponse<Log[]>>('/logs', { params }),
+  cleanup: () => api.delete<ApiResponse<{ deletedCount: number }>>('/logs/cleanup'),
+};
+
+// ── Health ────────────────────────────────────────────────────────
+export const healthApi = {
+  check: () => api.get<ApiResponse<{ status: string; database: string; localTime: string }>>('/health'),
+};
+
+// ── Expense Categories ─────────────────────────────────────────────
+export const expenseCategoriesApi = {
+  list: () => api.get<ApiResponse<{ id: string; name: string }[]>>('/expense-categories'),
+  create: (name: string) => api.post<ApiResponse<any>>('/expense-categories', { name }),
+  update: (id: string, name: string) => api.patch<ApiResponse<any>>(`/expense-categories/${id}`, { name }),
+  delete: (id: string) => api.delete<ApiResponse<any>>(`/expense-categories/${id}`),
+};
+
+// ── System / Server Management ────────────────────────────────────
+export const systemApi = {
+  getConfig: () => api.get<ApiResponse<SystemConfig>>('/system/config'),
+  updateConfig: (data: Partial<SystemConfig> & { broadcastToAll?: boolean }) => api.patch<ApiResponse<SystemConfig>>('/system/config', data),
+  getSessions: () => api.get<ApiResponse<Session[]>>('/system/sessions'),
+  kickSession: (id: string, timeout?: number) => api.post<ApiResponse<null>>(`/system/sessions/${id}/kick`, { timeout }),
+  messageUser: (userId: string, message: string) => api.post<ApiResponse<null>>(`/system/sessions/${userId}/message`, { message }),
+  getHealthStats: () => api.get<ApiResponse<any>>('/system/health-stats'),
+};

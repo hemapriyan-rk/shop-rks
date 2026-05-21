@@ -1,0 +1,133 @@
+export type Role = 'USER' | 'ADMIN' | 'SUPER_ADMIN';
+export type ServiceCategory = 'GOVT' | 'PRINTING' | 'CARDS' | 'OTHER';
+export type ExpenseStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
+export type AuditAction = 'CREATE' | 'UPDATE' | 'DELETE';
+
+export interface User {
+  id: string;
+  name: string;
+  username: string;
+  role: Role;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  _count?: { transactions: number; expenses?: number };
+}
+
+export interface Service {
+  id: string;
+  name: string;
+  category: ServiceCategory;
+  price: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Transaction {
+  id: string;
+  quantity: number;
+  unitPrice: number;
+  totalPrice: number;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+  user: { id: string; name: string; username: string };
+  service: { id: string; name: string; category: ServiceCategory };
+}
+
+export interface BankAccount {
+  id: string;
+  name: string;
+  balance: number;
+  createdAt: string;
+  updatedAt: string;
+  totalDeducted?: number;
+  expenses?: Array<{ id: string; amount: number; category: string; note?: string; createdAt: string; user: { name: string } }>;
+  logs?: Array<{ id: string; action: string; newValue: any; createdAt: string; user: { name: string } }>;
+  _count?: { expenses: number };
+}
+
+export interface Expense {
+  id: string;
+  amount: number;
+  category: string;
+  note?: string;
+  status: ExpenseStatus;
+  bankId?: string | null;
+  bank?: { id: string; name: string } | null;
+  createdAt: string;
+  updatedAt: string;
+  user: { id: string; name: string; username: string };
+}
+
+export interface Log {
+  id: string;
+  action: AuditAction;
+  tableName: string;
+  recordId: string;
+  oldValue: unknown;
+  newValue: unknown;
+  createdAt: string;
+  user: { name: string; username: string };
+}
+
+export interface DailyAnalytics {
+  date: string;
+  income: number;
+  expenses: number;
+  profit: number;
+  transactionCount: number;
+  expenseCount: number;
+  topServices: Array<{ service: Service; revenue: number; count: number }>;
+  userBreakdown: Array<{ user: User; revenue: number; count: number }>;
+  expenseCategories: Array<{ category: string; total: number }>;
+}
+
+export interface MonthlyAnalytics {
+  year: number;
+  month: number;
+  income: number;
+  expenses: number;
+  profit: number;
+  transactionCount: number;
+  expenseCount: number;
+  daily: Array<{ date: string; income: number; expenses: number; profit: number; count: number }>;
+}
+
+export interface TodaySummary {
+  date: string;
+  income: number;
+  expenses: number;
+  profit: number;
+  transactionCount: number;
+  expenseCount: number;
+  pendingExpenseCount: number;
+}
+
+export interface Session {
+  id: string;
+  userId: string;
+  loginTime: string;
+  logoutTime?: string | null;
+  lastSeen: string;
+  isKicked: boolean;
+  ipAddress?: string;
+  userAgent?: string;
+  user: { name: string; username: string; role: Role };
+}
+
+export interface SystemConfig {
+  maintenanceMode: boolean;
+  maintenanceMessage: string;
+  serverMessage: string;
+  version: string;
+}
+
+export interface ApiResponse<T> {
+  success: boolean;
+  data?: T;
+  error?: string;
+  message?: string;
+  meta?: { total?: number; page?: number; limit?: number; date?: string };
+}

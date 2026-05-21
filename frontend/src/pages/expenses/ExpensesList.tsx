@@ -1,0 +1,135 @@
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Layout from '../../components/layout/Layout';
+import { expensesApi, banksApi } from '../../api';
+import { useAuth } from '../../context/AuthContext';
+import type { Expense, BankAccount } from '../../types';
+
+const statusBadge = (s: string) => {
+  if (s === 'APPROVED') return <span className="badge badge-green">Approved</span>;
+  if (s === 'REJECTED') return <span className="badge badge-red">Rejected</span>;
+  return <span className="badge badge-yellow">Pending</span>;
+};
+
+function isToday(dateStr: string) {
+  return dateStr.startsWith(new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' }));
+}
+
+export default function ExpensesList() {
+  const { isAdmin } = useAuth();
+  const navigate = useNavigate();
+  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [banks, setBanks] = useState<BankAccount[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [date, setDate] = useState(new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' }));
+  const [error, setError] = useState('');
+
+  const load = () => {
+    setLoading(true);
+    Promise.all([
+      expensesApi.list({ date }),
+      banksApi.list()
+    ]).then(([expRes, bankRes]) => {
+      setExpenses(expRes.data.data ?? []);
+      setBanks(bankRes.data.data ?? []);
+    }).finally(() => setLoading(false));
+  };
+
+  useEffect(() => { load(); }, [date]);
+
+  const handleApprove = async (id: string, status: 'APPROVED' | 'REJECTED') => {
+    try { await expensesApi.approve(id, status); load(); }
+    catch (err: any) { setError(err.response?.data?.error || 'Action failed'); }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Delete this expense?')) return;
+    try { await expensesApi.delete(id); load(); }
+    catch (err: any) { setError(err.response?.data?.error || 'Delete failed'); }
+  };
+
+  const total = expenses.filter(e => e.status === 'APPROVED').reduce((s, e) => s + Number(e.amount), 0);
+  const pending = expenses.filter(e => e.status === 'PENDING');
+  const totalBankBalance = banks.reduce((s, b) => s + Number(b.balance), 0);
+
+  return (
+    <Layout title="Expenses">
+      <div className="page-header">
+        <div>
+          <div className="page-header-title">Expenses</div>
+          <div className="page-header-sub">Daily expense tracking</div>
+        </div>
+        <div className="page-actions">
+          {isAdmin ? (
+            <input type="date" className="form-input" style={{ width: 160 }} value={date} onChange={e => setDate(e.target.value)} max={new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' })} />
+          ) : (
+            <div className="badge badge-blue">Today: {date}</div>
+          )}
+          <button className="btn btn-primary" onClick={() => navigate('/expenses/new')}>+ Add Expense</button>
+        </div>
+      </div>
+
+      {error && <div className="alert alert-error mb-16">{error}</div>}
+      {isAdmin && pending.length > 0 && (
+        <div className="alert alert-warning mb-16">⚠️ {pending.length} expense(s) pending your approval</div>
+      )}
+
+      <div className="card" style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
+        <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{expenses.length} records — {pending.length} pending</span>
+        
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+          {banks.map(b => (
+            <div key={b.id} style={{ background: 'var(--bg-secondary)', padding: '6px 12px', borderRadius: 8, border: '1px solid var(--border-color)', textAlign: 'center', minWidth: 100 }}>
+              <div style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>{b.name}</div>
+              <div style={{ fontWeight: 800, fontSize: 14, color: 'var(--color-accent)' }}>₹{Number(b.balance).toLocaleString('en-IN')}</div>
+            </div>
+          ))}
+        </div>
+
+        <div style={{ textAlign: 'right', paddingLeft: 16, borderLeft: '1px solid var(--border-color)' }}>
+          <div style={{ color: 'var(--text-muted)', fontSize: 11, textTransform: 'uppercase' }}>Approved Total</div>
+          <div style={{ fontWeight: 800, fontSize: 20, color: 'var(--red)' }}>₹{total.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</div>
+        </div>
+      </div>
+
+      {loading ? <div className="page-loading"><div className="spinner spinner-lg" /></div> : expenses.length === 0 ? (
+        <div className="empty-state"><div className="empty-state-icon">💸</div><div className="empty-state-title">No expenses for this date</div></div>
+      ) : (
+        <div className="table-wrapper">
+          <table>
+            <thead><tr>
+              <th>Category</th><th>Amount</th><th>Note</th><th>By</th><th>Bank</th><th>Status</th><th>Time</th>
+              {isAdmin && <th>Actions</th>}
+            </tr></thead>
+            <tbody>
+              {expenses.map(e => (
+                <tr key={e.id}>
+                  <td style={{ fontWeight: 600 }}>{e.category}</td>
+                  <td style={{ fontWeight: 700, color: 'var(--red)' }}>₹{Number(e.amount).toFixed(2)}</td>
+                  <td style={{ color: 'var(--text-muted)' }}>{e.note || '—'}</td>
+                  <td style={{ color: 'var(--text-muted)' }}>{e.user.name}</td>
+                  <td style={{ fontSize: 12 }}>{e.bank?.name || <span className="text-muted">—</span>}</td>
+                  <td>{statusBadge(e.status)}</td>
+                  <td style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                    {new Date(e.createdAt).toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit' })}
+                  </td>
+                  {isAdmin && (
+                    <td>
+                      <div style={{ display: 'flex', gap: 6 }}>
+                        {e.status === 'PENDING' && <>
+                          <button className="btn btn-success btn-sm" onClick={() => handleApprove(e.id, 'APPROVED')}>✓ Approve</button>
+                          <button className="btn btn-danger btn-sm" onClick={() => handleApprove(e.id, 'REJECTED')}>✕ Reject</button>
+                        </>}
+                        {isToday(e.createdAt) && <button className="btn btn-ghost btn-sm" onClick={() => handleDelete(e.id)}>🗑</button>}
+                      </div>
+                    </td>
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </Layout>
+  );
+}
