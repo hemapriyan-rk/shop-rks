@@ -9,19 +9,24 @@ export default function LandingPage() {
       <header className="landing-header">
         <div className="landing-container landing-header-inner">
           <div className="landing-logo">
-            <span>RKS</span> XEROX
+            <img src="/image2.png" alt="RKS Xerox Logo" />
           </div>
           <nav className="landing-nav">
             <a href="#home" className="active">Home</a>
             <a href="#services">Services</a>
+            <a href="#pricing">Pricing</a>
             <a href="#features">About Us</a>
             <a href="#contact">Contact</a>
+            <a href="#location">Location</a>
           </nav>
           <div className="landing-header-actions">
-            <a href="https://wa.me/918122778794" target="_blank" rel="noreferrer" className="landing-btn landing-btn-outline" style={{ color: '#22c55e', borderColor: 'rgba(34,197,94,0.3)' }}>
-              💬 8122778794
+            <a href="https://wa.me/918122778794" target="_blank" rel="noreferrer" className="landing-btn landing-btn-outline" style={{ color: '#25D366', borderColor: 'rgba(37,211,102,0.3)' }}>
+              💬 WhatsApp
             </a>
-            <Link to="/login" className="landing-btn landing-btn-primary">
+            <a href="tel:+918122778794" className="landing-btn landing-btn-yellow">
+              📞 Call Now
+            </a>
+            <Link to="/login" className="landing-btn landing-btn-outline" style={{ marginLeft: 8 }}>
               Staff Login
             </Link>
           </div>
@@ -32,30 +37,28 @@ export default function LandingPage() {
       <section id="home" className="landing-hero">
         <div className="landing-container landing-hero-inner">
           <div>
-            <div className="hero-badge">WELCOME TO</div>
             <h1 className="hero-title">
-              <span className="highlight-orange">RKS</span> XEROX<br />
+              <span className="highlight-yellow">RKS</span> XEROX<br />
               AND COMPUTER CENTER
             </h1>
             <div className="hero-services">
-              PRINTING <span>•</span> XEROX <span>•</span> SCANNING <span>•</span> LAMINATION<br />
-              ONLINE SERVICES <span>•</span> TYPING <span>•</span> AND MORE
+              Printing <span>•</span> Xerox <span>•</span> Scanning <span>•</span> Lamination <span>•</span> Online Services
             </div>
             <p className="hero-desc">
-              One-stop destination for all your printing, digital, and computer needs. Fast, reliable, and affordable services under one roof.
+              One-stop destination for printing, photocopy, online forms, browsing, typing, and computer solutions.
             </p>
             <div className="hero-actions">
-              <a href="https://wa.me/918122778794" target="_blank" rel="noreferrer" className="landing-btn landing-btn-success">
+              <a href="https://wa.me/918122778794" target="_blank" rel="noreferrer" className="landing-btn landing-btn-green">
                 WhatsApp Now
               </a>
-              <a href="#contact" className="landing-btn landing-btn-outline">
+              <a href="#contact" className="landing-btn landing-btn-yellow">
                 📍 Visit Our Shop
               </a>
             </div>
           </div>
           <div>
             <div className="hero-graphic">
-              <div className="hero-graphic-icon">🖨️</div>
+              <img src="/image1.png" alt="RKS Services Graphic" />
             </div>
           </div>
         </div>
@@ -66,7 +69,7 @@ export default function LandingPage() {
         <div className="landing-container">
           <div className="section-header">
             <div className="section-subtitle">Our Services</div>
-            <h2 className="section-title">SERVICES WE PROVIDE</h2>
+            <h2 className="section-title">SERVICES <span>WE PROVIDE</span></h2>
           </div>
           <div className="services-grid">
             <div className="service-card">
@@ -116,7 +119,7 @@ export default function LandingPage() {
       {/* WHY CHOOSE US & ACHIEVEMENTS */}
       <section id="features" className="landing-container">
         <div className="split-section">
-          <div style={{ padding: '0 40px' }}>
+          <div style={{ paddingRight: '40px' }}>
             <h2 className="split-title">WHY CHOOSE US?</h2>
             <div className="features-grid">
               <div className="feature-item">
@@ -149,7 +152,7 @@ export default function LandingPage() {
               </div>
             </div>
           </div>
-          <div style={{ padding: '0 40px', borderLeft: '1px solid rgba(255,255,255,0.05)' }}>
+          <div style={{ paddingLeft: '40px', borderLeft: '1px solid rgba(0,0,0,0.05)' }}>
             <h2 className="split-title">OUR ACHIEVEMENTS</h2>
             <div className="achievements-grid">
               <div className="achievement-card">
@@ -165,7 +168,7 @@ export default function LandingPage() {
               <div className="achievement-card">
                 <div className="achievement-icon">⭐</div>
                 <div className="achievement-number">5+</div>
-                <div className="achievement-label">Years of Service</div>
+                <div className="achievement-label">Years Service</div>
               </div>
             </div>
           </div>
@@ -177,7 +180,7 @@ export default function LandingPage() {
         <div className="landing-container footer-grid">
           <div>
             <div className="footer-logo">
-              <span>RKS</span> XEROX
+              <img src="/image2.png" alt="RKS Logo" />
             </div>
             <p className="footer-desc">
               Your one-stop solution for all printing, xerox, computer and online services.
@@ -188,9 +191,10 @@ export default function LandingPage() {
             <ul className="footer-links">
               <li><a href="#home">Home</a></li>
               <li><a href="#services">Services</a></li>
+              <li><a href="#pricing">Pricing</a></li>
               <li><a href="#features">About Us</a></li>
               <li><a href="#contact">Contact</a></li>
-              <li><Link to="/login" style={{ color: '#f97316' }}>Staff Login</Link></li>
+              <li><Link to="/login" style={{ color: '#FFC107', fontWeight: 600 }}>Staff Login</Link></li>
             </ul>
           </div>
           <div>
@@ -208,11 +212,11 @@ export default function LandingPage() {
               <div>Near Main Road,<br />Your City, State - 000000</div>
             </div>
           </div>
-          <div>
+          <div id="location">
             <h4 className="footer-col-title">OUR LOCATION</h4>
-            <div className="map-placeholder">
-              🗺️ Map View
-            </div>
+            <a href="https://share.google/HjYj0vXmUT6mbV8ev" target="_blank" rel="noreferrer" className="map-placeholder">
+              📍 View on Google Maps
+            </a>
           </div>
         </div>
         
@@ -220,8 +224,8 @@ export default function LandingPage() {
           <div className="landing-container">
             <div className="opening-hours">
               ⏱️ <strong>OPENING HOURS:</strong>
-              <span>Monday - Saturday 8:30 AM - 8:00 PM</span> | 
-              <span>Sunday 10:00 AM - 5:00 PM</span>
+              <span>Monday - Saturday</span> <span className="time-badge">8:30 AM - 8:00 PM</span> | 
+              <span>Sunday</span> <span className="time-badge">10:00 AM - 5:00 PM</span>
             </div>
           </div>
         </div>
