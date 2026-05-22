@@ -204,17 +204,7 @@ export function initCronJobs() {
       }
 
       // Failsafe: Check if we missed the reconciliation jobs due to server restarts
-      const nowIST = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
-      const hours = nowIST.getHours();
-      
-      // If it's past 8 PM IST, ensure Cash Reconciliation ran
-      if (hours >= 20) {
-        await runCashReconciliation();
-      }
-      // If it's past 11:59 PM IST (which would be 23:59), ensure Online Reconciliation ran
-      if (hours === 23 && nowIST.getMinutes() >= 59) {
-        await runOnlineReconciliation();
-      }
+      await checkAndRunReconciliations();
 
     } catch (err) {
       console.error('[Anti-Sleep] Failed to ping self or run failsafe:', err);
@@ -321,15 +311,47 @@ export function initCronJobs() {
   }, {
     timezone: "Asia/Kolkata"
   });
+
+  // Cold Start Check: immediately run failsafe checks on boot (with 5-second buffer to ensure DB is ready)
+  setTimeout(() => {
+    console.log('🔄 Cold start buffer complete. Checking for missed reconciliations...');
+    checkAndRunReconciliations().catch(console.error);
+  }, 5000);
 }
 
-export async function runCashReconciliation() {
+export async function checkAndRunReconciliations() {
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Asia/Kolkata',
+    hour: 'numeric',
+    hour12: false
+  });
+  const now = new Date();
+  const hourStr = formatter.format(now);
+  const hours = parseInt(hourStr, 10);
+  const nowIST = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+
+  // Check today
+  if (hours >= 20) {
+    await runCashReconciliation(nowIST);
+  }
+  if (hours === 23 && nowIST.getMinutes() >= 59) {
+    await runOnlineReconciliation(nowIST);
+  }
+
+  // Always check yesterday to ensure we didn't sleep through the whole night
+  const yesterdayIST = new Date(nowIST);
+  yesterdayIST.setDate(yesterdayIST.getDate() - 1);
+  await runCashReconciliation(yesterdayIST);
+  await runOnlineReconciliation(yesterdayIST);
+}
+
+export async function runCashReconciliation(targetDate?: Date) {
   try {
     const sysUser = await prisma.user.findUnique({ where: { username: 'SYSTEM_AUTO' } });
     if (!sysUser) return;
 
-    const nowIST = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
-    const dateStr = nowIST.getFullYear() + '-' + String(nowIST.getMonth() + 1).padStart(2, '0') + '-' + String(nowIST.getDate()).padStart(2, '0');
+    const dateToUse = targetDate || new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+    const dateStr = dateToUse.getFullYear() + '-' + String(dateToUse.getMonth() + 1).padStart(2, '0') + '-' + String(dateToUse.getDate()).padStart(2, '0');
     
     const start = new Date(`${dateStr}T00:00:00+05:30`);
     const end = new Date(`${dateStr}T23:59:59.999+05:30`);
@@ -380,19 +402,22 @@ export async function runCashReconciliation() {
       }
     });
 
-    console.log(`✅ Cash Reconciliation complete. Added ₹${totalCash} to CASH-BALANCE.`);
+    console.log(`✅ Cash Reconciliation complete. Added ₹${totalCash} to CASH-BALANCE for ${dateStr}.`);
   } catch (err) {
     console.error('Failed to run Cash Reconciliation:', err);
   }
 }
 
-export async function runOnlineReconciliation() {
+export async function runOnlineReconciliation(targetDate?: Date) {
   try {
     const sysUser = await prisma.user.findUnique({ where: { username: 'SYSTEM_AUTO' } });
-    if (!sysUser) return;
+    if (!sysUser) {
+      console.log('⚠️ SYSTEM_AUTO user not found. Skipping online reconciliation.');
+      return;
+    }
 
-    const nowIST = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
-    const dateStr = nowIST.getFullYear() + '-' + String(nowIST.getMonth() + 1).padStart(2, '0') + '-' + String(nowIST.getDate()).padStart(2, '0');
+    const dateToUse = targetDate || new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+    const dateStr = dateToUse.getFullYear() + '-' + String(dateToUse.getMonth() + 1).padStart(2, '0') + '-' + String(dateToUse.getDate()).padStart(2, '0');
     
     const start = new Date(`${dateStr}T00:00:00+05:30`);
     const end = new Date(`${dateStr}T23:59:59.999+05:30`);
@@ -443,7 +468,7 @@ export async function runOnlineReconciliation() {
       }
     });
 
-    console.log(`✅ Online Reconciliation complete. Added ₹${totalOnline} to CANARA BANK.`);
+    console.log(`✅ Online Reconciliation complete. Added ₹${totalOnline} to CANARA BANK for ${dateStr}.`);
   } catch (err) {
     console.error('Failed to run Online Reconciliation:', err);
   }
