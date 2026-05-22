@@ -17,9 +17,24 @@ export default function ParticleGlow() {
 
     let mouse = { x: width / 2, y: height / 2 };
 
+    let particles: Particle[] = [];
+    let isMoving = false;
+    let moveTimeout: number;
+
     const handleMouseMove = (e: MouseEvent) => {
       mouse.x = e.clientX;
       mouse.y = e.clientY;
+      isMoving = true;
+      
+      // Spawn new particles at mouse position
+      for (let i = 0; i < 3; i++) {
+        particles.push(new Particle(mouse.x, mouse.y));
+      }
+      
+      window.clearTimeout(moveTimeout);
+      moveTimeout = window.setTimeout(() => {
+        isMoving = false;
+      }, 100);
     };
 
     window.addEventListener('mousemove', handleMouseMove);
@@ -29,7 +44,6 @@ export default function ParticleGlow() {
       height = window.innerHeight;
       canvas.width = width;
       canvas.height = height;
-      initParticles();
     };
 
     window.addEventListener('resize', handleResize);
@@ -37,127 +51,69 @@ export default function ParticleGlow() {
     class Particle {
       x: number;
       y: number;
-      originX: number;
-      originY: number;
-      angle: number;
-      distance: number;
-      color: string;
+      vx: number;
+      vy: number;
+      life: number;
+      maxLife: number;
       size: number;
-      vx: number = 0;
-      vy: number = 0;
+      color: string;
 
-      constructor(originX: number, originY: number, angle: number, distance: number, color: string) {
-        this.originX = originX;
-        this.originY = originY;
-        this.x = originX;
-        this.y = originY;
-        this.angle = angle;
-        this.distance = distance;
-        this.color = color;
-        this.size = 3 + Math.random() * 2;
+      constructor(x: number, y: number) {
+        this.x = x + (Math.random() - 0.5) * 20;
+        this.y = y + (Math.random() - 0.5) * 20;
+        
+        // Random velocity
+        const angle = Math.random() * Math.PI * 2;
+        const speed = Math.random() * 2;
+        this.vx = Math.cos(angle) * speed;
+        this.vy = Math.sin(angle) * speed;
+        
+        this.maxLife = 40 + Math.random() * 30; // frames
+        this.life = this.maxLife;
+        this.size = 2 + Math.random() * 3;
+        
+        const colors = ['#FFC107', '#3B82F6', '#8B5CF6', '#EC4899', '#F97316'];
+        this.color = colors[Math.floor(Math.random() * colors.length)];
       }
 
       update() {
-        const dx = mouse.x - this.x;
-        const dy = mouse.y - this.y;
-        const distToMouse = Math.sqrt(dx * dx + dy * dy);
-        
-        // Mouse repulsion
-        const maxDist = 150;
-        const force = Math.max(0, maxDist - distToMouse) / maxDist;
-        
-        if (force > 0) {
-          const angleToMouse = Math.atan2(dy, dx);
-          const pushX = Math.cos(angleToMouse) * force * -5;
-          const pushY = Math.sin(angleToMouse) * force * -5;
-          this.vx += pushX;
-          this.vy += pushY;
-        }
-
-        // Spring back to origin
-        this.vx += (this.originX - this.x) * 0.05;
-        this.vy += (this.originY - this.y) * 0.05;
-
-        // Friction
-        this.vx *= 0.85;
-        this.vy *= 0.85;
-
         this.x += this.vx;
         this.y += this.vy;
+        this.life--;
+        this.size *= 0.95; // shrink over time
       }
 
       draw() {
         if (!ctx) return;
+        const opacity = Math.max(0, this.life / this.maxLife);
         ctx.save();
-        ctx.translate(this.x, this.y);
-        // The angle is tangent to the circle
-        ctx.rotate(this.angle + Math.PI / 2);
-        
+        ctx.globalAlpha = opacity;
         ctx.beginPath();
-        ctx.moveTo(-this.size, 0);
-        ctx.lineTo(this.size, 0);
-        ctx.strokeStyle = this.color;
-        ctx.lineWidth = 2.5;
-        ctx.lineCap = 'round';
-        ctx.stroke();
-        
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+        // Glow effect
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = this.color;
+        ctx.fill();
         ctx.restore();
       }
     }
 
-    let particles: Particle[] = [];
-
-    const initParticles = () => {
-      particles = [];
-      const centerX = width * 0.8;
-      const centerY = height * 0.5;
-      const maxRadius = Math.max(width, height) * 1.2;
-      
-      const rings = 35;
-      
-      for (let r = 1; r <= rings; r++) {
-        const radius = r * 30;
-        if (radius > maxRadius) continue;
-        
-        const circumference = 2 * Math.PI * radius;
-        // The distance between particles on a ring
-        const dotSpacing = 30; 
-        const dotCount = Math.floor(circumference / dotSpacing);
-        
-        for (let i = 0; i < dotCount; i++) {
-          const angle = (i / dotCount) * Math.PI * 2 + (r * 0.1); // Add a slight spiral offset
-          const x = centerX + Math.cos(angle) * radius;
-          const y = centerY + Math.sin(angle) * radius;
-          
-          // Determine color based on distance
-          let color = '#FFC107'; // yellow
-          const distRatio = radius / maxRadius;
-          if (distRatio > 0.6) {
-            color = '#3B82F6'; // blue
-          } else if (distRatio > 0.45) {
-            color = '#8B5CF6'; // purple
-          } else if (distRatio > 0.3) {
-            color = '#EC4899'; // pink/red
-          } else if (distRatio > 0.15) {
-            color = '#F97316'; // orange
-          }
-          
-          particles.push(new Particle(x, y, angle, radius, color));
-        }
-      }
-    };
-
-    initParticles();
-
     let animationFrameId: number;
 
     const render = () => {
-      ctx.clearRect(0, 0, width, height);
+      // Clear with slight trailing effect
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+      ctx.fillRect(0, 0, width, height);
       
-      particles.forEach(p => {
+      particles.forEach((p) => {
         p.update();
         p.draw();
       });
+
+      // Remove dead particles
+      particles = particles.filter(p => p.life > 0);
 
       animationFrameId = requestAnimationFrame(render);
     };
@@ -168,6 +124,7 @@ export default function ParticleGlow() {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('resize', handleResize);
       cancelAnimationFrame(animationFrameId);
+      clearTimeout(moveTimeout);
     };
   }, []);
 
