@@ -13,7 +13,8 @@ export default function BanksPage() {
   const [error, setError] = useState('');
   const [depositModal, setDepositModal] = useState<BankAccount | null>(null);
   const [balanceModal, setBalanceModal] = useState<BankAccount | null>(null);
-  const [withdrawModal, setWithdrawModal] = useState<BankAccount | null>(null);
+  const [deductModal, setDeductModal] = useState<BankAccount | null>(null);
+  const [deductMiscModal, setDeductMiscModal] = useState<BankAccount | null>(null);
   const [amount, setAmount] = useState('');
   const [note, setNote] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -54,8 +55,21 @@ export default function BanksPage() {
     } finally { setSubmitting(false); }
   };
 
-  const handleWithdraw = async () => {
-    if (!withdrawModal) return;
+  const handleDeduct = async () => {
+    if (!deductModal) return;
+    const val = parseFloat(amount);
+    if (!val || val <= 0) return;
+    setSubmitting(true);
+    try {
+      await banksApi.adjust(deductModal.id, -val, note || `Manual deduction from ${deductModal.name}`);
+      setDeductModal(null); setAmount(''); setNote(''); load();
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Deduction failed');
+    } finally { setSubmitting(false); }
+  };
+
+  const handleDeductMisc = async () => {
+    if (!deductMiscModal) return;
     const val = parseFloat(amount);
     if (!val || val <= 0) return;
     setSubmitting(true);
@@ -63,12 +77,12 @@ export default function BanksPage() {
       await expensesApi.create({
         amount: val,
         category: 'Miscellaneous',
-        note: note || `Manual deduction from ${withdrawModal.name}`,
-        bankId: withdrawModal.id
+        note: note || `Miscellaneous deduction from ${deductMiscModal.name}`,
+        bankId: deductMiscModal.id
       });
-      setWithdrawModal(null); setAmount(''); setNote(''); load();
+      setDeductMiscModal(null); setAmount(''); setNote(''); load();
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Deduction failed');
+      setError(err.response?.data?.error || 'Misc deduction failed');
     } finally { setSubmitting(false); }
   };
 
@@ -122,10 +136,11 @@ export default function BanksPage() {
                 </div>
 
                 <div className="bank-card-actions">
-                  <div style={{ display: 'flex', gap: 8 }}>
+                  <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
                     <button className="btn btn-primary btn-sm btn-full" onClick={() => setDepositModal(bank)}>Deposit</button>
-                    <button className="btn btn-danger btn-sm btn-full" onClick={() => setWithdrawModal(bank)}>Deduct</button>
+                    <button className="btn btn-danger btn-sm btn-full" onClick={() => setDeductModal(bank)}>Deduct</button>
                   </div>
+                  <button className="btn btn-warning btn-sm btn-full" onClick={() => setDeductMiscModal(bank)}>Deduct-Misc</button>
                   {isSuperAdmin && !bank.isCash && (
                     <button className="btn btn-ghost btn-sm btn-full mt-8" onClick={() => setBalanceModal(bank)}>
                       Set Absolute Balance
@@ -161,7 +176,7 @@ export default function BanksPage() {
                             <tr key={exp.id}>
                               <td title={exp.note}>{exp.category}</td>
                               <td style={{ color: 'var(--red)', fontWeight: 700 }}>-₹{Number(exp.amount).toFixed(2)}</td>
-                              <td style={{ fontSize: 11, color: 'var(--text-muted)' }}>{new Date(exp.createdAt).toLocaleDateString()}</td>
+                              <td style={{ fontSize: 11, color: 'var(--text-muted)' }}>{new Date(exp.createdAt).toLocaleString()}</td>
                             </tr>
                           ))}
                         </tbody>
@@ -180,17 +195,26 @@ export default function BanksPage() {
                           {bank.logs.map(log => {
                             const val = log.newValue as any;
                             const isDeposit = val?.action === 'DEPOSIT';
-                            const isDeduction = val?.action === 'EXPENSE_DEDUCTION';
-                            let badgeClass = 'badge-blue', actionLabel = 'ADJUST', color = 'var(--color-accent)';
-                            let displayAmount = Number(val?.balance || 0);
+                            const isExpenseDeduct = val?.action === 'EXPENSE_DEDUCTION';
+                            const isAdjustDown = val?.action === 'ADJUST_DOWN';
+                            const isAdjustUp = val?.action === 'ADJUST_UP';
+                            
+                            let badgeClass = 'badge-blue', actionLabel = val?.action || 'ADJUST', color = 'var(--color-accent)';
+                            let displayAmount = Number(val?.amount || 0) || Number(val?.balance || 0);
+                            
                             if (isDeposit) { badgeClass = 'badge-green'; actionLabel = 'DEPOSIT'; color = 'var(--green)'; }
-                            else if (isDeduction) { badgeClass = 'badge-red'; actionLabel = 'DEDUCT'; color = 'var(--red)'; displayAmount = Number(val?.amount || 0); }
+                            else if (isExpenseDeduct) { badgeClass = 'badge-red'; actionLabel = 'EXPENSE'; color = 'var(--red)'; }
+                            else if (isAdjustDown) { badgeClass = 'badge-red'; actionLabel = 'DEDUCT'; color = 'var(--red)'; displayAmount = Math.abs(displayAmount); }
+                            else if (isAdjustUp) { badgeClass = 'badge-green'; actionLabel = 'ADD'; color = 'var(--green)'; }
+                            
+                            const isNegative = isExpenseDeduct || isAdjustDown;
+                            
                             return (
                               <tr key={log.id}>
                                 <td style={{ fontSize: 11 }}><span className={`badge ${badgeClass}`}>{actionLabel}</span></td>
-                                <td style={{ fontWeight: 700, color }}>{isDeduction ? '-' : ''}₹{displayAmount.toLocaleString()}</td>
+                                <td style={{ fontWeight: 700, color }}>{isNegative ? '-' : ''}₹{displayAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
                                 <td style={{ fontSize: 11 }}>{log.user.name}</td>
-                                <td style={{ fontSize: 11, color: 'var(--text-muted)' }}>{new Date(log.createdAt).toLocaleDateString()}</td>
+                                <td style={{ fontSize: 11, color: 'var(--text-muted)' }}>{new Date(log.createdAt).toLocaleString()}</td>
                               </tr>
                             );
                           })}
@@ -234,12 +258,12 @@ export default function BanksPage() {
       )}
 
       {/* Deduct Modal */}
-      {withdrawModal && (
-        <div className="modal-overlay" onClick={() => setWithdrawModal(null)}>
+      {deductModal && (
+        <div className="modal-overlay" onClick={() => setDeductModal(null)}>
           <div className="modal" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <span className="modal-title">Manual Deduction from {withdrawModal.name}</span>
-              <button className="btn btn-ghost btn-sm" onClick={() => setWithdrawModal(null)}>✕</button>
+              <span className="modal-title">Manual Deduction from {deductModal.name}</span>
+              <button className="btn btn-ghost btn-sm" onClick={() => setDeductModal(null)}>✕</button>
             </div>
             <div className="modal-body">
               <div className="form-group">
@@ -248,14 +272,43 @@ export default function BanksPage() {
               </div>
               <div className="form-group">
                 <label className="form-label">Reason / Note</label>
-                <input className="form-input" placeholder="e.g. Petty cash, Bank charges..." value={note} onChange={e => setNote(e.target.value)} />
+                <input className="form-input" placeholder="e.g. Petty cash, Bank transfer..." value={note} onChange={e => setNote(e.target.value)} />
+              </div>
+              <div className="alert alert-warning">ℹ️ This deducts from the balance without creating an expense.</div>
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-ghost" onClick={() => setDeductModal(null)}>Cancel</button>
+              <button className="btn btn-danger" disabled={submitting || !amount} onClick={handleDeduct}>
+                {submitting ? 'Processing...' : 'Confirm Deduction'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Deduct Misc Modal */}
+      {deductMiscModal && (
+        <div className="modal-overlay" onClick={() => setDeductMiscModal(null)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <span className="modal-title">Misc Deduction from {deductMiscModal.name}</span>
+              <button className="btn btn-ghost btn-sm" onClick={() => setDeductMiscModal(null)}>✕</button>
+            </div>
+            <div className="modal-body">
+              <div className="form-group">
+                <label className="form-label">Amount to Deduct (₹)</label>
+                <input className="form-input" type="number" placeholder="0.00" value={amount} onChange={e => setAmount(e.target.value)} autoFocus />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Reason / Note</label>
+                <input className="form-input" placeholder="e.g. Bank charges..." value={note} onChange={e => setNote(e.target.value)} />
               </div>
               <div className="alert alert-info">ℹ️ This creates a <strong>Miscellaneous</strong> expense record.</div>
             </div>
             <div className="modal-footer">
-              <button className="btn btn-ghost" onClick={() => setWithdrawModal(null)}>Cancel</button>
-              <button className="btn btn-danger" disabled={submitting || !amount} onClick={handleWithdraw}>
-                {submitting ? 'Processing...' : 'Confirm Deduction'}
+              <button className="btn btn-ghost" onClick={() => setDeductMiscModal(null)}>Cancel</button>
+              <button className="btn btn-warning" disabled={submitting || !amount} onClick={handleDeductMisc}>
+                {submitting ? 'Processing...' : 'Confirm Misc Deduction'}
               </button>
             </div>
           </div>
