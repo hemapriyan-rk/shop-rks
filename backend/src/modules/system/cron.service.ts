@@ -127,6 +127,25 @@ export async function performManualCleanup(endDate: Date, types: string[]) {
 }
 
 export function initCronJobs() {
+  // ── Render Anti-Sleep Ping ──
+  // Runs every 10 minutes to prevent Render free-tier from spinning down
+  cron.schedule('*/10 * * * *', async () => {
+    try {
+      const pingUrl = process.env.RENDER_EXTERNAL_URL 
+        ? `${process.env.RENDER_EXTERNAL_URL}/api/health`
+        : `http://localhost:${process.env.PORT || 5001}/api/health`;
+      
+      const res = await fetch(pingUrl);
+      if (res.ok) {
+        console.log(`[Anti-Sleep] Pinged ${pingUrl} successfully.`);
+      } else {
+        console.warn(`[Anti-Sleep] Pinged ${pingUrl} but got status: ${res.status}`);
+      }
+    } catch (err) {
+      console.error('[Anti-Sleep] Failed to ping self:', err);
+    }
+  });
+
   // Run daily at 1:00 AM IST
   cron.schedule('0 1 * * *', async () => {
     console.log('🕒 Running Daily Maintenance Job...');
