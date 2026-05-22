@@ -23,6 +23,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     { icon: '⊞', labelKey: 'nav.dashboard', path: '/dashboard' },
     { icon: '＋', labelKey: 'nav.newEntry', path: '/transactions/new' },
     { icon: '📄', labelKey: 'nav.billing', path: '/billing' },
+    { icon: '⚖️', labelKey: 'nav.terms', path: '/terms' },
     { icon: '📋', labelKey: 'nav.myTransactions', path: '/transactions' },
     { icon: '💸', labelKey: 'nav.myExpenses', path: '/expenses' },
   ];

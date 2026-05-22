@@ -16,6 +16,7 @@ export default function BillingPage() {
   const [services, setServices] = useState<Service[]>([]);
   const [customerName, setCustomerName] = useState('');
   const [printMode, setPrintMode] = useState<'DISCLAIMER' | 'SEAL_SIGN'>('DISCLAIMER');
+  const [isColorMode, setIsColorMode] = useState(false);
   
   // Date/Time state
   const now = new Date();
@@ -97,6 +98,12 @@ export default function BillingPage() {
           <div className="page-header-sub">Generate and print professional invoices</div>
         </div>
         <div style={{ display: 'flex', gap: 12 }}>
+          <button 
+            className="btn btn-ghost" 
+            onClick={() => setIsColorMode(!isColorMode)}
+          >
+            {isColorMode ? '🎨 Color Mode (ON)' : '⚫ B/W Mode (ON)'}
+          </button>
           <button className="btn btn-secondary" onClick={() => handlePrint('DISCLAIMER')} disabled={total === 0}>
             🖨 Print (Disclaimer)
           </button>
@@ -205,7 +212,7 @@ export default function BillingPage() {
       {/* ───────────────────────────────────────────────────────── */}
       {/* PRINT TEMPLATE (Hidden on screen, shown in print) */}
       {/* ───────────────────────────────────────────────────────── */}
-      <div className="print-only invoice-container">
+      <div className={`print-only invoice-container ${isColorMode ? 'color-mode' : 'bw-mode'}`}>
         <div className="invoice-header">
           <img src="/logo.png" alt="RKS Logo" className="invoice-logo" />
           <div className="invoice-shop-details">
@@ -304,7 +311,14 @@ export default function BillingPage() {
             width: 120px;
             height: auto;
             margin-right: 20px;
+          }
+
+          .bw-mode .invoice-logo {
             filter: grayscale(100%);
+          }
+          
+          .color-mode .invoice-shop-name {
+            color: #570F8E;
           }
 
           .invoice-shop-details {
