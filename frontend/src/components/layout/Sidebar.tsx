@@ -22,6 +22,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const userNav: NavItem[] = [
     { icon: '⊞', labelKey: 'nav.dashboard', path: '/dashboard' },
     { icon: '＋', labelKey: 'nav.newEntry', path: '/transactions/new' },
+    { icon: '📄', labelKey: 'nav.billing', path: '/billing' },
     { icon: '📋', labelKey: 'nav.myTransactions', path: '/transactions' },
     { icon: '💸', labelKey: 'nav.myExpenses', path: '/expenses' },
   ];

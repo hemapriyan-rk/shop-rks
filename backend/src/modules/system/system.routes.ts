@@ -25,4 +25,7 @@ router.post('/cleanup', authenticate, requireRole('SUPER_ADMIN'), controller.man
 router.get('/exports', authenticate, requireRole('ADMIN', 'SUPER_ADMIN'), controller.listExports);
 router.get('/exports/:id/download', authenticate, requireRole('ADMIN', 'SUPER_ADMIN'), controller.downloadExport);
 
+// Billing Log - All Authenticated Users
+router.post('/log-bill', authenticate, controller.logBill);
+
 export default router;

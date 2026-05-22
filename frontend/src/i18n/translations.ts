@@ -3,6 +3,7 @@ export const translations = {
     // Sidebar
     'nav.dashboard': 'Dashboard',
     'nav.newEntry': 'New Entry',
+    'nav.billing': 'Bill Generator',
     'nav.myTransactions': 'My Transactions',
     'nav.myExpenses': 'My Expenses',
     'nav.profile': 'Profile',
@@ -86,6 +87,7 @@ export const translations = {
     // Sidebar
     'nav.dashboard': 'முகப்பு',
     'nav.newEntry': 'புதிய பதிவு',
+    'nav.billing': 'ரசீது உருவாக்கு',
     'nav.myTransactions': 'எனது பரிவர்த்தனைகள்',
     'nav.myExpenses': 'எனது செலவுகள்',
     'nav.profile': 'சுயவிவரம்',

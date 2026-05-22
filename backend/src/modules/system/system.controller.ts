@@ -224,3 +224,19 @@ export async function downloadExport(req: Request, res: Response, next: NextFunc
     res.send(dataExport.fileData);
   } catch (err) { next(err); }
 }
+
+export async function logBill(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { customerName, total, items, date } = req.body;
+    await prisma.log.create({
+      data: {
+        userId: req.user!.userId,
+        action: 'CREATE',
+        tableName: 'bills',
+        recordId: `bill-${Date.now()}`,
+        newValue: { customerName, total, items, date } as any,
+      }
+    });
+    sendSuccess(res, null, 201, undefined, 'Bill logged successfully');
+  } catch (err) { next(err); }
+}

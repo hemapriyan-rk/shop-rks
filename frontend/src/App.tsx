@@ -10,6 +10,7 @@ import NewTransaction from './pages/transactions/NewTransaction';
 import TransactionsList from './pages/transactions/TransactionsList';
 import ExpensesList from './pages/expenses/ExpensesList';
 import NewExpense from './pages/expenses/NewExpense';
+import BillingPage from './pages/BillingPage';
 import ServicesPage from './pages/services/ServicesPage';
 import AnalyticsPage from './pages/analytics/AnalyticsPage';
 import UsersPage from './pages/users/UsersPage';
@@ -43,6 +44,7 @@ export default function App() {
             <Route path="/transactions" element={<TransactionsList />} />
             <Route path="/expenses" element={<ExpensesList />} />
             <Route path="/expenses/new" element={<NewExpense />} />
+            <Route path="/billing" element={<BillingPage />} />
             <Route path="/profile" element={<ProfilePage />} />
           </Route>
 
