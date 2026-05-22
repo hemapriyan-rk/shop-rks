@@ -71,6 +71,7 @@ model User {
   expenses     Expense[]
   logs         Log[]
   sessions     Session[]
+  dailySnapshots UserDailyAnalyticsSnapshot[]
 
   @@map("users")
   @@index([username])
@@ -280,6 +281,25 @@ model DailyAnalyticsSnapshot {
   transactionCount Int     @map("transaction_count")
 
   @@map("daily_analytics_snapshots")
+}
+
+model UserDailyAnalyticsSnapshot {
+  id              String   @id @default(uuid())
+  userId          String   @map("user_id")
+  date            DateTime @db.Date
+  income          Decimal  @db.Decimal(12, 2)
+  cashIncome      Decimal  @db.Decimal(12, 2)
+  onlineIncome    Decimal  @db.Decimal(12, 2)
+  otherIncome     Decimal  @db.Decimal(12, 2)
+  shopXeroxIncome Decimal  @db.Decimal(12, 2)
+  expenses        Decimal  @db.Decimal(12, 2)
+  profit          Decimal  @db.Decimal(12, 2)
+  transactionCount Int     @map("transaction_count")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+  @@map("user_daily_analytics_snapshots")
 }
 
 // ─────────────────────────────────────────────────────────

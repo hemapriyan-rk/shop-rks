@@ -48,6 +48,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         { icon: '💼', labelKey: 'nav.salary', path: '/admin/salary', permKey: 'salaryLogs' },
         { icon: '🏦', labelKey: 'nav.banks', path: '/banks', permKey: 'banks' },
         { icon: '⚙️', labelKey: 'nav.bankConfig', path: '/admin/bank-config', permKey: 'banks' },
+        { icon: '📊', labelKey: 'User Perf', path: '/admin/user-performance', adminOnly: true },
       ]
     },
     {
@@ -70,7 +71,6 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       title: 'System & Users',
       items: [
         { icon: '👥', labelKey: 'nav.users', path: '/users', superOnly: true },
-        { icon: '📊', labelKey: 'User Perf', path: '/admin/user-performance', superOnly: true },
         { icon: '🔐', labelKey: 'Roles', path: '/admin/roles', superOnly: true },
         { icon: '🖥', labelKey: 'nav.serverMgmt', path: '/admin/system', superOnly: true },
         { icon: '💾', labelKey: 'nav.storageMgmt', path: '/admin/storage', superOnly: true },

@@ -10,38 +10,63 @@ async function createAnalyticsSnapshots(endDate: Date) {
   // Aggregate transactions by date up to endDate
   const transactions = await prisma.transaction.findMany({
     where: { createdAt: { lt: endDate } },
-    select: { createdAt: true, paymentMethod: true, totalPrice: true }
+    select: { createdAt: true, paymentMethod: true, totalPrice: true, userId: true }
   });
 
   const expenses = await prisma.expense.findMany({
     where: { createdAt: { lt: endDate }, status: 'APPROVED' },
-    select: { createdAt: true, amount: true }
+    select: { createdAt: true, amount: true, userId: true }
   });
 
   const snapshotMap = new Map<string, any>();
+  const userSnapshotMap = new Map<string, any>(); // key: `${userId}_${dateStr}`
 
   for (const t of transactions) {
     const dStr = t.createdAt.toISOString().split('T')[0];
+    const userKey = `${t.userId}_${dStr}`;
+    
+    // Global
     if (!snapshotMap.has(dStr)) {
       snapshotMap.set(dStr, { income: 0, cashIncome: 0, onlineIncome: 0, otherIncome: 0, shopXeroxIncome: 0, expenses: 0, transactionCount: 0 });
     }
     const day = snapshotMap.get(dStr)!;
+    
+    // User
+    if (!userSnapshotMap.has(userKey)) {
+      userSnapshotMap.set(userKey, { userId: t.userId, dateStr: dStr, income: 0, cashIncome: 0, onlineIncome: 0, otherIncome: 0, shopXeroxIncome: 0, expenses: 0, transactionCount: 0 });
+    }
+    const userDay = userSnapshotMap.get(userKey)!;
+
     const amount = Number(t.totalPrice);
+    
     day.income += amount;
     day.transactionCount += 1;
-    if (t.paymentMethod === 'CASH') day.cashIncome += amount;
-    if (t.paymentMethod === 'ONLINE') day.onlineIncome += amount;
-    if (t.paymentMethod === 'OTHER') day.otherIncome += amount;
-    if (t.paymentMethod === 'SHOP_XEROX') day.shopXeroxIncome += amount;
+    userDay.income += amount;
+    userDay.transactionCount += 1;
+    
+    if (t.paymentMethod === 'CASH') { day.cashIncome += amount; userDay.cashIncome += amount; }
+    if (t.paymentMethod === 'ONLINE') { day.onlineIncome += amount; userDay.onlineIncome += amount; }
+    if (t.paymentMethod === 'OTHER') { day.otherIncome += amount; userDay.otherIncome += amount; }
+    if (t.paymentMethod === 'SHOP_XEROX') { day.shopXeroxIncome += amount; userDay.shopXeroxIncome += amount; }
   }
 
   for (const e of expenses) {
     const dStr = e.createdAt.toISOString().split('T')[0];
+    const userKey = `${e.userId}_${dStr}`;
+    
+    // Global
     if (!snapshotMap.has(dStr)) {
       snapshotMap.set(dStr, { income: 0, cashIncome: 0, onlineIncome: 0, otherIncome: 0, shopXeroxIncome: 0, expenses: 0, transactionCount: 0 });
     }
     const day = snapshotMap.get(dStr)!;
     day.expenses += Number(e.amount);
+
+    // User
+    if (!userSnapshotMap.has(userKey)) {
+      userSnapshotMap.set(userKey, { userId: e.userId, dateStr: dStr, income: 0, cashIncome: 0, onlineIncome: 0, otherIncome: 0, shopXeroxIncome: 0, expenses: 0, transactionCount: 0 });
+    }
+    const userDay = userSnapshotMap.get(userKey)!;
+    userDay.expenses += Number(e.amount);
   }
 
   // Save to database
@@ -51,6 +76,17 @@ async function createAnalyticsSnapshots(endDate: Date) {
       where: { date: dateObj },
       update: { ...stats, profit: stats.income - stats.expenses },
       create: { date: dateObj, ...stats, profit: stats.income - stats.expenses }
+    });
+  }
+
+  // Save to user database
+  for (const [key, stats] of userSnapshotMap.entries()) {
+    const dateObj = new Date(stats.dateStr);
+    const { userId, dateStr, ...updateData } = stats;
+    await prisma.userDailyAnalyticsSnapshot.upsert({
+      where: { userId_date: { userId, date: dateObj } },
+      update: { ...updateData, profit: stats.income - stats.expenses },
+      create: { userId, date: dateObj, ...updateData, profit: stats.income - stats.expenses }
     });
   }
 }

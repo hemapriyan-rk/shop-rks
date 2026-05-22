@@ -135,9 +135,17 @@ export async function getDailyAnalytics(req: Request, res: Response, next: NextF
 
     // Check Snapshot if no transactions exist (maybe deleted by auto-cleanup)
     if (txGroups.length === 0 && expAgg._count === 0) {
-      const snapshot = await prisma.dailyAnalyticsSnapshot.findUnique({
-        where: { date: new Date(`${targetDate}T00:00:00Z`) }
-      });
+      let snapshot: any = null;
+      if (targetUserId) {
+        snapshot = await prisma.userDailyAnalyticsSnapshot.findUnique({
+          where: { userId_date: { userId: targetUserId, date: new Date(`${targetDate}T00:00:00Z`) } }
+        });
+      } else {
+        snapshot = await prisma.dailyAnalyticsSnapshot.findUnique({
+          where: { date: new Date(`${targetDate}T00:00:00Z`) }
+        });
+      }
+      
       if (snapshot) {
         income = Number(snapshot.income);
         cashIncome = Number(snapshot.cashIncome);
@@ -272,9 +280,16 @@ export async function getMonthlyAnalytics(req: Request, res: Response, next: Nex
 
     if (txGroups.length === 0 && expAgg._count === 0) {
       // Fallback to snapshots
-      const snapshots = await prisma.dailyAnalyticsSnapshot.findMany({
-        where: { date: { gte: start, lte: end } }
-      });
+      let snapshots: any[] = [];
+      if (targetUserId) {
+        snapshots = await prisma.userDailyAnalyticsSnapshot.findMany({
+          where: { userId: targetUserId, date: { gte: start, lte: end } }
+        });
+      } else {
+        snapshots = await prisma.dailyAnalyticsSnapshot.findMany({
+          where: { date: { gte: start, lte: end } }
+        });
+      }
       for (const snap of snapshots) {
         const dayStr = snap.date.toISOString().split('T')[0];
         dayMap[dayStr] = {
