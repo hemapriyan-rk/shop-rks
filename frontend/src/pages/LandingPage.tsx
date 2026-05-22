@@ -160,6 +160,7 @@ export default function LandingPage() {
               <li><a href="#features">About Us</a></li>
               <li><a href="#contact">Contact</a></li>
               <li><Link to="/terms" style={{ color: '#FFC107', fontWeight: 600 }}>Terms & Rules</Link></li>
+              <li><Link to="/developer" style={{ color: '#25D366', fontWeight: 600 }}>Developed By</Link></li>
               <li><Link to="/login" style={{ color: '#FFC107', fontWeight: 600 }}>Staff Login</Link></li>
             </ul>
           </div>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export default function LoginPage() {
@@ -65,9 +65,14 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <p style={{ textAlign: 'center', marginTop: 24, fontSize: 11, color: 'var(--text-muted)' }}>
-          RKS Internal System — LAN Access Only
-        </p>
+        <div style={{ textAlign: 'center', marginTop: 24, display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: 0 }}>
+            RKS Internal System — LAN Access Only
+          </p>
+          <Link to="/developer" style={{ fontSize: 12, color: 'var(--color-primary)', fontWeight: 600, textDecoration: 'none' }}>
+            👨‍💻 Developed By HEMAPRIYAN R K
+          </Link>
+        </div>
       </div>
     </div>
   );

@@ -12,6 +12,7 @@ import ExpensesList from './pages/expenses/ExpensesList';
 import NewExpense from './pages/expenses/NewExpense';
 import BillingPage from './pages/BillingPage';
 import TermsPage from './pages/TermsPage';
+import DeveloperPage from './pages/DeveloperPage';
 import ServicesPage from './pages/services/ServicesPage';
 import AnalyticsPage from './pages/analytics/AnalyticsPage';
 import UsersPage from './pages/users/UsersPage';
@@ -37,6 +38,7 @@ export default function App() {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/terms" element={<TermsPage />} />
+          <Route path="/developer" element={<DeveloperPage />} />
           <Route path="/open" element={<LandingPage />} />
           <Route path="/" element={<Navigate to="/open" replace />} />
 
