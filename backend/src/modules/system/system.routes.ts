@@ -27,6 +27,7 @@ router.get('/exports/:id/download', authenticate, requireRole(['ADMIN', 'SUPER_A
 
 // Automatic Transactions — Admin & Super Admin
 router.get('/auto-transactions', authenticate, requireRole(['ADMIN', 'SUPER_ADMIN']), controller.getAutoTransactions);
+router.post('/auto-transactions/trigger', authenticate, requireRole(['ADMIN', 'SUPER_ADMIN']), controller.triggerReconciliation);
 
 // Billing Log - All Authenticated Users
 router.post('/log-bill', authenticate, controller.logBill);

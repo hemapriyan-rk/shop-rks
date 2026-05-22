@@ -40,12 +40,35 @@ export default function AutomaticTransactionsPage() {
     fetchTransactions();
   }, [page]);
 
+  const handleTrigger = async () => {
+    if (!window.confirm('Are you sure you want to run the end-of-day bank reconciliations now?')) return;
+    
+    try {
+      setLoading(true);
+      const res = await systemApi.triggerReconciliation();
+      if (res.data.success) {
+        alert('Reconciliations completed successfully!');
+        setPage(1);
+        fetchTransactions();
+      }
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Failed to trigger reconciliation');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <Layout title="Automatic Transactions">
       <div className="page-header">
         <div>
           <div className="page-header-title">Automatic Transactions</div>
           <div className="page-header-sub">System generated end-of-day bank reconciliations</div>
+        </div>
+        <div className="page-header-actions">
+          <button className="btn btn-primary" onClick={handleTrigger} disabled={loading}>
+            <span className="icon">⚡</span> Run Reconciliations Now
+          </button>
         </div>
       </div>
 

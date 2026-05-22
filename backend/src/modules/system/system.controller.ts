@@ -101,6 +101,15 @@ export async function kickSession(req: Request, res: Response, next: NextFunctio
   } catch (err) { next(err); }
 }
 
+export async function triggerReconciliation(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { runCashReconciliation, runOnlineReconciliation } = require('./cron.service');
+    await runCashReconciliation();
+    await runOnlineReconciliation();
+    sendSuccess(res, null, 200, undefined, 'Reconciliations triggered successfully');
+  } catch (err) { next(err); }
+}
+
 export async function messageUser(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const { userId } = req.params;
