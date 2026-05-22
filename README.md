@@ -35,7 +35,7 @@ Once running, access the web interface via any browser on the local network at:
 
 * **URL:** `http://localhost:3000` (or the host machine's local IP, e.g., `http://192.168.1.100:3000`)
 * **Default Admin Username:** `admin`
-* **Default Admin Password:** `Admin@123`
+* **Default Admin Password:** *(Check your terminal/docker logs during the first startup for the securely generated password)*
 
 *(Note: Change the default admin password immediately upon your first login for security).*
 

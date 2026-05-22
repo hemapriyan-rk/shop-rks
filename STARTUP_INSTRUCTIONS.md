@@ -76,7 +76,7 @@ docker-compose up postgres -d
 ## Default Credentials
 
 - **Username**: `admin`
-- **Password**: `Admin@123`
+- **Password**: *(Check your terminal/docker logs during the first startup for the securely generated password)*
 
 > [!IMPORTANT]
 > Please change the default administrator password immediately after your first login.
