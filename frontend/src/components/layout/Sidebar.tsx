@@ -8,6 +8,13 @@ interface NavItem {
   labelKey: string;
   path: string;
   permKey?: string;
+  superOnly?: boolean;
+  adminOnly?: boolean;
+}
+
+interface NavSection {
+  title: string;
+  items: NavItem[];
 }
 
 interface SidebarProps {
@@ -20,38 +27,57 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const { t } = useLanguage();
   const navigate = useNavigate();
 
-  const userNav: NavItem[] = [
-    { icon: '⊞', labelKey: 'nav.dashboard', path: '/dashboard' },
-    { icon: '＋', labelKey: 'nav.newEntry', path: '/transactions/new' },
-    { icon: '📄', labelKey: 'nav.billing', path: '/billing' },
-    { icon: '⚖️', labelKey: 'nav.terms', path: '/terms' },
-    { icon: '📋', labelKey: 'nav.myTransactions', path: '/transactions' },
-    { icon: '💸', labelKey: 'nav.myExpenses', path: '/expenses' },
-  ];
-
-  const adminNav: NavItem[] = [
-    { icon: '📊', labelKey: 'nav.analytics', path: '/analytics', permKey: 'analytics' },
-    { icon: '🛠', labelKey: 'nav.services', path: '/services', permKey: 'services' },
-    { icon: '🏦', labelKey: 'nav.banks', path: '/banks', permKey: 'banks' },
-    { icon: '⚙️', labelKey: 'nav.bankConfig', path: '/admin/bank-config', permKey: 'banks' },
-    { icon: '📂', labelKey: 'nav.allTransactions', path: '/admin/transactions', permKey: 'allRecords' },
-    { icon: '📑', labelKey: 'nav.allExpenses', path: '/admin/expenses', permKey: 'allRecords' },
-    { icon: '🏷', labelKey: 'nav.expenseCats', path: '/admin/expense-categories', permKey: 'expenseCategories' },
-    { icon: '💼', labelKey: 'nav.salary', path: '/admin/salary', permKey: 'salaryLogs' },
-    { icon: '📜', labelKey: 'nav.auditLogs', path: '/logs', permKey: 'salaryLogs' },
-    { icon: '📄', labelKey: 'nav.billLogs', path: '/admin/bill-logs', permKey: 'salaryLogs' },
-    { icon: '📦', labelKey: 'nav.dataExports', path: '/admin/exports', permKey: 'analytics' },
-  ];
-
-  const superNav: NavItem[] = [
-    { icon: '👥', labelKey: 'nav.users', path: '/users' },
-    { icon: '📊', labelKey: 'User Perf', path: '/admin/user-performance' },
-    { icon: '🔐', labelKey: 'Roles', path: '/admin/roles' },
-    { icon: '🖥', labelKey: 'nav.serverMgmt', path: '/admin/system' },
-    { icon: '⚙️', labelKey: 'Auto Tx', path: '/admin/auto-transactions' },
-    { icon: '☁️', labelKey: 'nav.renderMgmt', path: '/admin/render' },
-    { icon: '💾', labelKey: 'nav.storageMgmt', path: '/admin/storage' },
-    { icon: '📈', labelKey: 'nav.incomeMgmt', path: '/admin/income-management' },
+  const SECTIONS: NavSection[] = [
+    {
+      title: 'Main',
+      items: [
+        { icon: '⊞', labelKey: 'nav.dashboard', path: '/dashboard' },
+        { icon: '＋', labelKey: 'nav.newEntry', path: '/transactions/new' },
+        { icon: '📄', labelKey: 'nav.billing', path: '/billing' },
+        { icon: '⚖️', labelKey: 'nav.terms', path: '/terms' },
+        { icon: '📋', labelKey: 'nav.myTransactions', path: '/transactions' },
+        { icon: '💸', labelKey: 'nav.myExpenses', path: '/expenses' },
+      ]
+    },
+    {
+      title: 'Finance & Analytics',
+      items: [
+        { icon: '📊', labelKey: 'nav.analytics', path: '/analytics', permKey: 'analytics' },
+        { icon: '📂', labelKey: 'nav.allTransactions', path: '/admin/transactions', permKey: 'allRecords' },
+        { icon: '📑', labelKey: 'nav.allExpenses', path: '/admin/expenses', permKey: 'allRecords' },
+        { icon: '💼', labelKey: 'nav.salary', path: '/admin/salary', permKey: 'salaryLogs' },
+        { icon: '🏦', labelKey: 'nav.banks', path: '/banks', permKey: 'banks' },
+        { icon: '⚙️', labelKey: 'nav.bankConfig', path: '/admin/bank-config', permKey: 'banks' },
+      ]
+    },
+    {
+      title: 'Services & Config',
+      items: [
+        { icon: '🛠', labelKey: 'nav.services', path: '/services', permKey: 'services' },
+        { icon: '🏷', labelKey: 'nav.expenseCats', path: '/admin/expense-categories', permKey: 'expenseCategories' },
+      ]
+    },
+    {
+      title: 'Logs & Reports',
+      items: [
+        { icon: '📜', labelKey: 'nav.auditLogs', path: '/logs', permKey: 'salaryLogs' },
+        { icon: '📄', labelKey: 'nav.billLogs', path: '/admin/bill-logs', permKey: 'salaryLogs' },
+        { icon: '⚙️', labelKey: 'Auto Tx', path: '/admin/auto-transactions', adminOnly: true },
+        { icon: '📦', labelKey: 'nav.dataExports', path: '/admin/exports', permKey: 'analytics' },
+      ]
+    },
+    {
+      title: 'System & Users',
+      items: [
+        { icon: '👥', labelKey: 'nav.users', path: '/users', superOnly: true },
+        { icon: '📊', labelKey: 'User Perf', path: '/admin/user-performance', superOnly: true },
+        { icon: '🔐', labelKey: 'Roles', path: '/admin/roles', superOnly: true },
+        { icon: '🖥', labelKey: 'nav.serverMgmt', path: '/admin/system', superOnly: true },
+        { icon: '💾', labelKey: 'nav.storageMgmt', path: '/admin/storage', superOnly: true },
+        { icon: '☁️', labelKey: 'nav.renderMgmt', path: '/admin/render', superOnly: true },
+        { icon: '📈', labelKey: 'nav.incomeMgmt', path: '/admin/income-management', superOnly: true },
+      ]
+    }
   ];
 
   const handleLogout = () => { logout(); navigate('/login'); };
@@ -66,30 +92,29 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       </div>
 
       <nav className="sidebar-nav">
-        <div className="nav-section">
-          <div className="nav-section-title">Main</div>
-          {userNav.map(item => (
-            <NavLink key={item.path} to={item.path} end
-              className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}>
-              <span className="nav-icon">{item.icon}</span>
-              {t(item.labelKey as any)}
-            </NavLink>
-          ))}
-        </div>
+        {SECTIONS.map((section, idx) => {
+          const visibleItems = section.items.filter(item => {
+            if (item.superOnly) return isSuperAdmin;
+            if (item.adminOnly) return isAdmin || isSuperAdmin;
 
-        {(isAdmin || role === 'MANAGER' || role === 'CUSTOM') && (
-          <div className="nav-section">
-            <div className="nav-section-title">Admin</div>
-            {adminNav
-              .filter(item => {
-                if (isAdmin) return true;
-                if (role === 'MANAGER') return ['services', 'expenseCategories'].includes(item.permKey || '');
-                if (role === 'CUSTOM' && item.permKey) {
-                  return user?.customPermissions?.[item.permKey]?.read;
-                }
-                return false;
-              })
-              .map(item => (
+            // Main section items (no permKey, no superOnly, no adminOnly) are visible to everyone
+            if (!item.permKey && !item.superOnly && !item.adminOnly) return true;
+
+            // Otherwise, it's an admin/custom permission item
+            if (isAdmin || isSuperAdmin) return true;
+            if (role === 'MANAGER') return ['services', 'expenseCategories'].includes(item.permKey || '');
+            if (role === 'CUSTOM' && item.permKey) {
+              return user?.customPermissions?.[item.permKey]?.read;
+            }
+            return false;
+          });
+
+          if (visibleItems.length === 0) return null;
+
+          return (
+            <div className="nav-section" key={idx}>
+              <div className="nav-section-title">{section.title}</div>
+              {visibleItems.map(item => (
                 <NavLink key={item.path} to={item.path} end
                   className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
                   onClick={onClose}
@@ -98,23 +123,9 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                   {item.labelKey.startsWith('nav.') ? t(item.labelKey as any) : item.labelKey}
                 </NavLink>
               ))}
-          </div>
-        )}
-
-        {isSuperAdmin && (
-          <div className="nav-section">
-            <div className="nav-section-title">System</div>
-            {superNav.map(item => (
-              <NavLink key={item.path} to={item.path} end
-                className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
-                onClick={onClose}
-              >
-                <span className="nav-icon">{item.icon}</span>
-                {item.labelKey.startsWith('nav.') ? t(item.labelKey as any) : item.labelKey}
-              </NavLink>
-            ))}
-          </div>
-        )}
+            </div>
+          );
+        })}
 
         <div className="nav-section" style={{ marginTop: 'auto' }}>
           <NavLink to="/developer" className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`} onClick={onClose}>
