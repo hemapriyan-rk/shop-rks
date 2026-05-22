@@ -13,10 +13,15 @@ router.get('/me', authenticate, getMe);
 
 // POST /api/auth/logout — protected
 router.post('/logout', authenticate, (req, res, next) => {
-  const { userId } = req.user!;
+  const { sessionId } = req.user!;
+  if (!sessionId) {
+    res.json({ success: true });
+    return;
+  }
+  
   import('../../config/prisma').then(({ prisma }) => {
-    prisma.session.updateMany({
-      where: { userId, logoutTime: null },
+    prisma.session.update({
+      where: { id: sessionId },
       data: { logoutTime: new Date() }
     }).then(() => res.json({ success: true }))
       .catch(next);

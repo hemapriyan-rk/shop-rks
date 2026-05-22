@@ -123,6 +123,17 @@ export async function deleteUser(req: Request, res: Response, next: NextFunction
       return;
     }
 
+    // Prevent deleting the last super admin
+    if (user.role === 'SUPER_ADMIN') {
+      const superAdminCount = await prisma.user.count({
+        where: { role: 'SUPER_ADMIN', isActive: true },
+      });
+      if (superAdminCount <= 1) {
+        sendError(res, 'Cannot delete the last Super Admin', 400);
+        return;
+      }
+    }
+
     // Check if user has any activity
     const hasActivity = user._count.transactions > 0 || user._count.expenses > 0;
 
