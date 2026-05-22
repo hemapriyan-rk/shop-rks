@@ -99,6 +99,13 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         )}
 
         <div className="nav-section" style={{ marginTop: 'auto' }}>
+          <NavLink to="/developer" className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`} onClick={onClose}>
+            <span className="nav-icon">👨‍💻</span>
+            Developer Info
+          </NavLink>
+        </div>
+
+        <div className="nav-section">
           <button className="nav-item" style={{ color: 'var(--red)' }} onClick={handleLogout}>
             <span className="nav-icon">⇥</span>
             {t('nav.logout')}

@@ -59,3 +59,12 @@ If you wish to run the project in development mode:
 ## Deployment Network Configuration
 
 For strict LAN access, ensure that the machine running the system only exposes port `3000` to the internal Wi-Fi/Ethernet router. Avoid port forwarding port `3000` to the public WAN interface on your router.
+
+## Developed By
+
+**HEMAPRIYAN R K**  
+*Developer*
+
+* **Email:** connectwithhemapriyan@gmail.com
+* **GitHub:** [https://github.com/hemapriyan-rk](https://github.com/hemapriyan-rk)
+* **LinkedIn:** [https://www.linkedin.com/in/hemapriyan-rk](https://www.linkedin.com/in/hemapriyan-rk)

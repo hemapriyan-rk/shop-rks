@@ -27,7 +27,7 @@ export default function DeveloperPage() {
           }} />
           
           <img 
-            src="https://github.com/hemapriyan-rk.png" 
+            src="/developer.jpeg" 
             alt="Hemapriyan R K" 
             style={{ 
               width: 150, height: 150, borderRadius: '50%', objectFit: 'cover', 
