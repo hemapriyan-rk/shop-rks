@@ -356,11 +356,6 @@ export async function runCashReconciliation(targetDate?: Date) {
     const start = new Date(`${dateStr}T00:00:00+05:30`);
     const end = new Date(`${dateStr}T23:59:59.999+05:30`);
 
-    const existing = await prisma.autoTransaction.findFirst({
-      where: { type: 'CASH_RECONCILIATION', date: start }
-    });
-    if (existing) return;
-
     console.log('🕒 Running Cash Reconciliation Job...');
 
     const txs = await prisma.transaction.aggregate({
@@ -372,6 +367,32 @@ export async function runCashReconciliation(targetDate?: Date) {
     });
 
     const totalCash = Number(txs._sum.totalPrice || 0);
+
+    const existing = await prisma.autoTransaction.findFirst({
+      where: { type: 'CASH_RECONCILIATION', date: start }
+    });
+
+    if (existing) {
+      if (Number(existing.amount) === totalCash) return; // No change
+      
+      const diff = totalCash - Number(existing.amount);
+      
+      let cashBank = await prisma.bankAccount.findUnique({ where: { name: 'CASH-BALANCE' } });
+      if (cashBank) {
+        await prisma.bankAccount.update({
+          where: { id: cashBank.id },
+          data: { balance: { increment: diff } }
+        });
+      }
+
+      await prisma.autoTransaction.update({
+        where: { id: existing.id },
+        data: { amount: totalCash }
+      });
+      console.log(`🔄 Updated Cash Reconciliation. Difference of ₹${diff} applied for ${dateStr}.`);
+      return;
+    }
+
 
     let cashBank = await prisma.bankAccount.findUnique({ where: { name: 'CASH-BALANCE' } });
     if (!cashBank) {
@@ -422,11 +443,6 @@ export async function runOnlineReconciliation(targetDate?: Date) {
     const start = new Date(`${dateStr}T00:00:00+05:30`);
     const end = new Date(`${dateStr}T23:59:59.999+05:30`);
 
-    const existing = await prisma.autoTransaction.findFirst({
-      where: { type: 'ONLINE_RECONCILIATION', date: start }
-    });
-    if (existing) return;
-
     console.log('🕒 Running Online Reconciliation Job...');
 
     const txs = await prisma.transaction.aggregate({
@@ -438,6 +454,32 @@ export async function runOnlineReconciliation(targetDate?: Date) {
     });
 
     const totalOnline = Number(txs._sum.totalPrice || 0);
+
+    const existing = await prisma.autoTransaction.findFirst({
+      where: { type: 'ONLINE_RECONCILIATION', date: start }
+    });
+
+    if (existing) {
+      if (Number(existing.amount) === totalOnline) return; // No change
+      
+      const diff = totalOnline - Number(existing.amount);
+      
+      let canaraBank = await prisma.bankAccount.findUnique({ where: { name: 'CANARA BANK' } });
+      if (canaraBank) {
+        await prisma.bankAccount.update({
+          where: { id: canaraBank.id },
+          data: { balance: { increment: diff } }
+        });
+      }
+
+      await prisma.autoTransaction.update({
+        where: { id: existing.id },
+        data: { amount: totalOnline }
+      });
+      console.log(`🔄 Updated Online Reconciliation. Difference of ₹${diff} applied for ${dateStr}.`);
+      return;
+    }
+
 
     let canaraBank = await prisma.bankAccount.findUnique({ where: { name: 'CANARA BANK' } });
     if (!canaraBank) {
