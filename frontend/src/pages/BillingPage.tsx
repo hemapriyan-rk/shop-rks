@@ -15,6 +15,7 @@ export default function BillingPage() {
   
   const [services, setServices] = useState<Service[]>([]);
   const [customerName, setCustomerName] = useState('');
+  const [printMode, setPrintMode] = useState<'DISCLAIMER' | 'SEAL_SIGN'>('DISCLAIMER');
   
   // Date/Time state
   const now = new Date();
@@ -64,7 +65,8 @@ export default function BillingPage() {
 
   const total = items.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
 
-  const handlePrint = async () => {
+  const handlePrint = async (mode: 'DISCLAIMER' | 'SEAL_SIGN') => {
+    setPrintMode(mode);
     // 1. Log the bill in the system
     try {
       await systemApi.logBill({
@@ -77,8 +79,10 @@ export default function BillingPage() {
       console.error('Failed to log bill:', err);
     }
     
-    // 2. Trigger native browser print
-    window.print();
+    // Wait for React to apply the printMode before triggering print
+    setTimeout(() => {
+      window.print();
+    }, 100);
   };
 
   // Convert Date to DD/MM/YYYY for display
@@ -92,9 +96,14 @@ export default function BillingPage() {
           <div className="page-header-title">Bill Generator</div>
           <div className="page-header-sub">Generate and print professional invoices</div>
         </div>
-        <button className="btn btn-primary" onClick={handlePrint} disabled={total === 0}>
-          🖨 Print / Save PDF
-        </button>
+        <div style={{ display: 'flex', gap: 12 }}>
+          <button className="btn btn-secondary" onClick={() => handlePrint('DISCLAIMER')} disabled={total === 0}>
+            🖨 Print (Disclaimer)
+          </button>
+          <button className="btn btn-primary" onClick={() => handlePrint('SEAL_SIGN')} disabled={total === 0}>
+            🖨 Print (Seal & Sign)
+          </button>
+        </div>
       </div>
 
       <div className="billing-container no-print" style={{ maxWidth: 800, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 24 }}>
@@ -243,8 +252,21 @@ export default function BillingPage() {
         </table>
 
         <div className="invoice-footer">
-          <p><strong>Disclaimer:</strong> Applicable to whomsoever it may concern.</p>
-          <p><em>System generated bill. No signature required.</em></p>
+          {printMode === 'DISCLAIMER' ? (
+            <>
+              <p><strong>Disclaimer:</strong> Applicable to whomsoever it may concern.</p>
+              <p><em>System generated bill. No signature required.</em></p>
+            </>
+          ) : (
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 60 }}>
+              <div style={{ borderTop: '1px solid #000', paddingTop: 8, width: 200, textAlign: 'center' }}>
+                Customer Signature
+              </div>
+              <div style={{ borderTop: '1px solid #000', paddingTop: 8, width: 200, textAlign: 'center' }}>
+                Authorized Seal & Signature
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
