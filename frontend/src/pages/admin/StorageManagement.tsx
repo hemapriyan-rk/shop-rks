@@ -61,6 +61,34 @@ export default function StorageManagement() {
     }
   };
 
+  const handleToggleSuspend = async () => {
+    const newState = !autoEnabled;
+    const action = newState ? 'RESUME' : 'SUSPEND';
+    if (!confirm(`Are you sure you want to ${action} the auto-cleanup mechanism?`)) return;
+    
+    setSavingConfig(true);
+    try {
+      await systemApi.updateConfig({ 
+        autoCleanupEnabled: newState, 
+        autoCleanupDurationMonths: autoDuration 
+      });
+      setAutoEnabled(newState);
+      alert(`Auto-cleanup has been ${newState ? 'RESUMED' : 'SUSPENDED'}.`);
+      fetchData();
+    } catch (err) {
+      alert(`Failed to ${action.toLowerCase()} auto-cleanup`);
+    } finally {
+      setSavingConfig(false);
+    }
+  };
+
+  const calculateTargetDeletionDate = () => {
+    if (!config?.nextCleanupDate) return null;
+    const target = new Date(config.nextCleanupDate);
+    target.setMonth(target.getMonth() - autoDuration);
+    return target;
+  };
+
   const handleManualCleanup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!manualDate || cleanupTypes.length === 0) return alert('Select date and at least one type.');
@@ -121,31 +149,77 @@ export default function StorageManagement() {
             </p>
             
             {config && (
-              <form onSubmit={handleSaveConfig}>
-                <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <input type="checkbox" id="autoEnable" checked={autoEnabled} onChange={e => setAutoEnabled(e.target.checked)} style={{ width: 18, height: 18 }} />
-                  <label htmlFor="autoEnable" style={{ margin: 0 }}>Enable Auto Cleanup</label>
-                </div>
-                
-                <div className="form-group">
-                  <label className="form-label">Delete Data Older Than</label>
-                  <select className="form-input" value={autoDuration} onChange={e => setAutoDuration(Number(e.target.value))} disabled={!autoEnabled}>
-                    <option value={1}>1 Month</option>
-                    <option value={2}>2 Months</option>
-                    <option value={3}>3 Months</option>
-                    <option value={6}>6 Months</option>
-                  </select>
+              <div>
+                <div style={{
+                  padding: 16,
+                  borderRadius: 8,
+                  marginBottom: 24,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  background: autoEnabled ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                  border: `1px solid ${autoEnabled ? 'var(--color-success)' : 'var(--color-danger)'}`
+                }}>
+                  <div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Current Status</div>
+                    <div style={{ 
+                      fontSize: 20, 
+                      fontWeight: 700, 
+                      color: autoEnabled ? 'var(--color-success)' : 'var(--color-danger)' 
+                    }}>
+                      {autoEnabled ? '🟢 ACTIVE' : '🔴 SUSPENDED'}
+                    </div>
+                  </div>
+                  <button 
+                    className={`btn ${autoEnabled ? 'btn-danger' : 'btn-primary'}`} 
+                    onClick={handleToggleSuspend}
+                    disabled={savingConfig}
+                  >
+                    {savingConfig ? 'Processing...' : (autoEnabled ? 'Suspend All Cleanups' : 'Resume Cleanups')}
+                  </button>
                 </div>
 
-                <div style={{ marginBottom: 16, fontSize: 13, background: 'var(--bg-elevated)', padding: 12, borderRadius: 8 }}>
-                  <div><strong>Last Cleanup:</strong> {config.lastCleanupDate ? new Date(config.lastCleanupDate).toLocaleDateString() : 'Never'}</div>
-                  <div><strong>Next Cleanup:</strong> {config.nextCleanupDate ? new Date(config.nextCleanupDate).toLocaleDateString() : 'Pending Scheduling'}</div>
-                </div>
+                <form onSubmit={handleSaveConfig}>
+                  <div className="form-group">
+                    <label className="form-label">Delete Data Older Than</label>
+                    <select className="form-input" value={autoDuration} onChange={e => setAutoDuration(Number(e.target.value))} disabled={!autoEnabled}>
+                      <option value={1}>1 Month</option>
+                      <option value={2}>2 Months</option>
+                      <option value={3}>3 Months</option>
+                      <option value={6}>6 Months</option>
+                    </select>
+                  </div>
 
-                <button type="submit" className="btn btn-primary" disabled={savingConfig}>
-                  {savingConfig ? 'Saving...' : 'Save Configuration'}
-                </button>
-              </form>
+                  {autoEnabled && (
+                    <div style={{ marginBottom: 16, fontSize: 13, background: 'var(--bg-elevated)', padding: '16px', borderRadius: 8 }}>
+                      <div style={{ marginBottom: 8 }}>
+                        <span style={{ color: 'var(--text-muted)' }}>Last Cleanup:</span> <strong style={{ float: 'right' }}>{config.lastCleanupDate ? new Date(config.lastCleanupDate).toLocaleDateString() : 'Never'}</strong>
+                      </div>
+                      <div style={{ marginBottom: 8 }}>
+                        <span style={{ color: 'var(--text-muted)' }}>Next Execution Date:</span> <strong style={{ float: 'right' }}>{config.nextCleanupDate ? new Date(config.nextCleanupDate).toLocaleDateString() : 'Pending Scheduling'}</strong>
+                      </div>
+                      <hr style={{ margin: '12px 0', borderColor: 'var(--border-color)' }} />
+                      <div style={{ marginBottom: 8 }}>
+                        <span style={{ color: 'var(--color-danger)' }}>Target Deletion Date:</span> 
+                        <strong style={{ float: 'right', color: 'var(--color-danger)' }}>
+                          {calculateTargetDeletionDate() ? `< ${calculateTargetDeletionDate()?.toLocaleDateString()}` : 'N/A'}
+                        </strong>
+                      </div>
+                      <div>
+                        <span style={{ color: 'var(--text-muted)' }}>Target Tables (To Delete):</span> 
+                        <strong style={{ float: 'right' }}>Transactions, Expenses</strong>
+                      </div>
+                      <div style={{ marginTop: 8, fontSize: 11, color: 'var(--color-success)' }}>
+                        * Audit Logs and User Performance Snapshots are safely ignored and will NOT be deleted.
+                      </div>
+                    </div>
+                  )}
+
+                  <button type="submit" className="btn btn-secondary" disabled={savingConfig || !autoEnabled}>
+                    {savingConfig ? 'Saving...' : 'Save Configuration'}
+                  </button>
+                </form>
+              </div>
             )}
           </div>
 
