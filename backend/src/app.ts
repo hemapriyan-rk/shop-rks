@@ -29,6 +29,7 @@ import healthRoutes from './modules/health/health.routes';
 import bankRoutes from './modules/banks/banks.routes';
 import systemRoutes from './modules/system/system.routes';
 import expenseCategoryRoutes from './modules/expenses/expense-categories.routes';
+import rolesRoutes from './modules/roles/roles.routes';
 
 // Background jobs
 import { initCronJobs } from './modules/system/cron.service';
@@ -113,6 +114,7 @@ app.use('/api/logs', logsRoutes);
 app.use('/api/banks', bankRoutes);
 app.use('/api/system', systemRoutes);
 app.use('/api/expense-categories', expenseCategoryRoutes);
+app.use('/api/roles', rolesRoutes);
 
 // ── Serve Frontend Static Files (Production) ──────────────────────
 // In production, Express serves the React build from /app/public.

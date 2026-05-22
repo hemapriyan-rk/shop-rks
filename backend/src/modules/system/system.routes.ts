@@ -9,21 +9,21 @@ router.get('/events', authenticate, controller.eventStream);
 
 // Config — Read by App, Write by Super Admin
 router.get('/config', controller.getConfig);
-router.patch('/config', authenticate, requireRole('SUPER_ADMIN'), controller.updateConfig);
-router.get('/health-stats', authenticate, requireRole('SUPER_ADMIN'), controller.getSystemHealth);
+router.patch('/config', authenticate, requireRole(['SUPER_ADMIN']), controller.updateConfig);
+router.get('/health-stats', authenticate, requireRole(['SUPER_ADMIN']), controller.getSystemHealth);
 
 // Sessions — Super Admin only
-router.get('/sessions', authenticate, requireRole('SUPER_ADMIN'), controller.getSessions);
-router.post('/sessions/:id/kick', authenticate, requireRole('SUPER_ADMIN'), controller.kickSession);
-router.post('/sessions/:userId/message', authenticate, requireRole('SUPER_ADMIN'), controller.messageUser);
+router.get('/sessions', authenticate, requireRole(['SUPER_ADMIN']), controller.getSessions);
+router.post('/sessions/:id/kick', authenticate, requireRole(['SUPER_ADMIN']), controller.kickSession);
+router.post('/sessions/:userId/message', authenticate, requireRole(['SUPER_ADMIN']), controller.messageUser);
 
 // Storage & Cleanup — Super Admin only
-router.get('/storage', authenticate, requireRole('SUPER_ADMIN'), controller.getStorageStats);
-router.post('/cleanup', authenticate, requireRole('SUPER_ADMIN'), controller.manualCleanup);
+router.get('/storage', authenticate, requireRole(['SUPER_ADMIN']), controller.getStorageStats);
+router.post('/cleanup', authenticate, requireRole(['SUPER_ADMIN']), controller.manualCleanup);
 
 // Exports — Admin & Super Admin
-router.get('/exports', authenticate, requireRole('ADMIN', 'SUPER_ADMIN'), controller.listExports);
-router.get('/exports/:id/download', authenticate, requireRole('ADMIN', 'SUPER_ADMIN'), controller.downloadExport);
+router.get('/exports', authenticate, requireRole(['ADMIN', 'SUPER_ADMIN']), controller.listExports);
+router.get('/exports/:id/download', authenticate, requireRole(['ADMIN', 'SUPER_ADMIN']), controller.downloadExport);
 
 // Billing Log - All Authenticated Users
 router.post('/log-bill', authenticate, controller.logBill);

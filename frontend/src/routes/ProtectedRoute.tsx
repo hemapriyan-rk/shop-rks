@@ -5,10 +5,11 @@ import type { Role } from '../types';
 
 interface ProtectedRouteProps {
   allowedRoles?: Role[];
+  permissionKey?: string;
 }
 
-export default function ProtectedRoute({ allowedRoles }: ProtectedRouteProps) {
-  const { isAuthenticated, isLoading, role } = useAuth();
+export default function ProtectedRoute({ allowedRoles, permissionKey }: ProtectedRouteProps) {
+  const { isAuthenticated, isLoading, role, user } = useAuth();
 
   if (isLoading) {
     return (
@@ -22,6 +23,12 @@ export default function ProtectedRoute({ allowedRoles }: ProtectedRouteProps) {
   if (!isAuthenticated) return <Navigate to="/login" replace />;
 
   if (allowedRoles && role && !allowedRoles.includes(role)) {
+    if (role === 'CUSTOM' && permissionKey) {
+      const perms = user?.customPermissions?.[permissionKey];
+      if (perms?.read) {
+        return <Outlet />;
+      }
+    }
     return <Navigate to="/dashboard" replace />;
   }
 

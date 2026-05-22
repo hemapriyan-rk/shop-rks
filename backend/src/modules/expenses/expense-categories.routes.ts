@@ -8,8 +8,8 @@ const router = Router();
 router.get('/', authenticate, controller.getCategories);
 
 // Admin and Super Admin can manage categories
-router.post('/', authenticate, requireRole('ADMIN', 'SUPER_ADMIN'), controller.createCategory);
-router.patch('/:id', authenticate, requireRole('ADMIN', 'SUPER_ADMIN'), controller.updateCategory);
-router.delete('/:id', authenticate, requireRole('ADMIN', 'SUPER_ADMIN'), controller.deleteCategory);
+router.post('/', authenticate, requireRole(['MANAGER', 'ADMIN', 'SUPER_ADMIN']), controller.createCategory);
+router.patch('/:id', authenticate, requireRole(['MANAGER', 'ADMIN', 'SUPER_ADMIN']), controller.updateCategory);
+router.delete('/:id', authenticate, requireRole(['MANAGER', 'ADMIN', 'SUPER_ADMIN']), controller.deleteCategory);
 
 export default router;

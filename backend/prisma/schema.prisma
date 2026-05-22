@@ -17,8 +17,10 @@ datasource db {
 
 enum Role {
   USER
+  MANAGER
   ADMIN
   SUPER_ADMIN
+  CUSTOM
 }
 
 enum ServiceCategory {
@@ -57,7 +59,10 @@ model User {
   username     String   @unique
   passwordHash String   @map("password_hash")
   role         Role     @default(USER)
+  customRoleId String?  @map("custom_role_id")
+  customRole   CustomRole? @relation(fields: [customRoleId], references: [id])
   isActive     Boolean  @default(true) @map("is_active")
+  isSuspended  Boolean  @default(false) @map("is_suspended")
   bannedUntil  DateTime? @map("banned_until") @db.Timestamptz
   createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz
@@ -162,6 +167,21 @@ model ExpenseCategory {
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
   @@map("expense_categories")
+}
+
+// ─────────────────────────────────────────────────────────
+// CUSTOM ROLES
+// ─────────────────────────────────────────────────────────
+
+model CustomRole {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  permissions Json     // Expected format: Record<string, { read: boolean, write: boolean }>
+  users       User[]
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("custom_roles")
 }
 
 // ─────────────────────────────────────────────────────────

@@ -26,6 +26,8 @@ export default function LoginPage() {
     } finally { setLoading(false); }
   };
 
+  const isSuspendedError = error && error.toLowerCase().includes('account is suspended');
+
   return (
     <div className="login-page" style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-base)', fontFamily: 'Inter, sans-serif' }}>
       
@@ -84,9 +86,24 @@ export default function LoginPage() {
           </div>
 
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-            {error && (
+            {error && !isSuspendedError && (
               <div className="alert alert-error">
                 <span style={{ fontSize: 16 }}>⚠️</span> {error}
+              </div>
+            )}
+
+            {isSuspendedError && (
+              <div style={{
+                position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                background: 'rgba(0,0,0,0.5)', zIndex: 9999,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)'
+              }}>
+                <div style={{ background: 'var(--bg-surface)', padding: 32, borderRadius: 16, maxWidth: 400, width: '90%', textAlign: 'center', boxShadow: '0 24px 48px rgba(0,0,0,0.2)' }}>
+                  <div style={{ fontSize: 48, marginBottom: 16 }}>🚫</div>
+                  <h3 style={{ fontSize: 24, fontWeight: 800, color: 'var(--red)', marginBottom: 12 }}>Account Suspended</h3>
+                  <p style={{ color: 'var(--text-secondary)', marginBottom: 24, lineHeight: 1.5 }}>{error}</p>
+                  <button type="button" className="btn btn-primary" style={{ width: '100%' }} onClick={() => setError('')}>Close</button>
+                </div>
               </div>
             )}
 

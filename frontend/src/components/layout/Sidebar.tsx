@@ -7,6 +7,7 @@ interface NavItem {
   icon: string;
   labelKey: string;
   path: string;
+  permKey?: string;
 }
 
 interface SidebarProps {
@@ -29,21 +30,22 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   ];
 
   const adminNav: NavItem[] = [
-    { icon: '📊', labelKey: 'nav.analytics', path: '/analytics' },
-    { icon: '🛠', labelKey: 'nav.services', path: '/services' },
-    { icon: '🏦', labelKey: 'nav.banks', path: '/banks' },
-    { icon: '⚙️', labelKey: 'nav.bankConfig', path: '/admin/bank-config' },
-    { icon: '📂', labelKey: 'nav.allTransactions', path: '/admin/transactions' },
-    { icon: '📑', labelKey: 'nav.allExpenses', path: '/admin/expenses' },
-    { icon: '🏷', labelKey: 'nav.expenseCats', path: '/admin/expense-categories' },
-    { icon: '💼', labelKey: 'nav.salary', path: '/admin/salary' },
-    { icon: '📜', labelKey: 'nav.auditLogs', path: '/logs' },
-    { icon: '📄', labelKey: 'nav.billLogs', path: '/admin/bill-logs' },
-    { icon: '📦', labelKey: 'nav.dataExports', path: '/admin/exports' },
+    { icon: '📊', labelKey: 'nav.analytics', path: '/analytics', permKey: 'analytics' },
+    { icon: '🛠', labelKey: 'nav.services', path: '/services', permKey: 'services' },
+    { icon: '🏦', labelKey: 'nav.banks', path: '/banks', permKey: 'banks' },
+    { icon: '⚙️', labelKey: 'nav.bankConfig', path: '/admin/bank-config', permKey: 'banks' },
+    { icon: '📂', labelKey: 'nav.allTransactions', path: '/admin/transactions', permKey: 'allRecords' },
+    { icon: '📑', labelKey: 'nav.allExpenses', path: '/admin/expenses', permKey: 'allRecords' },
+    { icon: '🏷', labelKey: 'nav.expenseCats', path: '/admin/expense-categories', permKey: 'expenseCategories' },
+    { icon: '💼', labelKey: 'nav.salary', path: '/admin/salary', permKey: 'salaryLogs' },
+    { icon: '📜', labelKey: 'nav.auditLogs', path: '/logs', permKey: 'salaryLogs' },
+    { icon: '📄', labelKey: 'nav.billLogs', path: '/admin/bill-logs', permKey: 'salaryLogs' },
+    { icon: '📦', labelKey: 'nav.dataExports', path: '/admin/exports', permKey: 'analytics' },
   ];
 
   const superNav: NavItem[] = [
     { icon: '👥', labelKey: 'nav.users', path: '/users' },
+    { icon: '🔐', labelKey: 'Roles', path: '/admin/roles' },
     { icon: '🖥', labelKey: 'nav.serverMgmt', path: '/admin/system' },
     { icon: '☁️', labelKey: 'nav.renderMgmt', path: '/admin/render' },
     { icon: '💾', labelKey: 'nav.storageMgmt', path: '/admin/storage' },
@@ -73,16 +75,27 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           ))}
         </div>
 
-        {isAdmin && (
+        {(isAdmin || role === 'MANAGER' || role === 'CUSTOM') && (
           <div className="nav-section">
             <div className="nav-section-title">Admin</div>
-            {adminNav.map(item => (
-              <NavLink key={item.path} to={item.path} end
-                className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}>
-                <span className="nav-icon">{item.icon}</span>
-                {t(item.labelKey as any)}
-              </NavLink>
-            ))}
+            {adminNav
+              .filter(item => {
+                if (isAdmin) return true;
+                if (role === 'MANAGER') return ['services', 'expenseCategories'].includes(item.permKey || '');
+                if (role === 'CUSTOM' && item.permKey) {
+                  return user?.customPermissions?.[item.permKey]?.read;
+                }
+                return false;
+              })
+              .map(item => (
+                <NavLink key={item.path} to={item.path} end
+                  className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
+                  onClick={onClose}
+                >
+                  <span className="nav-icon">{item.icon}</span>
+                  {item.labelKey.startsWith('nav.') ? t(item.labelKey as any) : item.labelKey}
+                </NavLink>
+              ))}
           </div>
         )}
 
@@ -91,9 +104,11 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             <div className="nav-section-title">System</div>
             {superNav.map(item => (
               <NavLink key={item.path} to={item.path} end
-                className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}>
+                className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
+                onClick={onClose}
+              >
                 <span className="nav-icon">{item.icon}</span>
-                {t(item.labelKey as any)}
+                {item.labelKey.startsWith('nav.') ? t(item.labelKey as any) : item.labelKey}
               </NavLink>
             ))}
           </div>

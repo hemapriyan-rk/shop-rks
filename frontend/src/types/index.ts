@@ -1,4 +1,4 @@
-export type Role = 'USER' | 'ADMIN' | 'SUPER_ADMIN';
+export type Role = 'USER' | 'MANAGER' | 'ADMIN' | 'SUPER_ADMIN' | 'CUSTOM';
 export type ServiceCategory = 'GOVT' | 'PRINTING' | 'CARDS' | 'OTHER';
 export type ExpenseStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 export type AuditAction = 'CREATE' | 'UPDATE' | 'DELETE';
@@ -8,7 +8,10 @@ export interface User {
   name: string;
   username: string;
   role: Role;
+  customRoleId?: string | null;
+  customPermissions?: Record<string, { read: boolean; write: boolean }>;
   isActive: boolean;
+  isSuspended: boolean;
   createdAt: string;
   updatedAt: string;
   _count?: { transactions: number; expenses?: number };
@@ -48,6 +51,15 @@ export interface BankAccount {
   expenses?: Array<{ id: string; amount: number; category: string; note?: string; createdAt: string; user: { name: string } }>;
   logs?: Array<{ id: string; action: string; newValue: any; createdAt: string; user: { name: string } }>;
   _count?: { expenses: number };
+}
+
+export interface CustomRole {
+  id: string;
+  name: string;
+  permissions: Record<string, { read: boolean; write: boolean }>;
+  createdAt: string;
+  updatedAt: string;
+  _count?: { users: number };
 }
 
 export interface Expense {

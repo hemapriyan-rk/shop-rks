@@ -12,7 +12,7 @@ import {
 const router = Router();
 
 // All user routes require SUPER_ADMIN
-router.use(authenticate, requireRole('SUPER_ADMIN'));
+router.use(authenticate, requireRole(['SUPER_ADMIN']));
 
 router.get('/', getAllUsers);
 router.get('/:id', getUserById);

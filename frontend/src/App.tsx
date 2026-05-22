@@ -31,6 +31,7 @@ import MaintenancePage from './pages/Maintenance';
 import SalaryPage from './pages/admin/SalaryPage';
 import IncomeManagementPage from './pages/admin/IncomeManagementPage';
 import RenderMaintenancePage from './pages/admin/RenderMaintenancePage';
+import RoleManagementPage from './pages/admin/RoleManagementPage';
 
 export default function App() {
   return (
@@ -54,24 +55,40 @@ export default function App() {
             <Route path="/profile" element={<ProfilePage />} />
           </Route>
 
-          {/* Admin+ */}
-          <Route element={<ProtectedRoute allowedRoles={['ADMIN', 'SUPER_ADMIN']} />}>
+          {/* Admin+ */ /* Custom roles can access these depending on permissions */}
+          <Route element={<ProtectedRoute allowedRoles={['MANAGER', 'ADMIN', 'SUPER_ADMIN']} permissionKey="services" />}>
             <Route path="/services" element={<ServicesPage />} />
-            <Route path="/analytics" element={<AnalyticsPage />} />
+          </Route>
+          
+          <Route element={<ProtectedRoute allowedRoles={['MANAGER', 'ADMIN', 'SUPER_ADMIN']} permissionKey="expenseCategories" />}>
+            <Route path="/admin/expense-categories" element={<ManageExpenseCategories />} />
+          </Route>
+
+          <Route element={<ProtectedRoute allowedRoles={['ADMIN', 'SUPER_ADMIN']} permissionKey="banks" />}>
             <Route path="/banks" element={<BanksPage />} />
             <Route path="/admin/bank-config" element={<BankConfig />} />
+          </Route>
+
+          <Route element={<ProtectedRoute allowedRoles={['ADMIN', 'SUPER_ADMIN']} permissionKey="allRecords" />}>
             <Route path="/admin/transactions" element={<AdminTransactions />} />
             <Route path="/admin/expenses" element={<AdminExpenses />} />
+          </Route>
+
+          <Route element={<ProtectedRoute allowedRoles={['ADMIN', 'SUPER_ADMIN']} permissionKey="salaryLogs" />}>
             <Route path="/logs" element={<LogsPage />} />
             <Route path="/admin/bill-logs" element={<BillLogsPage />} />
-            <Route path="/admin/expense-categories" element={<ManageExpenseCategories />} />
             <Route path="/admin/salary" element={<SalaryPage />} />
+          </Route>
+
+          <Route element={<ProtectedRoute allowedRoles={['ADMIN', 'SUPER_ADMIN']} permissionKey="analytics" />}>
+            <Route path="/analytics" element={<AnalyticsPage />} />
             <Route path="/admin/exports" element={<DataExports />} />
           </Route>
 
           {/* Super Admin only */}
           <Route element={<ProtectedRoute allowedRoles={['SUPER_ADMIN']} />}>
             <Route path="/users" element={<UsersPage />} />
+            <Route path="/admin/roles" element={<RoleManagementPage />} />
             <Route path="/admin/system" element={<ServerManagement />} />
             <Route path="/admin/render" element={<RenderMaintenancePage />} />
             <Route path="/admin/storage" element={<StorageManagement />} />

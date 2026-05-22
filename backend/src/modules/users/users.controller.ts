@@ -9,7 +9,7 @@ export async function getAllUsers(req: Request, res: Response, next: NextFunctio
     const users = await prisma.user.findMany({
       select: {
         id: true, name: true, username: true, role: true,
-        isActive: true, createdAt: true, updatedAt: true,
+        isActive: true, isSuspended: true, createdAt: true, updatedAt: true,
         _count: { select: { transactions: true } },
       },
       orderBy: { createdAt: 'asc' },
@@ -24,7 +24,7 @@ export async function getUserById(req: Request, res: Response, next: NextFunctio
       where: { id: req.params.id },
       select: {
         id: true, name: true, username: true, role: true,
-        isActive: true, createdAt: true, updatedAt: true,
+        isActive: true, isSuspended: true, createdAt: true, updatedAt: true,
         _count: { select: { transactions: true, expenses: true } },
       },
     });
@@ -35,7 +35,7 @@ export async function getUserById(req: Request, res: Response, next: NextFunctio
 
 export async function createUser(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { name, username, password, role, isActive } = req.body;
+    const { name, username, password, role, isActive, customRoleId } = req.body;
 
     const existing = await prisma.user.findUnique({ where: { username: username.toLowerCase() } });
     if (existing) {
@@ -54,8 +54,8 @@ export async function createUser(req: Request, res: Response, next: NextFunction
       null,
       (u) => ({ id: u.id, name: u.name, username: u.username, role: u.role }),
       (tx) => tx.user.create({
-        data: { name, username: username.toLowerCase(), passwordHash, role, isActive: isActive ?? true },
-        select: { id: true, name: true, username: true, role: true, isActive: true, createdAt: true },
+        data: { name, username: username.toLowerCase(), passwordHash, role, isActive: isActive ?? true, customRoleId: role === 'CUSTOM' ? customRoleId : null },
+        select: { id: true, name: true, username: true, role: true, isActive: true, createdAt: true, customRoleId: true },
       })
     );
 
@@ -63,10 +63,27 @@ export async function createUser(req: Request, res: Response, next: NextFunction
   } catch (err) { next(err); }
 }
 
+const ROLE_RANKS: Record<string, number> = {
+  USER: 10,
+  CUSTOM: 20,
+  MANAGER: 30,
+  ADMIN: 40,
+  SUPER_ADMIN: 50,
+};
+
 export async function updateUser(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const existing = await prisma.user.findUnique({ where: { id: req.params.id } });
     if (!existing) { sendNotFound(res, 'User'); return; }
+
+    const actorRank = ROLE_RANKS[req.user!.role] || 0;
+    const targetRank = ROLE_RANKS[existing.role] || 0;
+
+    // You cannot modify someone with a higher or equal rank unless you are a SUPER_ADMIN
+    if (actorRank <= targetRank && req.user!.role !== 'SUPER_ADMIN') {
+      sendError(res, 'You do not have permission to modify a superior or equal role account', 403);
+      return;
+    }
 
     // Prevent deactivating the last super admin
     if (req.body.isActive === false && existing.role === 'SUPER_ADMIN') {
@@ -91,10 +108,20 @@ export async function updateUser(req: Request, res: Response, next: NextFunction
       }
     }
 
-    const updateData: Record<string, unknown> = { ...req.body };
+    const updateData: any = {};
+    if (req.body.name) updateData.name = req.body.name;
+    if (req.body.role) {
+      updateData.role = req.body.role;
+      if (req.body.role === 'CUSTOM') {
+        updateData.customRoleId = req.body.customRoleId;
+      } else {
+        updateData.customRoleId = null;
+      }
+    }
+    if (req.body.isActive !== undefined) updateData.isActive = req.body.isActive;
+    if (req.body.isSuspended !== undefined) updateData.isSuspended = req.body.isSuspended;
     if (req.body.password) {
       updateData.passwordHash = await bcrypt.hash(req.body.password, 12);
-      delete updateData.password;
     }
     if (req.body.username) {
       updateData.username = req.body.username.toLowerCase();
@@ -108,7 +135,7 @@ export async function updateUser(req: Request, res: Response, next: NextFunction
       (tx) => tx.user.update({
         where: { id: req.params.id },
         data: updateData,
-        select: { id: true, name: true, username: true, role: true, isActive: true, updatedAt: true },
+        select: { id: true, name: true, username: true, role: true, isActive: true, isSuspended: true, updatedAt: true, customRoleId: true },
       })
     );
 
@@ -129,6 +156,15 @@ export async function deleteUser(req: Request, res: Response, next: NextFunction
     });
     
     if (!user) { sendNotFound(res, 'User'); return; }
+
+    const actorRank = ROLE_RANKS[req.user!.role] || 0;
+    const targetRank = ROLE_RANKS[user.role] || 0;
+
+    // You cannot delete someone with a higher or equal rank unless you are a SUPER_ADMIN
+    if (actorRank <= targetRank && req.user!.role !== 'SUPER_ADMIN') {
+      sendError(res, 'You do not have permission to delete a superior or equal role account', 403);
+      return;
+    }
 
     if (id === req.user!.userId) {
       sendError(res, 'Cannot delete your own account', 400);

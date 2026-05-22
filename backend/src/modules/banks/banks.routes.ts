@@ -10,7 +10,7 @@ import {
 } from './banks.controller';
 
 const router = Router();
-router.use(authenticate, requireRole('ADMIN', 'SUPER_ADMIN'));
+router.use(authenticate, requireRole(['ADMIN', 'SUPER_ADMIN']));
 
 // ── Schemas ──────────────────────────────────────────────────────
 const createBankSchema = z.object({
@@ -51,10 +51,10 @@ router.patch('/:id/deposit', validate(depositSchema), depositToBank);
 router.patch('/:id/adjust', validate(adjustSchema), adjustBalance);
 
 // Super Admin only — destructive / privileged
-router.post('/', requireRole('SUPER_ADMIN'), validate(createBankSchema), createBank);
-router.patch('/:id/rename', requireRole('SUPER_ADMIN'), validate(renameSchema), renameBank);
-router.patch('/:id/balance', requireRole('SUPER_ADMIN'), validate(setBalanceSchema), setBalance);
-router.patch('/:id/reset', requireRole('SUPER_ADMIN'), validate(resetSchema), hardResetBalance);
-router.delete('/:id', requireRole('SUPER_ADMIN'), deleteBank);
+router.post('/', requireRole(['SUPER_ADMIN']), validate(createBankSchema), createBank);
+router.patch('/:id/rename', requireRole(['SUPER_ADMIN']), validate(renameSchema), renameBank);
+router.patch('/:id/balance', requireRole(['SUPER_ADMIN']), validate(setBalanceSchema), setBalance);
+router.patch('/:id/reset', requireRole(['SUPER_ADMIN']), validate(resetSchema), hardResetBalance);
+router.delete('/:id', requireRole(['SUPER_ADMIN']), deleteBank);
 
 export default router;

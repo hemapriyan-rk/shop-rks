@@ -11,6 +11,7 @@ export interface AuthPayload {
   role: Role;
   name: string;
   sessionId?: string;
+  customPermissions?: Record<string, { read: boolean; write: boolean }>;
 }
 
 // Extend Express Request to include authenticated user
@@ -133,19 +134,36 @@ export async function authenticate(
  * Role-based access control middleware factory.
  * Fix #7: All permissions enforced in backend — no frontend trust.
  * 
- * Usage: requireRole('ADMIN', 'SUPER_ADMIN')
+ * Usage: requireRole(['ADMIN', 'SUPER_ADMIN'])
  */
-export function requireRole(...allowedRoles: Role[]) {
+export function requireRole(allowedRoles: Role[], requiredModule?: string, requiredAction?: 'read' | 'write') {
   return (req: Request, res: Response, next: NextFunction): void => {
     if (!req.user) {
       sendUnauthorized(res);
       return;
     }
 
-    if (!allowedRoles.includes(req.user.role)) {
+    const rolesArray = allowedRoles;
+
+    if (req.user.role === 'CUSTOM' && requiredModule) {
+      const perms = req.user.customPermissions?.[requiredModule];
+      if (perms) {
+        if (requiredAction === 'write' && perms.write) {
+          next();
+          return;
+        }
+        if (requiredAction === 'read' && perms.read) {
+          next();
+          return;
+        }
+        // If they don't have the specific module permission, it falls through to reject
+      }
+    }
+
+    if (!rolesArray.includes(req.user.role)) {
       res.status(403).json({
         success: false,
-        error: `Access denied. Required role: ${allowedRoles.join(' or ')}`,
+        error: `Access denied. Insufficient permissions.`,
       });
       return;
     }

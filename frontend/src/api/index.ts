@@ -1,4 +1,5 @@
 import api from './client';
+export const apiClient = api;
 import type { ApiResponse, User, Service, Transaction, Expense, Log, DailyAnalytics, MonthlyAnalytics, TodaySummary, BankAccount, Session, SystemConfig } from '../types';
 
 // ── Auth ────────────────────────────────────────────────────────
@@ -15,7 +16,7 @@ export const authApi = {
 export const usersApi = {
   list: () => api.get<ApiResponse<User[]>>('/users'),
   get: (id: string) => api.get<ApiResponse<User>>(`/users/${id}`),
-  create: (data: { name: string; username: string; password: string; role: string; isActive?: boolean }) =>
+  create: (data: { name: string; username: string; password: string; role: string; isActive?: boolean; customRoleId?: string }) =>
     api.post<ApiResponse<User>>('/users', data),
   update: (id: string, data: Partial<User> & { password?: string }) =>
     api.patch<ApiResponse<User>>(`/users/${id}`, data),

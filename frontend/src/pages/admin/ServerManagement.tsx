@@ -60,14 +60,29 @@ export default function ServerManagement() {
     } catch (err) { alert('Failed to broadcast'); }
   };
 
-  const handleKick = async (id: string) => {
-    const reason = window.confirm('Kick this session?');
-    if (!reason) return;
-    const timeoutStr = prompt('Enter timeout in minutes:', '10');
-    if (timeoutStr === null) return;
-    const timeout = parseInt(timeoutStr) || 0;
+  const [kickSessionId, setKickSessionId] = useState<string | null>(null);
+  const [kickTimeout, setKickTimeout] = useState<number>(10);
+  const [kickMessage, setKickMessage] = useState<string>('You have been timed out by an administrator.');
+
+  const handleKick = (id: string) => {
+    setKickSessionId(id);
+  };
+
+  const confirmKick = async () => {
+    if (!kickSessionId) return;
     try {
-      await systemApi.kickSession(id, timeout);
+      // Backend kickSession expects (id, timeout). If we want to send a custom message during kick,
+      // we might need to modify the backend or just rely on backend's message which is
+      // `You have been kicked for ${timeout} minutes.`. 
+      // Actually, since the prompt asked for a warning message, we can just message the user FIRST, then kick them.
+      if (kickMessage) {
+        const sessionToKick = sessions.find(s => s.id === kickSessionId);
+        if (sessionToKick) {
+          await systemApi.messageUser(sessionToKick.userId, kickMessage);
+        }
+      }
+      await systemApi.kickSession(kickSessionId, kickTimeout);
+      setKickSessionId(null);
       loadData();
     } catch (err) { alert('Failed to kick session'); }
   };
@@ -105,6 +120,29 @@ export default function ServerManagement() {
 
   return (
     <Layout title="Server Management">
+      {kickSessionId && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.5)', zIndex: 9999,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)'
+        }}>
+          <div style={{ background: 'var(--bg-surface)', padding: 32, borderRadius: 16, maxWidth: 400, width: '90%', boxShadow: '0 24px 48px rgba(0,0,0,0.2)' }}>
+            <h3 style={{ fontSize: 20, fontWeight: 800, marginBottom: 16 }}>Timeout Session</h3>
+            <div className="form-group">
+              <label className="form-label">Timeout Duration (minutes)</label>
+              <input type="number" className="form-input" value={kickTimeout} onChange={e => setKickTimeout(parseInt(e.target.value) || 0)} min="0" />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Warning Message</label>
+              <input type="text" className="form-input" value={kickMessage} onChange={e => setKickMessage(e.target.value)} />
+            </div>
+            <div style={{ display: 'flex', gap: 12, marginTop: 24, justifyContent: 'flex-end' }}>
+              <button className="btn btn-ghost" onClick={() => setKickSessionId(null)}>Cancel</button>
+              <button className="btn btn-danger" onClick={confirmKick}>Confirm Timeout</button>
+            </div>
+          </div>
+        </div>
+      )}
       <div style={{ padding: '24px 32px' }}>
         <div className="flex-between mb-24">
           <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>Server Management</h2>
@@ -232,7 +270,7 @@ export default function ServerManagement() {
                       <td style={{ textAlign: 'right' }}>
                         <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}>
                           <button className="btn btn-ghost btn-xs" onClick={() => handleMessageUser(s.userId)}>💬</button>
-                          <button className="btn btn-danger btn-xs" onClick={() => handleKick(s.id)} disabled={s.userId === user?.id}>Kick</button>
+                          <button className="btn btn-danger btn-xs" onClick={() => handleKick(s.id)} disabled={s.userId === user?.id}>Timeout</button>
                         </div>
                       </td>
                     </tr>
@@ -263,7 +301,7 @@ export default function ServerManagement() {
                       </td>
                       <td className="text-xs">{formatTime(s.lastSeen)}</td>
                       <td style={{ textAlign: 'right' }}>
-                        <button className="btn btn-danger btn-xs" onClick={() => handleKick(s.id)}>Kick</button>
+                        <button className="btn btn-danger btn-xs" onClick={() => handleKick(s.id)}>Timeout</button>
                       </td>
                     </tr>
                   ))}

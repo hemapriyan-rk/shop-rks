@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Layout from '../../components/layout/Layout';
-import { usersApi } from '../../api';
+import { usersApi, apiClient } from '../../api';
 import type { User, Role } from '../../types';
 
 interface UserModalProps { user?: User; onClose: () => void; onSave: () => void; }
@@ -11,8 +11,15 @@ function UserModal({ user, onClose, onSave }: UserModalProps) {
   const [password, setPassword] = useState('');
   const [role, setRole] = useState<Role>(user?.role ?? 'USER');
   const [isActive, setIsActive] = useState(user?.isActive ?? true);
+  const [isSuspended, setIsSuspended] = useState(user?.isSuspended ?? false);
+  const [customRoleId, setCustomRoleId] = useState<string>(user?.customRoleId ?? '');
+  const [customRoles, setCustomRoles] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    apiClient.get('/roles').then((res: any) => setCustomRoles(res.data.data || [])).catch(() => {});
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,9 +28,9 @@ function UserModal({ user, onClose, onSave }: UserModalProps) {
     setLoading(true);
     try {
       if (user) {
-        await usersApi.update(user.id, { name, role, isActive, ...(password && { password }) });
+        await usersApi.update(user.id, { name, role, isActive, isSuspended, customRoleId, ...(password && { password }) });
       } else {
-        await usersApi.create({ name, username, password, role, isActive });
+        await usersApi.create({ name, username, password, role, isActive, customRoleId });
       }
       onSave();
     } catch (err: any) {
@@ -60,10 +67,21 @@ function UserModal({ user, onClose, onSave }: UserModalProps) {
                 <label className="form-label">Role</label>
                 <select className="form-select" value={role} onChange={e => setRole(e.target.value as Role)}>
                   <option value="USER">Operator (USER)</option>
+                  <option value="MANAGER">Manager</option>
                   <option value="ADMIN">Admin</option>
                   <option value="SUPER_ADMIN">Super Admin</option>
+                  <option value="CUSTOM">Custom Role</option>
                 </select>
               </div>
+              {role === 'CUSTOM' && (
+                <div className="form-group">
+                  <label className="form-label">Select Custom Role</label>
+                  <select className="form-select" value={customRoleId} onChange={e => setCustomRoleId(e.target.value)} required>
+                    <option value="">-- Select Role --</option>
+                    {customRoles.map(cr => <option key={cr.id} value={cr.id}>{cr.name}</option>)}
+                  </select>
+                </div>
+              )}
               <div className="form-group" style={{ justifyContent: 'flex-end' }}>
                 <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', marginTop: 26 }}>
                   <input type="checkbox" checked={isActive} onChange={e => setIsActive(e.target.checked)} />
@@ -71,6 +89,14 @@ function UserModal({ user, onClose, onSave }: UserModalProps) {
                 </label>
               </div>
             </div>
+            {user && (
+              <div className="form-group" style={{ marginTop: 16 }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', padding: '12px', background: 'rgba(255,50,50,0.1)', borderRadius: 8, border: '1px solid rgba(255,50,50,0.2)' }}>
+                  <input type="checkbox" checked={isSuspended} onChange={e => setIsSuspended(e.target.checked)} />
+                  <span style={{ fontSize: 14, color: 'var(--red)', fontWeight: 600 }}>Suspend Account</span>
+                </label>
+              </div>
+            )}
           </div>
           <div className="modal-footer">
             <button type="button" className="btn btn-ghost" onClick={onClose}>Cancel</button>
@@ -136,7 +162,12 @@ export default function UsersPage() {
                   <td style={{ fontWeight: 600 }}>{u.name}</td>
                   <td style={{ color: 'var(--text-muted)', fontFamily: 'monospace' }}>{u.username}</td>
                   <td>{roleChip(u.role)}</td>
-                  <td>{u.isActive ? <span className="badge badge-green">Active</span> : <span className="badge badge-red">Inactive</span>}</td>
+                  <td>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                      {u.isActive ? <span className="badge badge-green">Active</span> : <span className="badge badge-red">Inactive</span>}
+                      {u.isSuspended && <span className="badge badge-red" style={{ background: '#ff3333', color: 'white' }}>Suspended</span>}
+                    </div>
+                  </td>
                   <td style={{ color: 'var(--text-muted)' }}>{u._count?.transactions ?? 0}</td>
                   <td>
                     <div style={{ display: 'flex', gap: 8 }}>
