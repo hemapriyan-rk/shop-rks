@@ -128,8 +128,9 @@ export async function performManualCleanup(endDate: Date, types: string[]) {
 
 export function initCronJobs() {
   // ── Render Anti-Sleep Ping ──
-  // Runs every 10 minutes to prevent Render free-tier from spinning down
-  cron.schedule('*/10 * * * *', async () => {
+  // Runs every 10 minutes ONLY between 8 AM and 8 PM (IST)
+  // Conserves Render free hours (uses ~400 hours/month instead of 744 hours/month)
+  cron.schedule('*/10 8-20 * * *', async () => {
     try {
       const pingUrl = process.env.RENDER_EXTERNAL_URL 
         ? `${process.env.RENDER_EXTERNAL_URL}/api/health`
@@ -144,6 +145,8 @@ export function initCronJobs() {
     } catch (err) {
       console.error('[Anti-Sleep] Failed to ping self:', err);
     }
+  }, {
+    timezone: "Asia/Kolkata"
   });
 
   // Run daily at 1:00 AM IST
