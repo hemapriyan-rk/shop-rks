@@ -63,8 +63,10 @@ export const createUserSchema = z.object({
     .min(3, 'Username must be at least 3 characters')
     .regex(/^[a-z0-9_]+$/, 'Username: lowercase letters, numbers, underscores only'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
-  role: z.enum(['USER', 'ADMIN', 'SUPER_ADMIN']),
+  role: z.enum(['USER', 'MANAGER', 'ADMIN', 'SUPER_ADMIN', 'CUSTOM']),
+  customRoleId: z.string().optional().nullable(),
   isActive: z.boolean().optional().default(true),
+  isSuspended: z.boolean().optional().default(false),
 });
 
 export const updateUserSchema = createUserSchema
