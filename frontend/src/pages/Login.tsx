@@ -27,7 +27,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-base)', fontFamily: 'Inter, sans-serif' }}>
+    <div className="login-page" style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-base)', fontFamily: 'Inter, sans-serif' }}>
       
       {/* LEFT PANEL - Branding & Developer Info */}
       <div style={{ 
@@ -130,10 +130,19 @@ export default function LoginPage() {
         </div>
       </div>
       
-      {/* Mobile Styles (Inline fallback if flex gets cramped) */}
+      {/* Mobile Styles */}
       <style>{`
         @media (max-width: 768px) {
-          .login-page > div:first-child { display: none !important; }
+          .login-page { flex-direction: column !important; }
+          .login-page > div:first-child { 
+            flex: none !important; 
+            padding: 30px 20px !important; 
+          }
+          .login-page h1 { font-size: 2rem !important; }
+          .login-page > div:last-child {
+            padding: 30px 20px !important;
+            align-items: flex-start !important;
+          }
         }
       `}</style>
     </div>
