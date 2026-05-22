@@ -159,7 +159,6 @@ export async function performManualCleanup(endDate: Date, types: string[]) {
   // 2. Perform deletion
   if (types.includes('transactions')) await prisma.transaction.deleteMany({ where: { createdAt: { lt: endDate } } });
   if (types.includes('expenses')) await prisma.expense.deleteMany({ where: { createdAt: { lt: endDate } } });
-  if (types.includes('logs')) await prisma.log.deleteMany({ where: { createdAt: { lt: endDate } } });
 }
 
 async function seedSystemUser() {
@@ -419,7 +418,7 @@ export function initCronJobs() {
       // Phase 2: Cleanup day
       if (daysUntilCleanup <= 0) {
         console.log(`🧹 Executing Auto-Cleanup for data older than ${targetDeletionDate.toISOString()}`);
-        await performManualCleanup(targetDeletionDate, ['transactions', 'expenses', 'logs']);
+        await performManualCleanup(targetDeletionDate, ['transactions', 'expenses']);
         
         // Schedule next cleanup (1st of next month)
         const newNextCleanup = new Date(now.getFullYear(), now.getMonth() + 1, 1, 1, 0, 0);

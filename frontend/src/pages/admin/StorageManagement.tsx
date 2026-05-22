@@ -9,7 +9,7 @@ export default function StorageManagement() {
   
   // Manual Cleanup State
   const [manualDate, setManualDate] = useState('');
-  const [cleanupTypes, setCleanupTypes] = useState<string[]>(['logs']);
+  const [cleanupTypes, setCleanupTypes] = useState<string[]>(['transactions', 'expenses']);
   const [cleaning, setCleaning] = useState(false);
 
   // Auto Cleanup Config State
@@ -168,9 +168,6 @@ export default function StorageManagement() {
                   </label>
                   <label style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                     <input type="checkbox" checked={cleanupTypes.includes('expenses')} onChange={() => toggleType('expenses')} /> Expenses
-                  </label>
-                  <label style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                    <input type="checkbox" checked={cleanupTypes.includes('logs')} onChange={() => toggleType('logs')} /> Audit Logs
                   </label>
                 </div>
               </div>
