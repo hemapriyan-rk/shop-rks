@@ -128,9 +128,9 @@ export async function performManualCleanup(endDate: Date, types: string[]) {
 
 export function initCronJobs() {
   // ── Render Anti-Sleep Ping ──
-  // Runs every 10 minutes ONLY between 8 AM and 8 PM (IST), Monday through Saturday
-  // Conserves Render free hours (uses ~346 hours/month instead of 744 hours/month)
-  cron.schedule('*/10 8-20 * * 1-6', async () => {
+  // Runs every 10 minutes ONLY between 6 AM and 8 PM (IST), Monday through Saturday
+  // Conserves Render free hours (uses ~390 hours/month instead of 744 hours/month)
+  cron.schedule('*/10 6-20 * * 1-6', async () => {
     try {
       const pingUrl = process.env.RENDER_EXTERNAL_URL 
         ? `${process.env.RENDER_EXTERNAL_URL}/api/health`
