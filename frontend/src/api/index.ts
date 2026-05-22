@@ -80,12 +80,11 @@ export const banksApi = {
     api.delete<ApiResponse<null>>(`/banks/${id}`),
 };
 
-// ── Analytics ─────────────────────────────────────────────────────
+// ── Analytics ──────────────────────────────────────────────────────
 export const analyticsApi = {
   todaySummary: () => api.get<ApiResponse<TodaySummary>>('/analytics/today-summary'),
-  daily: (date?: string) => api.get<ApiResponse<DailyAnalytics>>('/analytics/daily', { params: { date } }),
-  monthly: (year?: number, month?: number) =>
-    api.get<ApiResponse<MonthlyAnalytics>>('/analytics/monthly', { params: { year, month } }),
+  daily: (date?: string, userId?: string) => api.get<ApiResponse<DailyAnalytics>>('/analytics/daily', { params: { date, userId } }),
+  monthly: (year?: number, month?: number, userId?: string) => api.get<ApiResponse<MonthlyAnalytics>>('/analytics/monthly', { params: { year, month, userId } }),
   manualAdjust: (data: { date: string, type: 'INCOME' | 'EXPENSE', amount: number, note?: string }) =>
     api.post<ApiResponse<any>>('/analytics/adjust', data),
 };

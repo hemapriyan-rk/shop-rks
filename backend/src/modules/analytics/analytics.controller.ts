@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../../config/prisma';
+import { Prisma } from '@prisma/client';
 import { isAdminOrAbove } from '../../middleware/auth';
 import { getISTDayBounds, getISTMonthBounds, toISTDateString } from '../../utils/time';
 import { sendSuccess } from '../../utils/response';
@@ -71,23 +72,26 @@ export async function getDailyAnalytics(req: Request, res: Response, next: NextF
   try {
     const targetDate = (req.query.date as string) || toISTDateString();
     const { start, end } = getISTDayBounds(targetDate);
+    const isAdmin = isAdminOrAbove(req.user!, 'analytics');
+    const targetUserId = isAdmin && req.query.userId ? (req.query.userId as string) : undefined;
+    const userIdFilter = targetUserId ? { userId: targetUserId } : {};
 
     const [txGroups, expAgg, topServices, userBreakdown] = await Promise.all([
       prisma.transaction.groupBy({
         by: ['paymentMethod'],
-        where: { createdAt: { gte: start, lte: end } },
+        where: { createdAt: { gte: start, lte: end }, ...userIdFilter },
         _sum: { totalPrice: true },
         _count: true,
       }),
       prisma.expense.aggregate({
-        where: { createdAt: { gte: start, lte: end }, status: 'APPROVED' },
+        where: { createdAt: { gte: start, lte: end }, status: 'APPROVED', ...userIdFilter },
         _sum: { amount: true },
         _count: true,
       }),
       // Top services by revenue
       prisma.transaction.groupBy({
         by: ['serviceId'],
-        where: { createdAt: { gte: start, lte: end } },
+        where: { createdAt: { gte: start, lte: end }, ...userIdFilter },
         _sum: { totalPrice: true },
         _count: true,
         orderBy: { _sum: { totalPrice: 'desc' } },
@@ -96,7 +100,7 @@ export async function getDailyAnalytics(req: Request, res: Response, next: NextF
       // Per-user breakdown
       prisma.transaction.groupBy({
         by: ['userId'],
-        where: { createdAt: { gte: start, lte: end } },
+        where: { createdAt: { gte: start, lte: end }, ...userIdFilter },
         _sum: { totalPrice: true },
         _count: true,
         orderBy: { _sum: { totalPrice: 'desc' } },
@@ -122,7 +126,7 @@ export async function getDailyAnalytics(req: Request, res: Response, next: NextF
     // Expense categories breakdown
     const expenseCategories = await prisma.expense.groupBy({
       by: ['category'],
-      where: { createdAt: { gte: start, lte: end }, status: 'APPROVED' },
+      where: { createdAt: { gte: start, lte: end }, status: 'APPROVED', ...userIdFilter },
       _sum: { amount: true },
     });
 
@@ -192,16 +196,19 @@ export async function getMonthlyAnalytics(req: Request, res: Response, next: Nex
     const month = parseInt((req.query.month as string) || String(now.getMonth() + 1));
 
     const { start, end } = getISTMonthBounds(year, month);
+    const isAdmin = isAdminOrAbove(req.user!, 'analytics');
+    const targetUserId = isAdmin && req.query.userId ? (req.query.userId as string) : undefined;
+    const userIdFilter = targetUserId ? { userId: targetUserId } : {};
 
     const [txGroups, expAgg] = await Promise.all([
       prisma.transaction.groupBy({
         by: ['paymentMethod'],
-        where: { createdAt: { gte: start, lte: end } },
+        where: { createdAt: { gte: start, lte: end }, ...userIdFilter },
         _sum: { totalPrice: true },
         _count: true,
       }),
       prisma.expense.aggregate({
-        where: { createdAt: { gte: start, lte: end }, status: 'APPROVED' },
+        where: { createdAt: { gte: start, lte: end }, status: 'APPROVED', ...userIdFilter },
         _sum: { amount: true },
         _count: true,
       }),
@@ -221,6 +228,7 @@ export async function getMonthlyAnalytics(req: Request, res: Response, next: Nex
         COUNT(*)::bigint as count
       FROM transactions
       WHERE created_at >= ${start} AND created_at <= ${end}
+      ${targetUserId ? Prisma.sql`AND user_id = ${targetUserId}` : Prisma.empty}
       GROUP BY day
       ORDER BY day ASC
     `;
@@ -234,6 +242,7 @@ export async function getMonthlyAnalytics(req: Request, res: Response, next: Nex
       FROM expenses
       WHERE created_at >= ${start} AND created_at <= ${end}
         AND status = 'APPROVED'
+        ${targetUserId ? Prisma.sql`AND user_id = ${targetUserId}` : Prisma.empty}
       GROUP BY day
       ORDER BY day ASC
     `;

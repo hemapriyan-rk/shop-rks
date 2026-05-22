@@ -45,6 +45,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
   const superNav: NavItem[] = [
     { icon: '👥', labelKey: 'nav.users', path: '/users' },
+    { icon: '📊', labelKey: 'User Perf', path: '/admin/user-performance' },
     { icon: '🔐', labelKey: 'Roles', path: '/admin/roles' },
     { icon: '🖥', labelKey: 'nav.serverMgmt', path: '/admin/system' },
     { icon: '⚙️', labelKey: 'Auto Tx', path: '/admin/auto-transactions' },
