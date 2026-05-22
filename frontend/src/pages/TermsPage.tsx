@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 export default function TermsPage() {
   const [isColorMode, setIsColorMode] = useState(false);
+  const navigate = useNavigate();
 
   const handlePrint = () => {
     window.print();
@@ -16,7 +17,7 @@ export default function TermsPage() {
           <div className="page-header-sub">View and download shop policies and regulations</div>
         </div>
         <div style={{ display: 'flex', gap: 12 }}>
-          <Link to="/" className="btn btn-ghost">← Back</Link>
+          <button onClick={() => navigate(-1)} className="btn btn-ghost">← Back</button>
           <button 
             className="btn btn-ghost" 
             onClick={() => setIsColorMode(!isColorMode)}
