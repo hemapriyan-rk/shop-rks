@@ -54,6 +54,8 @@ export const expensesApi = {
     api.patch<ApiResponse<Expense>>(`/expenses/${id}`, data),
   approve: (id: string, status: 'APPROVED' | 'REJECTED', bankId?: string) =>
     api.patch<ApiResponse<Expense>>(`/expenses/${id}/approve`, { status, bankId }),
+  paySalary: (data: { staffName: string, amount: number, note?: string, bankId: string }) => 
+    api.post<ApiResponse<Expense>>('/expenses/salary', data),
   delete: (id: string) => api.delete<ApiResponse<null>>(`/expenses/${id}`),
 };
 
@@ -83,6 +85,8 @@ export const analyticsApi = {
   daily: (date?: string) => api.get<ApiResponse<DailyAnalytics>>('/analytics/daily', { params: { date } }),
   monthly: (year?: number, month?: number) =>
     api.get<ApiResponse<MonthlyAnalytics>>('/analytics/monthly', { params: { year, month } }),
+  manualAdjust: (data: { date: string, type: 'INCOME' | 'EXPENSE', amount: number, note?: string }) =>
+    api.post<ApiResponse<any>>('/analytics/adjust', data),
 };
 
 // ── Logs ──────────────────────────────────────────────────────────

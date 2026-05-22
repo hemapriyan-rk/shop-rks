@@ -24,6 +24,8 @@ import ManageExpenseCategories from './pages/admin/ManageExpenseCategories';
 import StorageManagement from './pages/admin/StorageManagement';
 import DataExports from './pages/admin/DataExports';
 import MaintenancePage from './pages/Maintenance';
+import SalaryPage from './pages/admin/SalaryPage';
+import IncomeManagementPage from './pages/admin/IncomeManagementPage';
 
 export default function App() {
   return (
@@ -54,6 +56,7 @@ export default function App() {
             <Route path="/admin/expenses" element={<AdminExpenses />} />
             <Route path="/logs" element={<LogsPage />} />
             <Route path="/admin/expense-categories" element={<ManageExpenseCategories />} />
+            <Route path="/admin/salary" element={<SalaryPage />} />
             <Route path="/admin/exports" element={<DataExports />} />
           </Route>
 
@@ -62,6 +65,7 @@ export default function App() {
             <Route path="/users" element={<UsersPage />} />
             <Route path="/admin/system" element={<ServerManagement />} />
             <Route path="/admin/storage" element={<StorageManagement />} />
+            <Route path="/admin/income-management" element={<IncomeManagementPage />} />
           </Route>
 
           <Route path="/maintenance" element={<MaintenancePage />} />

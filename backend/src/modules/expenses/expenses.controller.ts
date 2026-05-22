@@ -245,3 +245,83 @@ export async function deleteExpense(req: Request, res: Response, next: NextFunct
     sendSuccess(res, null, 200, undefined, 'Expense deleted');
   } catch (err) { next(err); }
 }
+
+export async function paySalary(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { staffName, amount, note, bankId } = req.body;
+    const isSuperAdmin = req.user!.role === 'SUPER_ADMIN';
+
+    if (!bankId) {
+      sendError(res, 'Please select a bank account to deduct the salary from.', 400);
+      return;
+    }
+
+    const now = new Date();
+    // Use IST date logic
+    const istOffset = 5.5 * 60 * 60 * 1000;
+    const istNow = new Date(now.getTime() + istOffset);
+    const day = istNow.getUTCDate();
+
+    if (day > 5 && !isSuperAdmin) {
+      sendForbidden(res, 'Salaries can only be processed between the 1st and 5th of the month.');
+      return;
+    }
+
+    // Get the last day of the previous month
+    // Example: if today is June 3rd, month is 5 (0-indexed).
+    // new Date(UTCYear, UTCMonth, 0) gives the last day of the previous month!
+    const previousMonthLastDay = new Date(Date.UTC(istNow.getUTCFullYear(), istNow.getUTCMonth(), 0, 23, 59, 59));
+
+    const bank = await prisma.bankAccount.findUnique({ where: { id: bankId } });
+    if (!bank) { sendError(res, 'Selected bank account not found', 400); return; }
+    if (Number(bank.balance) < amount) {
+      sendError(res, `Insufficient balance in ${bank.name}. Available: ₹${Number(bank.balance).toFixed(2)}`, 400);
+      return;
+    }
+
+    const result = await prisma.$transaction(async (tx) => {
+      const expense = await tx.expense.create({
+        data: { 
+          userId: req.user!.userId, 
+          amount, 
+          category: 'Salary', 
+          note: `Salary for ${staffName}${note ? ' - ' + note : ''}`, 
+          status: 'APPROVED', 
+          bankId,
+          createdAt: previousMonthLastDay // Explicitly backdate to previous month
+        },
+        select: EXP_SELECT,
+      });
+
+      await tx.bankAccount.update({
+        where: { id: bankId },
+        data: { balance: { decrement: amount } },
+      });
+
+      return expense;
+    });
+
+    await prisma.log.create({
+      data: {
+        userId: req.user!.userId,
+        action: 'CREATE',
+        tableName: 'expenses',
+        recordId: result.id,
+        newValue: { amount, category: 'Salary', status: 'APPROVED', bankId } as any,
+        createdAt: previousMonthLastDay // Backdate log too? Or keep it current? Keep current makes sense, but backdating prevents it from being purged early if the log is retained for X days. Let's keep it current.
+      },
+    });
+
+    await prisma.log.create({
+      data: {
+        userId: req.user!.userId,
+        action: 'UPDATE',
+        tableName: 'bank_accounts',
+        recordId: bankId,
+        newValue: { action: 'EXPENSE_DEDUCTION', amount, category: 'Salary', expenseId: result.id } as any,
+      }
+    });
+
+    sendSuccess(res, result, 200, undefined, `Salary processed for ${staffName}`);
+  } catch (err) { next(err); }
+}

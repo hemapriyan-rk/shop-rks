@@ -317,3 +317,68 @@ export async function getMonthlyAnalytics(req: Request, res: Response, next: Nex
     });
   } catch (err) { next(err); }
 }
+
+export async function manualAdjust(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { date, type, amount, note } = req.body;
+    
+    if (req.user!.role !== 'SUPER_ADMIN') {
+      sendSuccess(res, null, 403, undefined, 'Only Super Admin can do this');
+      return;
+    }
+
+    if (!date || !type || !amount || amount <= 0) {
+      sendSuccess(res, null, 400, undefined, 'Missing required fields or invalid amount');
+      return;
+    }
+
+    // Set the time to 12:00 PM on that date to ensure it falls safely in that day
+    const [year, month, day] = date.split('-');
+    const adjustedDate = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day), 12, 0, 0));
+
+    let result;
+    if (type === 'INCOME') {
+      // Find a dummy service or create an arbitrary record
+      const defaultService = await prisma.service.findFirst({ where: { name: 'Others' } });
+      result = await prisma.transaction.create({
+        data: {
+          userId: req.user!.userId,
+          serviceId: defaultService?.id || '',
+          serviceName: 'Manual Adjustment',
+          quantity: 1,
+          unitPrice: amount,
+          totalPrice: amount,
+          paymentMethod: 'OTHER',
+          notes: note || 'SuperAdmin Manual Income Adjustment',
+          createdAt: adjustedDate
+        }
+      });
+    } else if (type === 'EXPENSE') {
+      result = await prisma.expense.create({
+        data: {
+          userId: req.user!.userId,
+          amount,
+          category: 'Manual Adjustment',
+          note: note || 'SuperAdmin Manual Expense Adjustment',
+          status: 'APPROVED',
+          createdAt: adjustedDate
+        }
+      });
+    } else {
+      sendSuccess(res, null, 400, undefined, 'Invalid type');
+      return;
+    }
+
+    await prisma.log.create({
+      data: {
+        userId: req.user!.userId,
+        action: 'CREATE',
+        tableName: type === 'INCOME' ? 'transactions' : 'expenses',
+        recordId: result.id,
+        newValue: { action: 'MANUAL_ANALYTICS_ADJUSTMENT', type, amount, note, adjustedDate } as any,
+      }
+    });
+
+    sendSuccess(res, result, 200, undefined, `${type} adjustment applied successfully to ${date}`);
+  } catch (err) { next(err); }
+}

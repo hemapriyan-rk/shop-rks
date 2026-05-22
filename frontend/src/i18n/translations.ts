@@ -16,8 +16,9 @@ export const translations = {
     'nav.auditLogs': 'Audit Logs',
     'nav.serverMgmt': 'Server Management',
     'nav.storageMgmt': 'Storage Mgmt',
-    'nav.dataExports': 'Data Exports',
     'nav.expenseCats': 'Expense Categories',
+    'nav.salary': 'Staff Salary',
+    'nav.incomeMgmt': 'Income Mgmt',
     'nav.logout': 'Logout',
     
     // Topbar
@@ -100,6 +101,8 @@ export const translations = {
     'nav.storageMgmt': 'சேமிப்பு மேலாண்மை',
     'nav.dataExports': 'தரவு ஏற்றுமதி',
     'nav.expenseCats': 'செலவு வகைகள்',
+    'nav.salary': 'பணியாளர் சம்பளம்',
+    'nav.incomeMgmt': 'வருமான மேலாண்மை',
     'nav.logout': 'வெளியேறு',
     
     // Topbar
