@@ -287,6 +287,12 @@ img { max-width: 100%; display: block; }
   border: 2px solid rgba(239,68,68,0.2);
 }
 .btn-danger:hover:not(:disabled) { background: var(--red); color: #fff; }
+.btn-warning {
+  background: var(--yellow-dim);
+  color: var(--yellow);
+  border: 2px solid rgba(245, 158, 11, 0.2);
+}
+.btn-warning:hover:not(:disabled) { background: var(--yellow); color: #000; }
 .btn-success {
   background: var(--green-dim);
   color: var(--green);

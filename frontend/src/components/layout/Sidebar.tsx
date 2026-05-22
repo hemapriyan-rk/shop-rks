@@ -37,6 +37,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     { icon: '🏷', labelKey: 'nav.expenseCats', path: '/admin/expense-categories' },
     { icon: '💼', labelKey: 'nav.salary', path: '/admin/salary' },
     { icon: '📜', labelKey: 'nav.auditLogs', path: '/logs' },
+    { icon: '📄', labelKey: 'nav.billLogs', path: '/admin/bill-logs' },
     { icon: '📦', labelKey: 'nav.dataExports', path: '/admin/exports' },
   ];
 

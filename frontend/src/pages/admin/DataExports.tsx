@@ -37,15 +37,18 @@ export default function DataExports() {
 
   return (
     <Layout title="Data Exports & Archives">
-      <div className="container" style={{ maxWidth: 1000 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-          <h2>Data Exports & Archives</h2>
-          <button className="btn btn-outline" onClick={fetchExports} disabled={loading}>
-            {loading ? 'Refreshing...' : 'Refresh List'}
-          </button>
+      <div className="page-header">
+        <div>
+          <div className="page-header-title">Data Exports & Archives</div>
+          <div className="page-header-sub">Download your generated Excel reports before they expire</div>
         </div>
+        <button className="btn btn-ghost" onClick={fetchExports} disabled={loading}>
+          {loading ? 'Refreshing...' : '🔄 Refresh List'}
+        </button>
+      </div>
 
-        <div className="card" style={{ marginBottom: 24, background: 'var(--bg-elevated)', border: '1px solid var(--border-color)' }}>
+      <div style={{ maxWidth: 1000, margin: '0 auto' }}>
+        <div className="alert alert-info" style={{ marginBottom: 24 }}>
           <p style={{ margin: 0, fontSize: 14 }}>
             <strong>Note:</strong> Auto-cleanup generates Excel archives 5 days before deletion. These files expire and are permanently deleted 2 days after the cleanup executes. Please download them while they are available.
           </p>
@@ -58,8 +61,8 @@ export default function DataExports() {
         )}
 
         {exports.length > 0 && (
-          <div className="card" style={{ overflowX: 'auto' }}>
-            <table className="table">
+          <div className="table-wrapper">
+            <table>
               <thead>
                 <tr>
                   <th>File Name</th>
@@ -79,12 +82,12 @@ export default function DataExports() {
                       <td>{new Date(exp.createdAt).toLocaleString()}</td>
                       <td>{new Date(exp.scheduledFor).toLocaleDateString()}</td>
                       <td>
-                        <span style={{ color: isExpired ? 'var(--color-danger)' : 'var(--color-warning)' }}>
+                        <span style={{ color: isExpired ? 'var(--red)' : 'var(--yellow)', fontWeight: 600 }}>
                           {new Date(exp.expiresAt).toLocaleString()}
                         </span>
                       </td>
                       <td>
-                        <span className={`badge ${isExpired ? 'badge-danger' : 'badge-success'}`}>
+                        <span className={`badge ${isExpired ? 'badge-red' : 'badge-green'}`}>
                           {isExpired ? 'EXPIRED' : exp.status}
                         </span>
                       </td>
@@ -94,7 +97,7 @@ export default function DataExports() {
                           disabled={isExpired}
                           onClick={() => downloadFile(exp.id, exp.fileName)}
                         >
-                          ⬇ Download Excel
+                          ⬇ Download
                         </button>
                       </td>
                     </tr>

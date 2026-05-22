@@ -18,6 +18,7 @@ import LogsPage from './pages/logs/LogsPage';
 import ProfilePage from './pages/Profile';
 import AdminTransactions from './pages/admin/AdminTransactions';
 import AdminExpenses from './pages/admin/AdminExpenses';
+import BillLogsPage from './pages/logs/BillLogsPage';
 import BanksPage from './pages/banks/BanksPage';
 import BankConfig from './pages/admin/BankConfig';
 import ServerManagement from './pages/admin/ServerManagement';
@@ -57,6 +58,7 @@ export default function App() {
             <Route path="/admin/transactions" element={<AdminTransactions />} />
             <Route path="/admin/expenses" element={<AdminExpenses />} />
             <Route path="/logs" element={<LogsPage />} />
+            <Route path="/admin/bill-logs" element={<BillLogsPage />} />
             <Route path="/admin/expense-categories" element={<ManageExpenseCategories />} />
             <Route path="/admin/salary" element={<SalaryPage />} />
             <Route path="/admin/exports" element={<DataExports />} />
