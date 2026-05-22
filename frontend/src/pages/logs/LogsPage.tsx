@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Layout from '../../components/layout/Layout';
-import { logsApi } from '../../api';
-import type { Log } from '../../types';
+import { logsApi, usersApi } from '../../api';
+import type { Log, User } from '../../types';
 
 const actionBadge = (a: string) => {
   const cls = a === 'CREATE' ? 'badge-green' : a === 'DELETE' ? 'badge-red' : 'badge-yellow';
@@ -13,7 +13,8 @@ export default function LogsPage() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
-  const [filter, setFilter] = useState({ action: '', tableName: '', date: '' });
+  const [filter, setFilter] = useState({ action: '', tableName: '', date: '', userId: '' });
+  const [users, setUsers] = useState<User[]>([]);
   const [cleaning, setCleaning] = useState(false);
   const [msg, setMsg] = useState('');
   const LIMIT = 50;
@@ -24,6 +25,10 @@ export default function LogsPage() {
       .then(r => { setLogs(r.data.data ?? []); setTotal(r.data.meta?.total ?? 0); })
       .finally(() => setLoading(false));
   };
+
+  useEffect(() => {
+    usersApi.list().then(r => setUsers(r.data.data || []));
+  }, []);
 
   useEffect(() => { load(); }, [page, filter]);
 
@@ -74,10 +79,15 @@ export default function LogsPage() {
           <option value="transactions">Transactions</option>
           <option value="expenses">Expenses</option>
           <option value="bank_accounts">Bank Accounts</option>
+          <option value="auto_transactions">Auto Transactions</option>
           <option value="services">Services</option>
           <option value="users">Users</option>
         </select>
-        <button className="btn btn-ghost" onClick={() => setFilter({ action: '', tableName: '', date: '' })}>Clear</button>
+        <select className="form-select" style={{ width: 150 }} value={filter.userId} onChange={e => { setFilter(f => ({ ...f, userId: e.target.value })); setPage(1); }}>
+          <option value="">All Users</option>
+          {users.map(u => <option key={u.id} value={u.id}>{u.name} ({u.username})</option>)}
+        </select>
+        <button className="btn btn-ghost" onClick={() => setFilter({ action: '', tableName: '', date: '', userId: '' })}>Clear</button>
       </div>
 
       {loading ? <div className="page-loading"><div className="spinner spinner-lg" /></div> : logs.length === 0 ? (

@@ -20,6 +20,7 @@ import LogsPage from './pages/logs/LogsPage';
 import ProfilePage from './pages/Profile';
 import AdminTransactions from './pages/admin/AdminTransactions';
 import AdminExpenses from './pages/admin/AdminExpenses';
+import AutomaticTransactionsPage from './pages/admin/AutomaticTransactionsPage';
 import BillLogsPage from './pages/logs/BillLogsPage';
 import BanksPage from './pages/banks/BanksPage';
 import BankConfig from './pages/admin/BankConfig';
@@ -92,6 +93,7 @@ export default function App() {
             <Route path="/admin/system" element={<ServerManagement />} />
             <Route path="/admin/render" element={<RenderMaintenancePage />} />
             <Route path="/admin/storage" element={<StorageManagement />} />
+            <Route path="/admin/auto-transactions" element={<AutomaticTransactionsPage />} />
             <Route path="/admin/income-management" element={<IncomeManagementPage />} />
           </Route>
 

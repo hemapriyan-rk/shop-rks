@@ -121,6 +121,7 @@ export const systemApi = {
   getStorageStats: () => api.get<ApiResponse<{ tables: any[], totalBytes: number, totalMb: string }>>('/system/storage'),
   manualCleanup: (endDate: string, types: string[]) => api.post<ApiResponse<null>>('/system/cleanup', { endDate, types }),
   logBill: (data: { customerName: string, total: number, items: any[], date: string }) => api.post<ApiResponse<null>>('/system/log-bill', data),
+  getAutoTransactions: (params?: { page?: number; limit?: number; date?: string; type?: string }) => api.get<ApiResponse<any[]>>('/system/auto-transactions', { params }),
 };
 
 // ── Exports ───────────────────────────────────────────────────────

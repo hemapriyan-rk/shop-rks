@@ -47,6 +47,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     { icon: '👥', labelKey: 'nav.users', path: '/users' },
     { icon: '🔐', labelKey: 'Roles', path: '/admin/roles' },
     { icon: '🖥', labelKey: 'nav.serverMgmt', path: '/admin/system' },
+    { icon: '⚙️', labelKey: 'Auto Tx', path: '/admin/auto-transactions' },
     { icon: '☁️', labelKey: 'nav.renderMgmt', path: '/admin/render' },
     { icon: '💾', labelKey: 'nav.storageMgmt', path: '/admin/storage' },
     { icon: '📈', labelKey: 'nav.incomeMgmt', path: '/admin/income-management' },

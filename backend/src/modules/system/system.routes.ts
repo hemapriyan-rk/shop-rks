@@ -25,6 +25,9 @@ router.post('/cleanup', authenticate, requireRole(['SUPER_ADMIN']), controller.m
 router.get('/exports', authenticate, requireRole(['ADMIN', 'SUPER_ADMIN']), controller.listExports);
 router.get('/exports/:id/download', authenticate, requireRole(['ADMIN', 'SUPER_ADMIN']), controller.downloadExport);
 
+// Automatic Transactions — Admin & Super Admin
+router.get('/auto-transactions', authenticate, requireRole(['ADMIN', 'SUPER_ADMIN']), controller.getAutoTransactions);
+
 // Billing Log - All Authenticated Users
 router.post('/log-bill', authenticate, controller.logBill);
 

@@ -126,7 +126,33 @@ export async function performManualCleanup(endDate: Date, types: string[]) {
   if (types.includes('logs')) await prisma.log.deleteMany({ where: { createdAt: { lt: endDate } } });
 }
 
+async function seedSystemUser() {
+  try {
+    let sysUser = await prisma.user.findUnique({ where: { username: 'SYSTEM_AUTO' } });
+    if (!sysUser) {
+      const bcrypt = require('bcryptjs');
+      const hash = await bcrypt.hash('system_auto_do_not_login', 10);
+      sysUser = await prisma.user.create({
+        data: {
+          name: 'System Auto',
+          username: 'SYSTEM_AUTO',
+          passwordHash: hash,
+          role: 'SUPER_ADMIN',
+          isActive: true
+        }
+      });
+      console.log('✅ SYSTEM_AUTO user created for audit logs.');
+    }
+    return sysUser;
+  } catch (err) {
+    console.error('Failed to seed SYSTEM_AUTO user:', err);
+    return null;
+  }
+}
+
 export function initCronJobs() {
+  seedSystemUser();
+
   // ── Render Anti-Sleep Ping ──
   // Runs every 10 minutes ONLY between 6 AM and 8 PM (IST), Monday through Saturday
   // Conserves Render free hours (uses ~390 hours/month instead of 744 hours/month)
@@ -148,6 +174,146 @@ export function initCronJobs() {
   }, {
     timezone: "Asia/Kolkata"
   });
+
+  // ── Automatic Transactions (Bank Reconciliation) ──
+  // Cash & Shop-Xerox -> CASH-BALANCE (Runs every day at 8:00 PM IST)
+  cron.schedule('0 20 * * *', async () => {
+    console.log('🕒 Running Cash Reconciliation Job...');
+    try {
+      const sysUser = await prisma.user.findUnique({ where: { username: 'SYSTEM_AUTO' } });
+      if (!sysUser) return;
+
+      const dateStr = new Date().toISOString().split('T')[0];
+      const start = new Date(`${dateStr}T00:00:00+05:30`);
+      const end = new Date(`${dateStr}T23:59:59.999+05:30`);
+
+      // Check if already run for today
+      const existing = await prisma.autoTransaction.findFirst({
+        where: { type: 'CASH_RECONCILIATION', date: start }
+      });
+      if (existing) {
+        console.log('Cash Reconciliation already ran for today. Skipping.');
+        return;
+      }
+
+      // Calculate Cash & Shop-Xerox Income
+      const txs = await prisma.transaction.aggregate({
+        where: {
+          createdAt: { gte: start, lte: end },
+          paymentMethod: { in: ['CASH', 'SHOP_XEROX'] }
+        },
+        _sum: { totalPrice: true }
+      });
+
+      const totalCash = Number(txs._sum.totalPrice || 0);
+
+      // Add to CASH-BALANCE
+      let cashBank = await prisma.bankAccount.findUnique({ where: { name: 'CASH-BALANCE' } });
+      if (!cashBank) {
+        cashBank = await prisma.bankAccount.create({ data: { name: 'CASH-BALANCE', isCash: true, balance: 0 } });
+      }
+
+      const updatedBank = await prisma.bankAccount.update({
+        where: { id: cashBank.id },
+        data: { balance: { increment: totalCash } }
+      });
+
+      // Record AutoTransaction
+      const autoTx = await prisma.autoTransaction.create({
+        data: {
+          type: 'CASH_RECONCILIATION',
+          amount: totalCash,
+          date: start,
+          bankName: 'CASH-BALANCE'
+        }
+      });
+
+      // Log it
+      await prisma.log.create({
+        data: {
+          userId: sysUser.id,
+          action: 'CREATE',
+          tableName: 'auto_transactions',
+          recordId: autoTx.id,
+          newValue: JSON.parse(JSON.stringify(autoTx))
+        }
+      });
+
+      console.log(`✅ Cash Reconciliation complete. Added ₹${totalCash} to CASH-BALANCE.`);
+    } catch (err) {
+      console.error('Failed to run Cash Reconciliation:', err);
+    }
+  }, { timezone: "Asia/Kolkata" });
+
+
+  // Online -> CANARA BANK (Runs every day at 11:59 PM IST)
+  cron.schedule('59 23 * * *', async () => {
+    console.log('🕒 Running Online Reconciliation Job...');
+    try {
+      const sysUser = await prisma.user.findUnique({ where: { username: 'SYSTEM_AUTO' } });
+      if (!sysUser) return;
+
+      const dateStr = new Date().toISOString().split('T')[0];
+      const start = new Date(`${dateStr}T00:00:00+05:30`);
+      const end = new Date(`${dateStr}T23:59:59.999+05:30`);
+
+      // Check if already run for today
+      const existing = await prisma.autoTransaction.findFirst({
+        where: { type: 'ONLINE_RECONCILIATION', date: start }
+      });
+      if (existing) {
+        console.log('Online Reconciliation already ran for today. Skipping.');
+        return;
+      }
+
+      // Calculate Online Income
+      const txs = await prisma.transaction.aggregate({
+        where: {
+          createdAt: { gte: start, lte: end },
+          paymentMethod: 'ONLINE'
+        },
+        _sum: { totalPrice: true }
+      });
+
+      const totalOnline = Number(txs._sum.totalPrice || 0);
+
+      // Add to CANARA BANK
+      let canaraBank = await prisma.bankAccount.findUnique({ where: { name: 'CANARA BANK' } });
+      if (!canaraBank) {
+        canaraBank = await prisma.bankAccount.create({ data: { name: 'CANARA BANK', isCash: false, balance: 0 } });
+      }
+
+      const updatedBank = await prisma.bankAccount.update({
+        where: { id: canaraBank.id },
+        data: { balance: { increment: totalOnline } }
+      });
+
+      // Record AutoTransaction
+      const autoTx = await prisma.autoTransaction.create({
+        data: {
+          type: 'ONLINE_RECONCILIATION',
+          amount: totalOnline,
+          date: start,
+          bankName: 'CANARA BANK'
+        }
+      });
+
+      // Log it
+      await prisma.log.create({
+        data: {
+          userId: sysUser.id,
+          action: 'CREATE',
+          tableName: 'auto_transactions',
+          recordId: autoTx.id,
+          newValue: JSON.parse(JSON.stringify(autoTx))
+        }
+      });
+
+      console.log(`✅ Online Reconciliation complete. Added ₹${totalOnline} to CANARA BANK.`);
+    } catch (err) {
+      console.error('Failed to run Online Reconciliation:', err);
+    }
+  }, { timezone: "Asia/Kolkata" });
 
   // Run daily at 1:00 AM IST
   cron.schedule('0 1 * * *', async () => {

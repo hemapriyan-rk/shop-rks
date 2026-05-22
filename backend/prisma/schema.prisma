@@ -281,3 +281,18 @@ model DailyAnalyticsSnapshot {
 
   @@map("daily_analytics_snapshots")
 }
+
+// ─────────────────────────────────────────────────────────
+// SYSTEM AUTOMATIC TRANSACTIONS
+// ─────────────────────────────────────────────────────────
+
+model AutoTransaction {
+  id        String   @id @default(uuid())
+  type      String   // e.g., "CASH_RECONCILIATION", "ONLINE_RECONCILIATION"
+  amount    Decimal  @db.Decimal(12, 2)
+  date      DateTime @db.Date
+  bankName  String   @map("bank_name")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@map("auto_transactions")
+}

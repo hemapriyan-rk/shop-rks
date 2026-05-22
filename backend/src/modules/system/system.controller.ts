@@ -240,3 +240,42 @@ export async function logBill(req: Request, res: Response, next: NextFunction): 
     sendSuccess(res, null, 201, undefined, 'Bill logged successfully');
   } catch (err) { next(err); }
 }
+
+export async function getAutoTransactions(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { date, type, limit = '50', page = '1' } = req.query;
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit as string)));
+    const pageNum = Math.max(1, parseInt(page as string));
+
+    const where: any = {};
+    if (date) {
+      // date is YYYY-MM-DD
+      const targetDate = new Date(`${date}T00:00:00.000Z`);
+      where.date = targetDate;
+    }
+    if (type) where.type = type as string;
+
+    const [transactions, total] = await Promise.all([
+      prisma.autoTransaction.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        take: limitNum,
+        skip: (pageNum - 1) * limitNum,
+      }),
+      prisma.autoTransaction.count({ where })
+    ]);
+
+    res.json({
+      success: true,
+      data: transactions,
+      meta: {
+        total,
+        page: pageNum,
+        limit: limitNum,
+        totalPages: Math.ceil(total / limitNum)
+      }
+    });
+  } catch (err) {
+    next(err);
+  }
+}
