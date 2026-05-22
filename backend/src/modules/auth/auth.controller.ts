@@ -42,13 +42,17 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
             where: { ipAddress: ip },
             data: { pastBlocks: 2, blockedUntil: new Date(Date.now() + 100 * 365 * 24 * 60 * 60 * 1000) }
           });
+          return `Access permanently blocked from this device due to suspicious activity.`;
         } else {
           await prisma.loginAttempt.update({
             where: { ipAddress: ip },
             data: { pastBlocks: 1, blockedUntil: new Date(Date.now() + 24 * 60 * 60 * 1000) }
           });
+          return `Too many failed attempts. Try again in 24 hours.`;
         }
       }
+      const remaining = 5 - attempt.attempts;
+      return `Invalid credentials. You have ${remaining} attempt(s) left.`;
     };
 
     const user = await prisma.user.findUnique({
@@ -56,8 +60,8 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
     });
 
     if (!user || !user.isActive) {
-      await handleFailedLogin();
-      sendUnauthorized(res, 'Invalid username or password');
+      const msg = await handleFailedLogin();
+      sendUnauthorized(res, msg);
       return;
     }
 
@@ -69,8 +73,8 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
 
     const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
     if (!isPasswordValid) {
-      await handleFailedLogin();
-      sendUnauthorized(res, 'Invalid username or password');
+      const msg = await handleFailedLogin();
+      sendUnauthorized(res, msg);
       return;
     }
 
