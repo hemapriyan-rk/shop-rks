@@ -13,7 +13,7 @@ export async function getTodaySummary(req: Request, res: Response, next: NextFun
   try {
     const today = toISTDateString();
     const { start, end } = getISTDayBounds(today);
-    const isAdmin = isAdminOrAbove(req.user!.role);
+    const isAdmin = isAdminOrAbove(req.user!, 'analytics');
     const userId = isAdmin ? undefined : req.user!.userId;
 
     const [txGroups, expAgg, pendingExpenses] = await Promise.all([

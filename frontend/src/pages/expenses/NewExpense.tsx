@@ -6,7 +6,8 @@ import { useAuth } from '../../context/AuthContext';
 import { BankAccount } from '../../types';
 
 export default function NewExpense() {
-  const { isAdmin } = useAuth();
+  const { hasPermission } = useAuth();
+  const canManage = hasPermission('allRecords', 'write');
   const navigate = useNavigate();
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('');
@@ -20,11 +21,11 @@ export default function NewExpense() {
   const [success, setSuccess] = useState('');
 
   useEffect(() => {
-    if (isAdmin) {
+    if (canManage) {
       banksApi.list().then(r => setBanks(r.data.data ?? []));
     }
     expenseCategoriesApi.list().then(r => setCategories(r.data.data ?? []));
-  }, [isAdmin]);
+  }, [canManage]);
 
   const finalCategory = category === '__custom__' ? customCat : category;
 
@@ -33,16 +34,16 @@ export default function NewExpense() {
     const amt = parseFloat(amount);
     if (!amt || amt <= 0) { setError('Enter a valid amount'); return; }
     if (!finalCategory.trim()) { setError('Category is required'); return; }
-    if (isAdmin && !bankId) { setError('Please select a bank account'); return; }
+    if (canManage && !bankId) { setError('Please select a bank account'); return; }
     setError(''); setSubmitting(true);
     try {
       await expensesApi.create({ 
         amount: amt, 
-        category: finalCategory, 
+        category: finalCategory,
         note: note || undefined,
-        bankId: isAdmin ? bankId : undefined
+        bankId: canManage ? bankId : undefined
       });
-      setSuccess(isAdmin ? 'Expense recorded and deducted from bank!' : 'Expense recorded! Pending admin approval.');
+      setSuccess(canManage ? 'Expense recorded and deducted from bank!' : 'Expense recorded! Pending admin approval.');
       setAmount(''); setCategory(''); setCustomCat(''); setNote(''); setBankId('');
       setTimeout(() => navigate('/expenses'), 2000);
     } catch (err: any) {
@@ -84,7 +85,7 @@ export default function NewExpense() {
                 <input className="form-input" type="text" placeholder="Enter category name" value={customCat} onChange={e => setCustomCat(e.target.value)} />
               </div>
             )}
-            {isAdmin && (
+            {canManage && (
               <div className="form-group">
                 <label className="form-label">Deduct from Bank</label>
                 <select className="form-select" value={bankId} onChange={e => setBankId(e.target.value)} required>

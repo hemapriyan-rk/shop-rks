@@ -10,7 +10,8 @@ function isToday(dateStr: string) {
 }
 
 export default function TransactionsList() {
-  const { isAdmin } = useAuth();
+  const { hasPermission } = useAuth();
+  const canManage = hasPermission('allRecords');
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [date, setDate] = useState(new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' }));
@@ -57,7 +58,7 @@ export default function TransactionsList() {
             <option value="OTHER">Other Only</option>
             <option value="SHOP_XEROX">Shop Xerox Only</option>
           </select>
-          {isAdmin ? (
+          {canManage ? (
             <input type="date" className="form-input" style={{ width: 160 }} value={date} onChange={e => setDate(e.target.value)} max={new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' })} />
           ) : (
             <div className="badge badge-blue" style={{ padding: '8px 12px' }}>Today: {date}</div>
@@ -101,7 +102,7 @@ export default function TransactionsList() {
                       {new Date(t.createdAt).toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit' })}
                     </td>
                     <td>
-                      {isAdmin && editable && (
+                      {canManage && editable && (
                         deleteId === t.id ? (
                           <span>
                             <button className="btn btn-danger btn-sm" onClick={() => handleDelete(t.id)}>Confirm</button>

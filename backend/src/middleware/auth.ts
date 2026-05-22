@@ -174,9 +174,15 @@ export function requireRole(allowedRoles: Role[], requiredModule?: string, requi
 
 /**
  * Checks if user has admin-level access (ADMIN or SUPER_ADMIN)
+ * or if they have custom permission for a specific module.
  */
-export function isAdminOrAbove(role: Role): boolean {
-  return role === 'ADMIN' || role === 'SUPER_ADMIN';
+export function isAdminOrAbove(user: AuthPayload, module?: string): boolean {
+  if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') return true;
+  if (user.role === 'MANAGER' && module && ['services', 'expenseCategories'].includes(module)) return true;
+  if (user.role === 'CUSTOM' && module) {
+    return !!user.customPermissions?.[module]?.read;
+  }
+  return false;
 }
 
 /**

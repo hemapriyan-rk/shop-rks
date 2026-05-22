@@ -23,7 +23,7 @@ export async function getTransactions(req: Request, res: Response, next: NextFun
     const skip = (pageNum - 1) * limitNum;
 
     // USERs can only see their own; ADMIN+ can see all or filter by userId
-    const isAdmin = isAdminOrAbove(req.user!.role);
+    const isAdmin = isAdminOrAbove(req.user!, 'allRecords');
     const filterUserId = isAdmin
       ? (queryUserId as string | undefined)
       : req.user!.userId;
@@ -131,8 +131,8 @@ export async function updateTransaction(req: Request, res: Response, next: NextF
       return;
     }
 
-    // USERs can only edit their own records
-    if (!isAdminOrAbove(req.user!.role) && existing.userId !== req.user!.userId) {
+    // Admins can update anyone's transaction. Users can only update their own if it's today.
+    if (!isAdminOrAbove(req.user!, 'allRecords') && existing.userId !== req.user!.userId) {
       sendForbidden(res, 'You can only edit your own records');
       return;
     }

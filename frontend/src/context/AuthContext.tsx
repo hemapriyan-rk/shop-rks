@@ -16,6 +16,7 @@ interface AuthContextType extends AuthState {
   isAdmin: boolean;
   isSuperAdmin: boolean;
   refreshUser: () => Promise<void>;
+  hasPermission: (module: string, action?: 'read' | 'write') => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -68,6 +69,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const role = state.user?.role ?? null;
 
+  const hasPermission = useCallback((module: string, action: 'read' | 'write' = 'read') => {
+    if (role === 'SUPER_ADMIN' || role === 'ADMIN') return true;
+    if (role === 'MANAGER' && ['services', 'expenseCategories'].includes(module)) return true;
+    if (role === 'CUSTOM') {
+      const perms = state.user?.customPermissions?.[module];
+      return !!(perms && (action === 'read' ? perms.read : perms.write));
+    }
+    return false;
+  }, [role, state.user?.customPermissions]);
+
   return (
     <AuthContext.Provider value={{
       ...state,
@@ -77,6 +88,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isAdmin: role === 'ADMIN' || role === 'SUPER_ADMIN',
       isSuperAdmin: role === 'SUPER_ADMIN',
       refreshUser,
+      hasPermission,
     }}>
       {children}
     </AuthContext.Provider>

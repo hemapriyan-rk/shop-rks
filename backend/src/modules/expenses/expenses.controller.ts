@@ -16,9 +16,9 @@ const EXP_SELECT = {
 
 export async function getExpenses(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { date, status, userId: queryUserId } = req.query;
-    const isAdmin = isAdminOrAbove(req.user!.role);
-    const filterUserId = isAdmin ? (queryUserId as string | undefined) : req.user!.userId;
+    const { date, status } = req.query;
+    const isAdmin = isAdminOrAbove(req.user!, 'allRecords');
+    const filterUserId = isAdmin ? (req.query.userId as string | undefined) : req.user!.userId;
 
     // Regular users can ONLY view today's expenses — ignore any date param they pass
     const targetDate = isAdmin
@@ -44,7 +44,7 @@ export async function getExpenses(req: Request, res: Response, next: NextFunctio
 export async function createExpense(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const { amount, category, note, bankId } = req.body;
-    const isAdmin = isAdminOrAbove(req.user!.role);
+    const isAdmin = isAdminOrAbove(req.user!, 'allRecords');
 
     // Admin/SuperAdmin expenses → APPROVED automatically, deduct from bank
     // User expenses → PENDING, no bank deduction yet
@@ -141,10 +141,8 @@ export async function updateExpense(req: Request, res: Response, next: NextFunct
       (tx) => tx.expense.update({
         where: { id: req.params.id },
         data: {
-          ...(amount !== undefined && { amount }),
-          ...(category !== undefined && { category }),
-          ...(note !== undefined && { note }),
-          ...(!isAdminOrAbove(req.user!.role) && { status: 'PENDING' }),
+          ...req.body,
+          ...(!isAdminOrAbove(req.user!, 'allRecords') && { status: 'PENDING' }),
         },
         select: EXP_SELECT,
       })

@@ -11,7 +11,8 @@ const CAT_LABELS: Record<ServiceCategory, string> = { GOVT: '🏛 Govt', PRINTIN
 
 export default function NewTransaction() {
   const { t } = useLanguage();
-  const { isAdmin } = useAuth();
+  const { hasPermission } = useAuth();
+  const canManage = hasPermission('allRecords', 'write');
   const navigate = useNavigate();
   const [services, setServices] = useState<Service[]>([]);
   const [search, setSearch] = useState('');
@@ -293,7 +294,7 @@ export default function NewTransaction() {
           </div>
 
           {/* SHOP XEROX CARD */}
-          {isAdmin && (
+          {canManage && (
             <div className="card" style={{ display: 'flex', flexDirection: 'column' }}>
               <h4 style={{ marginBottom: 16 }}>SHOP-XEROX</h4>
               <form onSubmit={handleShopXeroxSubmit} style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>

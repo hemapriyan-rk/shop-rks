@@ -9,7 +9,8 @@ import type { TodaySummary } from '../types';
 const fmt = (n: number) => '₹' + n.toLocaleString('en-IN', { maximumFractionDigits: 2 });
 
 export default function Dashboard() {
-  const { user, isAdmin, isSuperAdmin } = useAuth();
+  const { user, hasPermission, isSuperAdmin } = useAuth();
+  const canViewAnalytics = hasPermission('analytics');
   const { t } = useLanguage();
   const navigate = useNavigate();
   const [summary, setSummary] = useState<TodaySummary | null>(null);
@@ -42,7 +43,7 @@ export default function Dashboard() {
           <div className="stat-sub">{summary?.transactionCount ?? 0} {t('dashboard.transactionsCount' as any)}</div>
         </div>
 
-        {isAdmin && (
+        {canViewAnalytics && (
           <>
             <div className="stat-card" style={{ '--stat-color': 'var(--red)' } as React.CSSProperties}>
               <div className="stat-icon">📤</div>
@@ -61,7 +62,7 @@ export default function Dashboard() {
           </>
         )}
 
-        {isAdmin && summary && summary.pendingExpenseCount > 0 && (
+        {canViewAnalytics && summary && summary.pendingExpenseCount > 0 && (
           <div className="stat-card" style={{ '--stat-color': 'var(--yellow)' } as React.CSSProperties}>
             <div className="stat-icon">⏳</div>
             <div className="stat-label">{t('dashboard.pendingApprovals' as any)}</div>
@@ -90,7 +91,7 @@ export default function Dashboard() {
           <div className="quick-action-icon">📑</div>
           <div className="quick-action-label">{t('nav.myExpenses' as any)}</div>
         </div>
-        {isAdmin && (
+        {canViewAnalytics && (
           <>
             <div className="quick-action-card" onClick={() => navigate('/analytics')}>
               <div className="quick-action-icon">📊</div>

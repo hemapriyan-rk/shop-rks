@@ -16,7 +16,8 @@ function isToday(dateStr: string) {
 }
 
 export default function ExpensesList() {
-  const { isAdmin } = useAuth();
+  const { hasPermission } = useAuth();
+  const canManage = hasPermission('allRecords');
   const navigate = useNavigate();
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [banks, setBanks] = useState<BankAccount[]>([]);
@@ -27,8 +28,8 @@ export default function ExpensesList() {
   const load = () => {
     setLoading(true);
     const promises: Promise<any>[] = [expensesApi.list({ date })];
-    // Only admins can access the banks API
-    if (isAdmin) promises.push(banksApi.list());
+    // Only users with permission can access the banks API
+    if (canManage) promises.push(banksApi.list());
 
     Promise.all(promises).then(([expRes, bankRes]) => {
       setExpenses(expRes.data.data ?? []);
@@ -61,7 +62,7 @@ export default function ExpensesList() {
           <div className="page-header-sub">Daily expense tracking</div>
         </div>
         <div className="page-actions">
-          {isAdmin ? (
+          {canManage ? (
             <input type="date" className="form-input" style={{ width: 160 }} value={date} onChange={e => setDate(e.target.value)} max={new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' })} />
           ) : (
             <div className="badge badge-blue">Today: {date}</div>
@@ -71,15 +72,15 @@ export default function ExpensesList() {
       </div>
 
       {error && <div className="alert alert-error mb-16">{error}</div>}
-      {isAdmin && pending.length > 0 && (
+      {canManage && pending.length > 0 && (
         <div className="alert alert-warning mb-16">⚠️ {pending.length} expense(s) pending your approval</div>
       )}
 
       <div className="card" style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
         <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{expenses.length} records — {pending.length} pending</span>
 
-        {/* Bank balance summary — admin only, Cash balance hidden */}
-        {isAdmin && banks.length > 0 && (
+        {/* Bank balance summary — authorized only, Cash balance hidden */}
+        {canManage && banks.length > 0 && (
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             {banks.map(b => (
               <div key={b.id} style={{ background: 'var(--bg-secondary)', padding: '6px 12px', borderRadius: 8, border: '1px solid var(--border-color)', textAlign: 'center', minWidth: 100 }}>
@@ -107,7 +108,7 @@ export default function ExpensesList() {
           <table>
             <thead><tr>
               <th>Category</th><th>Amount</th><th>Note</th><th>By</th><th>Bank</th><th>Status</th><th>Time</th>
-              {isAdmin && <th>Actions</th>}
+              {canManage && <th>Actions</th>}
             </tr></thead>
             <tbody>
               {expenses.map(e => (
@@ -121,7 +122,7 @@ export default function ExpensesList() {
                   <td style={{ fontSize: 12, color: 'var(--text-muted)' }}>
                     {new Date(e.createdAt).toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit' })}
                   </td>
-                  {isAdmin && (
+                  {canManage && (
                     <td>
                       <div style={{ display: 'flex', gap: 6 }}>
                         {e.status === 'PENDING' && <>
