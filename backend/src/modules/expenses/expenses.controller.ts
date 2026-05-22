@@ -280,6 +280,30 @@ export async function paySalary(req: Request, res: Response, next: NextFunction)
     }
 
     const result = await prisma.$transaction(async (tx) => {
+      // Find default service for the negative transaction
+      let defaultService = await tx.service.findFirst({ where: { name: 'Others' } });
+      if (!defaultService) defaultService = await tx.service.findFirst();
+      if (!defaultService) {
+        defaultService = await tx.service.create({
+          data: { name: 'Manual Adjustment', category: 'OTHER', price: 0, isActive: false }
+        });
+      }
+
+      // 1. Create a negative transaction to decrease the last day's income
+      await tx.transaction.create({
+        data: {
+          userId: req.user!.userId,
+          serviceId: defaultService.id,
+          quantity: 1,
+          unitPrice: -amount, // Negative amount
+          totalPrice: -amount, // Negative amount
+          paymentMethod: 'OTHER',
+          notes: `Salary deduction from income for ${staffName}`,
+          createdAt: previousMonthLastDay
+        }
+      });
+
+      // 2. Create the expense record
       const expense = await tx.expense.create({
         data: { 
           userId: req.user!.userId, 

@@ -339,12 +339,20 @@ export async function manualAdjust(req: Request, res: Response, next: NextFuncti
     let result;
     if (type === 'INCOME') {
       // Find a dummy service or create an arbitrary record
-      const defaultService = await prisma.service.findFirst({ where: { name: 'Others' } });
+      let defaultService = await prisma.service.findFirst({ where: { name: 'Others' } });
+      if (!defaultService) {
+        defaultService = await prisma.service.findFirst();
+      }
+      if (!defaultService) {
+        defaultService = await prisma.service.create({
+          data: { name: 'Manual Adjustment', category: 'OTHER', price: 0, isActive: false }
+        });
+      }
+
       result = await prisma.transaction.create({
         data: {
           userId: req.user!.userId,
-          serviceId: defaultService?.id || '',
-          serviceName: 'Manual Adjustment',
+          serviceId: defaultService.id,
           quantity: 1,
           unitPrice: amount,
           totalPrice: amount,
