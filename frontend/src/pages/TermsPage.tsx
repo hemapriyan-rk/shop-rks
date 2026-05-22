@@ -150,9 +150,7 @@ export default function TermsPage() {
           @page { size: A4 portrait; margin: 15mm; }
           body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; background: #fff !important; margin: 0; padding: 0; }
           
-          #root > *:not(.app-layout) { display: none !important; }
-          .sidebar, .topbar, .no-print, .alert { display: none !important; }
-          .main-content { margin: 0 !important; padding: 0 !important; max-width: none !important; width: 100% !important; background: #fff !important; }
+          .no-print { display: none !important; }
 
           .print-only { display: block !important; }
           
@@ -182,6 +180,9 @@ export default function TermsPage() {
           
           .color-mode .invoice-shop-name {
             color: #570F8E;
+          }
+          .color-mode .invoice-header {
+            border-bottom: 2px solid #570F8E;
           }
 
           .invoice-shop-details {

@@ -320,6 +320,21 @@ export default function BillingPage() {
           .color-mode .invoice-shop-name {
             color: #570F8E;
           }
+          .color-mode .invoice-table th {
+            background-color: rgba(87, 15, 142, 0.1) !important;
+            color: #570F8E;
+            border-color: #570F8E;
+          }
+          .color-mode .invoice-table td {
+            border-color: #570F8E;
+          }
+          .color-mode .invoice-table tfoot td {
+            color: #B8860B;
+            border-color: #570F8E;
+          }
+          .color-mode .invoice-header {
+            border-bottom: 2px solid #570F8E;
+          }
 
           .invoice-shop-details {
             flex: 1;
