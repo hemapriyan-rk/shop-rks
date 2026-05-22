@@ -45,6 +45,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const superNav: NavItem[] = [
     { icon: '👥', labelKey: 'nav.users', path: '/users' },
     { icon: '🖥', labelKey: 'nav.serverMgmt', path: '/admin/system' },
+    { icon: '☁️', labelKey: 'nav.renderMgmt', path: '/admin/render' },
     { icon: '💾', labelKey: 'nav.storageMgmt', path: '/admin/storage' },
     { icon: '📈', labelKey: 'nav.incomeMgmt', path: '/admin/income-management' },
   ];

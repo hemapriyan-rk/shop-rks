@@ -423,6 +423,29 @@ tbody tr:last-child td { border-bottom: none; }
 .page-header-sub { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
 .page-actions { display: flex; gap: 10px; }
 
+/* ── Render Free Tier Widget ───────────────────────────────────── */
+.render-stats-widget {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin-right: 10px;
+}
+.render-stats-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+.render-stats-value {
+  font-size: 12px;
+  font-weight: 700;
+}
+@media (max-width: 768px) {
+  .render-stats-label { display: none; }
+  .render-stats-widget { margin-right: 4px; }
+  .render-stats-value { font-size: 11px; }
+  .hide-mobile { display: none; }
+}
+
 /* ── Search ────────────────────────────────────────────────────── */
 .search-box {
   position: relative; display: flex; align-items: center;

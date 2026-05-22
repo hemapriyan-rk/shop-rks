@@ -96,7 +96,7 @@ export default function LoginPage() {
                 id="username"
                 className="form-input"
                 type="text"
-                placeholder="admin"
+                placeholder="e.g. johndoe"
                 value={username}
                 onChange={e => setUsername(e.target.value)}
                 autoFocus

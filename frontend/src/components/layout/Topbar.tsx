@@ -59,10 +59,10 @@ export default function Topbar({ title, onMenuClick }: TopbarProps) {
       
       <div className="flex-center gap-12" style={{ marginLeft: 'auto' }}>
         {renderStats && (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', marginRight: 10 }}>
-            <span style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600 }}>RENDER FREE TIER</span>
-            <span style={{ fontSize: 12, fontWeight: 700, color: renderStats.remaining < 50 ? 'var(--red)' : 'var(--green)' }}>
-              {renderStats.used}h used • {renderStats.remaining}h left
+          <div className="render-stats-widget">
+            <span className="render-stats-label">RENDER FREE TIER</span>
+            <span className="render-stats-value" style={{ color: renderStats.remaining < 50 ? 'var(--red)' : 'var(--green)' }}>
+              {renderStats.used}h <span className="hide-mobile">used</span> • {renderStats.remaining}h <span className="hide-mobile">left</span>
             </span>
           </div>
         )}

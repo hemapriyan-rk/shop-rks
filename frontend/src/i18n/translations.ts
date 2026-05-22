@@ -22,6 +22,7 @@ export const translations = {
     'nav.expenseCats': 'Expense Categories',
     'nav.salary': 'Staff Salary',
     'nav.incomeMgmt': 'Income Mgmt',
+    'nav.renderMgmt': 'Render Tier',
     'nav.logout': 'Logout',
     
     // Topbar
@@ -109,6 +110,7 @@ export const translations = {
     'nav.expenseCats': 'செலவு வகைகள்',
     'nav.salary': 'பணியாளர் சம்பளம்',
     'nav.incomeMgmt': 'வருமான மேலாண்மை',
+    'nav.renderMgmt': 'ரெண்டர் டயர்',
     'nav.logout': 'வெளியேறு',
     
     // Topbar
