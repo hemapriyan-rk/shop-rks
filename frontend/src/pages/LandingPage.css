@@ -2,19 +2,6 @@
 
 /* LandingPage.css */
 
-/* ── Mouse Glow Effect ── */
-.mouse-glow {
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  pointer-events: none;
-  z-index: 9999;
-  background: radial-gradient(
-    800px circle at var(--cursor-x, 50%) var(--cursor-y, 50%), 
-    rgba(255, 193, 7, 0.08),
-    transparent 40%
-  );
-}
-
 .landing-page {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background-color: #ffffff;
