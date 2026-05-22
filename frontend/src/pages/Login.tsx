@@ -19,7 +19,10 @@ export default function LoginPage() {
       await login(username.trim(), password);
       navigate('/dashboard');
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Login failed. Check your credentials.');
+      console.error("Login Error:", err);
+      const serverError = err.response?.data?.error || err.response?.data?.message;
+      const networkError = err.response ? null : (err.message || 'Network error connecting to server');
+      setError(serverError || networkError || 'Login failed. Check your credentials.');
     } finally { setLoading(false); }
   };
 
