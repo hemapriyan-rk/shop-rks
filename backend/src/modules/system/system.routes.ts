@@ -17,4 +17,12 @@ router.get('/sessions', authenticate, requireRole('SUPER_ADMIN'), controller.get
 router.post('/sessions/:id/kick', authenticate, requireRole('SUPER_ADMIN'), controller.kickSession);
 router.post('/sessions/:userId/message', authenticate, requireRole('SUPER_ADMIN'), controller.messageUser);
 
+// Storage & Cleanup — Super Admin only
+router.get('/storage', authenticate, requireRole('SUPER_ADMIN'), controller.getStorageStats);
+router.post('/cleanup', authenticate, requireRole('SUPER_ADMIN'), controller.manualCleanup);
+
+// Exports — Admin & Super Admin
+router.get('/exports', authenticate, requireRole('ADMIN', 'SUPER_ADMIN'), controller.listExports);
+router.get('/exports/:id/download', authenticate, requireRole('ADMIN', 'SUPER_ADMIN'), controller.downloadExport);
+
 export default router;

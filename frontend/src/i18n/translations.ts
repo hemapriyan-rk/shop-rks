@@ -15,6 +15,8 @@ export const translations = {
     'nav.users': 'Users',
     'nav.auditLogs': 'Audit Logs',
     'nav.serverMgmt': 'Server Management',
+    'nav.storageMgmt': 'Storage Mgmt',
+    'nav.dataExports': 'Data Exports',
     'nav.expenseCats': 'Expense Categories',
     'nav.logout': 'Logout',
     
@@ -95,6 +97,8 @@ export const translations = {
     'nav.users': 'பயனர்கள்',
     'nav.auditLogs': 'கணக்காய்வு பதிவுகள்',
     'nav.serverMgmt': 'சர்வர் மேலாண்மை',
+    'nav.storageMgmt': 'சேமிப்பு மேலாண்மை',
+    'nav.dataExports': 'தரவு ஏற்றுமதி',
     'nav.expenseCats': 'செலவு வகைகள்',
     'nav.logout': 'வெளியேறு',
     

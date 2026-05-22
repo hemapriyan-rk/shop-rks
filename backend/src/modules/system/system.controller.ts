@@ -3,6 +3,7 @@ import { prisma } from '../../config/prisma';
 import { sendSuccess, sendError } from '../../utils/response';
 import si from 'systeminformation';
 import { socketBroadcast } from '../../config/socket';
+import { performManualCleanup } from './cron.service';
 
 export async function getConfig(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
@@ -17,7 +18,7 @@ export async function getConfig(req: Request, res: Response, next: NextFunction)
 
 export async function updateConfig(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { maintenanceMode, maintenanceMessage, serverMessage, broadcastToAll } = req.body;
+    const { maintenanceMode, maintenanceMessage, serverMessage, broadcastToAll, autoCleanupEnabled, autoCleanupDurationMonths } = req.body;
     
     const config = await prisma.systemConfig.upsert({
       where: { id: 1 },
@@ -25,7 +26,9 @@ export async function updateConfig(req: Request, res: Response, next: NextFuncti
       update: {
         ...(maintenanceMode !== undefined && { maintenanceMode }),
         ...(maintenanceMessage !== undefined && { maintenanceMessage }),
-        ...(serverMessage !== undefined && { serverMessage })
+        ...(serverMessage !== undefined && { serverMessage }),
+        ...(autoCleanupEnabled !== undefined && { autoCleanupEnabled }),
+        ...(autoCleanupDurationMonths !== undefined && { autoCleanupDurationMonths })
       }
     });
 
@@ -153,4 +156,71 @@ export async function getSystemHealth(req: Request, res: Response, next: NextFun
 
 export function eventStream(req: Request, res: Response): void {
   sendError(res, 'SSE is deprecated. Use Socket.IO instead.', 410);
+}
+
+// ── Storage Management ──────────────────────────────────────────────────────
+
+export async function getStorageStats(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    // In PostgreSQL, you can get table sizes. We use raw query for this.
+    const result: any[] = await prisma.$queryRaw`
+      SELECT relname as table_name, pg_total_relation_size(relid) as size_bytes
+      FROM pg_catalog.pg_statio_user_tables
+      WHERE relname IN ('transactions', 'expenses', 'logs', 'daily_analytics_snapshots', 'data_exports');
+    `;
+    
+    const sizes = result.map(r => ({
+      table: r.table_name,
+      sizeBytes: Number(r.size_bytes),
+      sizeMb: (Number(r.size_bytes) / (1024 * 1024)).toFixed(2) + ' MB'
+    }));
+
+    const totalBytes = sizes.reduce((acc, curr) => acc + curr.sizeBytes, 0);
+
+    sendSuccess(res, {
+      tables: sizes,
+      totalBytes,
+      totalMb: (totalBytes / (1024 * 1024)).toFixed(2) + ' MB'
+    });
+  } catch (err) { next(err); }
+}
+
+export async function manualCleanup(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { endDate, types } = req.body as { endDate: string, types: string[] };
+    if (!endDate || !types || types.length === 0) {
+      sendError(res, 'Missing endDate or types array', 400);
+      return;
+    }
+    const end = new Date(endDate);
+    await performManualCleanup(end, types);
+    sendSuccess(res, null, 200, undefined, 'Cleanup completed successfully.');
+  } catch (err) { next(err); }
+}
+
+// ── Exports ─────────────────────────────────────────────────────────────────
+
+export async function listExports(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const exports = await prisma.dataExport.findMany({
+      select: { id: true, fileName: true, status: true, scheduledFor: true, createdAt: true, expiresAt: true },
+      orderBy: { createdAt: 'desc' }
+    });
+    sendSuccess(res, exports);
+  } catch (err) { next(err); }
+}
+
+export async function downloadExport(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { id } = req.params;
+    const dataExport = await prisma.dataExport.findUnique({ where: { id } });
+    if (!dataExport) {
+      sendError(res, 'Export not found', 404);
+      return;
+    }
+
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="${dataExport.fileName}"`);
+    res.send(dataExport.fileData);
+  } catch (err) { next(err); }
 }

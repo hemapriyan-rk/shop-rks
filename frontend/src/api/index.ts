@@ -113,4 +113,12 @@ export const systemApi = {
   kickSession: (id: string, timeout?: number) => api.post<ApiResponse<null>>(`/system/sessions/${id}/kick`, { timeout }),
   messageUser: (userId: string, message: string) => api.post<ApiResponse<null>>(`/system/sessions/${userId}/message`, { message }),
   getHealthStats: () => api.get<ApiResponse<any>>('/system/health-stats'),
+  getStorageStats: () => api.get<ApiResponse<{ tables: any[], totalBytes: number, totalMb: string }>>('/system/storage'),
+  manualCleanup: (endDate: string, types: string[]) => api.post<ApiResponse<null>>('/system/cleanup', { endDate, types }),
+};
+
+// ── Exports ───────────────────────────────────────────────────────
+export const exportsApi = {
+  list: () => api.get<ApiResponse<any[]>>('/system/exports'),
+  downloadUrl: (id: string) => `${api.defaults.baseURL}/system/exports/${id}/download`,
 };

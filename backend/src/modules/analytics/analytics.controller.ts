@@ -127,17 +127,34 @@ export async function getDailyAnalytics(req: Request, res: Response, next: NextF
     });
 
     let income = 0, cashIncome = 0, onlineIncome = 0, otherIncome = 0, shopXeroxIncome = 0, txCount = 0;
-    for (const g of txGroups) {
-      const sum = Number(g._sum.totalPrice ?? 0);
-      income += sum;
-      txCount += g._count;
-      if (g.paymentMethod === 'CASH') cashIncome += sum;
-      if (g.paymentMethod === 'ONLINE') onlineIncome += sum;
-      if (g.paymentMethod === 'OTHER') otherIncome += sum;
-      if (g.paymentMethod === 'SHOP_XEROX') shopXeroxIncome += sum;
-    }
+    let expenses = 0;
 
-    const expenses = Number(expAgg._sum.amount ?? 0);
+    // Check Snapshot if no transactions exist (maybe deleted by auto-cleanup)
+    if (txGroups.length === 0 && expAgg._count === 0) {
+      const snapshot = await prisma.dailyAnalyticsSnapshot.findUnique({
+        where: { date: new Date(`${targetDate}T00:00:00Z`) }
+      });
+      if (snapshot) {
+        income = Number(snapshot.income);
+        cashIncome = Number(snapshot.cashIncome);
+        onlineIncome = Number(snapshot.onlineIncome);
+        otherIncome = Number(snapshot.otherIncome);
+        shopXeroxIncome = Number(snapshot.shopXeroxIncome);
+        expenses = Number(snapshot.expenses);
+        txCount = snapshot.transactionCount;
+      }
+    } else {
+      for (const g of txGroups) {
+        const sum = Number(g._sum.totalPrice ?? 0);
+        income += sum;
+        txCount += g._count;
+        if (g.paymentMethod === 'CASH') cashIncome += sum;
+        if (g.paymentMethod === 'ONLINE') onlineIncome += sum;
+        if (g.paymentMethod === 'OTHER') otherIncome += sum;
+        if (g.paymentMethod === 'SHOP_XEROX') shopXeroxIncome += sum;
+      }
+      expenses = Number(expAgg._sum.amount ?? 0);
+    }
 
     sendSuccess(res, {
       date: targetDate,
@@ -242,17 +259,45 @@ export async function getMonthlyAnalytics(req: Request, res: Response, next: Nex
     }
 
     let income = 0, cashIncome = 0, onlineIncome = 0, otherIncome = 0, shopXeroxIncome = 0, txCount = 0;
-    for (const g of txGroups) {
-      const sum = Number(g._sum.totalPrice ?? 0);
-      income += sum;
-      txCount += g._count;
-      if (g.paymentMethod === 'CASH') cashIncome += sum;
-      if (g.paymentMethod === 'ONLINE') onlineIncome += sum;
-      if (g.paymentMethod === 'OTHER') otherIncome += sum;
-      if (g.paymentMethod === 'SHOP_XEROX') shopXeroxIncome += sum;
-    }
+    let expenses = 0, expCount = expAgg._count;
 
-    const expenses = Number(expAgg._sum.amount ?? 0);
+    if (txGroups.length === 0 && expAgg._count === 0) {
+      // Fallback to snapshots
+      const snapshots = await prisma.dailyAnalyticsSnapshot.findMany({
+        where: { date: { gte: start, lte: end } }
+      });
+      for (const snap of snapshots) {
+        const dayStr = snap.date.toISOString().split('T')[0];
+        dayMap[dayStr] = {
+          income: Number(snap.income),
+          cashIncome: Number(snap.cashIncome),
+          onlineIncome: Number(snap.onlineIncome),
+          otherIncome: Number(snap.otherIncome),
+          shopXeroxIncome: Number(snap.shopXeroxIncome),
+          expenses: Number(snap.expenses),
+          profit: Number(snap.profit),
+          count: snap.transactionCount
+        };
+        income += Number(snap.income);
+        cashIncome += Number(snap.cashIncome);
+        onlineIncome += Number(snap.onlineIncome);
+        otherIncome += Number(snap.otherIncome);
+        shopXeroxIncome += Number(snap.shopXeroxIncome);
+        expenses += Number(snap.expenses);
+        txCount += snap.transactionCount;
+      }
+    } else {
+      for (const g of txGroups) {
+        const sum = Number(g._sum.totalPrice ?? 0);
+        income += sum;
+        txCount += g._count;
+        if (g.paymentMethod === 'CASH') cashIncome += sum;
+        if (g.paymentMethod === 'ONLINE') onlineIncome += sum;
+        if (g.paymentMethod === 'OTHER') otherIncome += sum;
+        if (g.paymentMethod === 'SHOP_XEROX') shopXeroxIncome += sum;
+      }
+      expenses = Number(expAgg._sum.amount ?? 0);
+    }
 
     sendSuccess(res, {
       year,
@@ -265,7 +310,7 @@ export async function getMonthlyAnalytics(req: Request, res: Response, next: Nex
       expenses,
       profit: income - expenses,
       transactionCount: txCount,
-      expenseCount: expAgg._count,
+      expenseCount: expCount,
       daily: Object.entries(dayMap)
         .map(([date, data]) => ({ date, ...data }))
         .sort((a, b) => a.date.localeCompare(b.date)),

@@ -192,6 +192,11 @@ model SystemConfig {
   serverMessage      String?  @map("server_message")
   version            String   @default("1.0.0")
 
+  autoCleanupEnabled        Boolean   @default(true) @map("auto_cleanup_enabled")
+  autoCleanupDurationMonths Int       @default(3) @map("auto_cleanup_duration_months")
+  lastCleanupDate           DateTime? @map("last_cleanup_date") @db.Timestamptz
+  nextCleanupDate           DateTime? @map("next_cleanup_date") @db.Timestamptz
+
   @@map("system_config")
 }
 
@@ -227,3 +232,32 @@ model Log {
   @@index([tableName])
 }
 
+// ─────────────────────────────────────────────────────────
+// STORAGE MANAGEMENT & ANALYTICS SNAPSHOTS
+// ─────────────────────────────────────────────────────────
+
+model DataExport {
+  id           String   @id @default(uuid())
+  fileName     String   @map("file_name")
+  fileData     Bytes    @map("file_data")
+  status       String   @default("READY") // READY, EXPIRED
+  scheduledFor DateTime @map("scheduled_for") @db.Timestamptz
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
+  expiresAt    DateTime @map("expires_at") @db.Timestamptz
+  
+  @@map("data_exports")
+}
+
+model DailyAnalyticsSnapshot {
+  date            DateTime @id @db.Date
+  income          Decimal  @db.Decimal(12, 2)
+  cashIncome      Decimal  @db.Decimal(12, 2)
+  onlineIncome    Decimal  @db.Decimal(12, 2)
+  otherIncome     Decimal  @db.Decimal(12, 2)
+  shopXeroxIncome Decimal  @db.Decimal(12, 2)
+  expenses        Decimal  @db.Decimal(12, 2)
+  profit          Decimal  @db.Decimal(12, 2)
+  transactionCount Int     @map("transaction_count")
+
+  @@map("daily_analytics_snapshots")
+}

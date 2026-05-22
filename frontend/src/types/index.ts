@@ -136,6 +136,19 @@ export interface SystemConfig {
   maintenanceMessage: string;
   serverMessage: string;
   version: string;
+  autoCleanupEnabled: boolean;
+  autoCleanupDurationMonths: number;
+  lastCleanupDate?: string | null;
+  nextCleanupDate?: string | null;
+}
+
+export interface DataExport {
+  id: string;
+  fileName: string;
+  status: string;
+  scheduledFor: string;
+  createdAt: string;
+  expiresAt: string;
 }
 
 export interface ApiResponse<T> {

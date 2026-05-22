@@ -21,6 +21,8 @@ import BanksPage from './pages/banks/BanksPage';
 import BankConfig from './pages/admin/BankConfig';
 import ServerManagement from './pages/admin/ServerManagement';
 import ManageExpenseCategories from './pages/admin/ManageExpenseCategories';
+import StorageManagement from './pages/admin/StorageManagement';
+import DataExports from './pages/admin/DataExports';
 import MaintenancePage from './pages/Maintenance';
 
 export default function App() {
@@ -52,12 +54,14 @@ export default function App() {
             <Route path="/admin/expenses" element={<AdminExpenses />} />
             <Route path="/logs" element={<LogsPage />} />
             <Route path="/admin/expense-categories" element={<ManageExpenseCategories />} />
+            <Route path="/admin/exports" element={<DataExports />} />
           </Route>
 
           {/* Super Admin only */}
           <Route element={<ProtectedRoute allowedRoles={['SUPER_ADMIN']} />}>
             <Route path="/users" element={<UsersPage />} />
             <Route path="/admin/system" element={<ServerManagement />} />
+            <Route path="/admin/storage" element={<StorageManagement />} />
           </Route>
 
           <Route path="/maintenance" element={<MaintenancePage />} />

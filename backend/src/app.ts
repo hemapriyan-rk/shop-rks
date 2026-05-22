@@ -31,7 +31,7 @@ import systemRoutes from './modules/system/system.routes';
 import expenseCategoryRoutes from './modules/expenses/expense-categories.routes';
 
 // Background jobs
-import { startLogCleanupJob } from './modules/logs/logs.cleanup';
+import { initCronJobs } from './modules/system/cron.service';
 
 const app = express();
 
@@ -158,8 +158,8 @@ httpServer.listen(PORT, '0.0.0.0', () => {
   console.log(` Time: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`);
   console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
 
-  // Start background jobs
-  startLogCleanupJob();
+  // Start cron jobs
+  initCronJobs();
 });
 
 // Graceful shutdown

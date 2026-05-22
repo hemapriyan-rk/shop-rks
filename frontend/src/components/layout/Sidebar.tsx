@@ -35,11 +35,13 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     { icon: '📑', labelKey: 'nav.allExpenses', path: '/admin/expenses' },
     { icon: '🏷', labelKey: 'nav.expenseCats', path: '/admin/expense-categories' },
     { icon: '📜', labelKey: 'nav.auditLogs', path: '/logs' },
+    { icon: '📦', labelKey: 'nav.dataExports', path: '/admin/exports' },
   ];
 
   const superNav: NavItem[] = [
     { icon: '👥', labelKey: 'nav.users', path: '/users' },
     { icon: '🖥', labelKey: 'nav.serverMgmt', path: '/admin/system' },
+    { icon: '💾', labelKey: 'nav.storageMgmt', path: '/admin/storage' },
   ];
 
   const handleLogout = () => { logout(); navigate('/login'); };
