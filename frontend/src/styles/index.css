@@ -486,10 +486,8 @@ tbody tr:last-child td { border-bottom: none; }
 /* ── Login Page ────────────────────────────────────────────────── */
 .login-page {
   min-height: 100vh;
-  display: flex; align-items: center; justify-content: center;
-  background: radial-gradient(ellipse at 30% 50%, rgba(87,15,142,0.15) 0%, transparent 60%),
-              radial-gradient(ellipse at 70% 20%, rgba(212,175,55,0.07) 0%, transparent 50%),
-              var(--bg-base);
+  display: flex;
+  background: var(--bg-base);
 }
 .login-box {
   background: var(--bg-card);
