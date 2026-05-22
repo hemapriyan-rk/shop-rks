@@ -79,6 +79,18 @@ export async function updateUser(req: Request, res: Response, next: NextFunction
       }
     }
 
+    // Hardcode protection for the main 'admin' user
+    if (existing.username === 'admin') {
+      if (req.body.isActive === false) {
+        sendError(res, 'The main admin user cannot be deactivated', 400);
+        return;
+      }
+      if (req.body.role && req.body.role !== 'SUPER_ADMIN') {
+        sendError(res, 'The main admin user role cannot be changed', 400);
+        return;
+      }
+    }
+
     const updateData: Record<string, unknown> = { ...req.body };
     if (req.body.password) {
       updateData.passwordHash = await bcrypt.hash(req.body.password, 12);
@@ -120,6 +132,12 @@ export async function deleteUser(req: Request, res: Response, next: NextFunction
 
     if (id === req.user!.userId) {
       sendError(res, 'Cannot delete your own account', 400);
+      return;
+    }
+
+    // Prevent deleting the main admin user entirely
+    if (user.username === 'admin') {
+      sendError(res, 'The main admin user cannot be deleted under any circumstances', 400);
       return;
     }
 

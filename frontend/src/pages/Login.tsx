@@ -82,8 +82,8 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
             {error && (
-              <div style={{ background: 'var(--red-dim)', color: 'var(--red)', padding: '12px 16px', borderRadius: 8, fontSize: 14, border: '1px solid rgba(239, 68, 68, 0.2)' }}>
-                {error}
+              <div className="alert alert-error">
+                <span style={{ fontSize: 16 }}>⚠️</span> {error}
               </div>
             )}
 
