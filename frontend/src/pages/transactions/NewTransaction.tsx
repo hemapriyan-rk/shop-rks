@@ -5,6 +5,7 @@ import { servicesApi, transactionsApi } from '../../api';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
 import type { Service, ServiceCategory } from '../../types';
+import FloatingCalculator from '../../components/common/FloatingCalculator';
 
 const CATS: ServiceCategory[] = ['GOVT', 'PRINTING', 'CARDS', 'OTHER'];
 const CAT_LABELS: Record<ServiceCategory, string> = { GOVT: '🏛 Govt', PRINTING: '🖨 Printing', CARDS: '🪪 Cards', OTHER: '🔧 Other' };
@@ -314,6 +315,7 @@ export default function NewTransaction() {
         </div>
 
       </div>
+      <FloatingCalculator />
     </Layout>
   );
 }

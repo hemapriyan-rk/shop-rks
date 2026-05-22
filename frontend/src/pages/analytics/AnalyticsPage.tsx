@@ -3,6 +3,7 @@ import Layout from '../../components/layout/Layout';
 import { analyticsApi } from '../../api';
 import type { DailyAnalytics, MonthlyAnalytics } from '../../types';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
+import FloatingCalculator from '../../components/common/FloatingCalculator';
 
 const fmt = (n: number) => `₹${n.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
 
@@ -73,6 +74,7 @@ export default function AnalyticsPage() {
         <>
           <div className="stat-grid">
             <StatCard label="Total Income" value={daily.income} color="var(--green)" />
+            <StatCard label="SHOP-COMPUTER" value={daily.income - (daily.shopXeroxIncome || 0)} color="#EC4899" />
             <StatCard label="Cash Income" value={daily.cashIncome} color="#10B981" />
             <StatCard label="Online Income" value={daily.onlineIncome} color="#3B82F6" />
             <StatCard label="Other Income" value={daily.otherIncome || 0} color="#F59E0B" />
@@ -133,6 +135,7 @@ export default function AnalyticsPage() {
         <>
           <div className="stat-grid">
             <StatCard label="Monthly Income" value={monthly.income} color="var(--green)" />
+            <StatCard label="SHOP-COMPUTER" value={monthly.income - (monthly.shopXeroxIncome || 0)} color="#EC4899" />
             <StatCard label="Monthly Cash" value={monthly.cashIncome} color="#10B981" />
             <StatCard label="Monthly Online" value={monthly.onlineIncome} color="#3B82F6" />
             <StatCard label="Monthly Other" value={monthly.otherIncome || 0} color="#F59E0B" />
@@ -166,6 +169,8 @@ export default function AnalyticsPage() {
           )}
         </>
       )}
+
+      <FloatingCalculator />
     </Layout>
   );
 }
