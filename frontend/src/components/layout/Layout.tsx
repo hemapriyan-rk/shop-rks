@@ -19,6 +19,14 @@ export default function Layout({ children, title }: LayoutProps) {
 
   // Socket connection
   useEffect(() => {
+    // Register Service Worker for Mobile Notifications
+    if ('serviceWorker' in navigator && 'Notification' in window) {
+      navigator.serviceWorker.register('/sw.js').catch(console.error);
+      if (Notification.permission === 'default') {
+        Notification.requestPermission();
+      }
+    }
+
     if (!token) return;
 
     // Connect to Socket.IO
@@ -32,11 +40,30 @@ export default function Layout({ children, title }: LayoutProps) {
       console.log('[SOCKET] Connected to real-time server');
     });
 
-    socket.on('notification', (data: any) => {
+    socket.on('notification', async (data: any) => {
       console.log('[SOCKET] Received notification:', data);
+      
+      const fireBrowserNotification = async (title: string, body: string) => {
+        if ('Notification' in window && Notification.permission === 'granted') {
+          try {
+            if ('serviceWorker' in navigator) {
+              const reg = await navigator.serviceWorker.ready;
+              reg.showNotification(title, { body, icon: '/logo.png', badge: '/logo.png' });
+            } else {
+              new Notification(title, { body, icon: '/logo.png' });
+            }
+          } catch (e) {
+            console.error('Notification failed', e);
+          }
+        }
+      };
       
       if (data.type === 'MESSAGE') {
         setBroadcast(data.message);
+        fireBrowserNotification('RKS Broadcast', data.message);
+      } else if (data.type === 'NEW_ALERT') {
+        // Broadcast System Alert
+        fireBrowserNotification('System Alert', data.payload?.message || 'New system alert received');
       } else if (data.type === 'KICK') {
         alert(data.message || 'Your session has been terminated.');
         logout();
