@@ -165,7 +165,7 @@ async function seedSystemUser() {
   try {
     let sysUser = await prisma.user.findUnique({ where: { username: 'SYSTEM_AUTO' } });
     if (!sysUser) {
-      const bcrypt = require('bcryptjs');
+      const bcrypt = require('bcrypt');
       const hash = await bcrypt.hash('system_auto_do_not_login', 10);
       sysUser = await prisma.user.create({
         data: {
