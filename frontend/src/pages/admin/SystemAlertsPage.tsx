@@ -16,7 +16,7 @@ export default function SystemAlertsPage() {
       setLoading(true);
       const res = await systemApi.getAlerts();
       if (res.data.success) {
-        setAlerts(res.data.data);
+        setAlerts(res.data.data || []);
       }
     } catch (err) {
       console.error(err);

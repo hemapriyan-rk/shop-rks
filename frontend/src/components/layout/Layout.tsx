@@ -62,8 +62,10 @@ export default function Layout({ children, title }: LayoutProps) {
         setBroadcast(data.message);
         fireBrowserNotification('RKS Broadcast', data.message);
       } else if (data.type === 'NEW_ALERT') {
-        // Broadcast System Alert
         fireBrowserNotification('System Alert', data.payload?.message || 'New system alert received');
+      } else if (data.type === 'PERIODIC_UPDATE') {
+        const { income, expenses, profit } = data.payload || {};
+        fireBrowserNotification('Daily Financial Update', `Income: ₹${income || 0} | Expenses: ₹${expenses || 0} | Profit: ₹${profit || 0}`);
       } else if (data.type === 'KICK') {
         alert(data.message || 'Your session has been terminated.');
         logout();

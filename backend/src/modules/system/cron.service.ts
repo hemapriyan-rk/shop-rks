@@ -225,6 +225,38 @@ export function initCronJobs() {
     await runOnlineReconciliation();
   }, { timezone: "Asia/Kolkata" });
 
+  // ── Periodic Financial Update (Every 2 Hours) ──
+  cron.schedule('0 */2 * * *', async () => {
+    try {
+      const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+      const start = new Date(`${today}T00:00:00+05:30`);
+      const end = new Date(`${today}T23:59:59.999+05:30`);
+
+      const [txs, exps] = await Promise.all([
+        prisma.transaction.aggregate({
+          where: { createdAt: { gte: start, lte: end } },
+          _sum: { totalPrice: true }
+        }),
+        prisma.expense.aggregate({
+          where: { createdAt: { gte: start, lte: end }, status: 'APPROVED' },
+          _sum: { amount: true }
+        })
+      ]);
+
+      const income = Number(txs._sum.totalPrice || 0);
+      const expenses = Number(exps._sum.amount || 0);
+      const profit = income - expenses;
+
+      socketBroadcast({
+        type: 'PERIODIC_UPDATE',
+        targetRoles: ['SUPER_ADMIN', 'ADMIN'],
+        payload: { income, expenses, profit }
+      });
+    } catch (err) {
+      console.error('[Periodic Update] Failed:', err);
+    }
+  }, { timezone: "Asia/Kolkata" });
+
   cron.schedule('0 1 * * *', async () => {
     console.log('🕒 Running Daily Maintenance Job...');
     try {
@@ -393,7 +425,7 @@ export async function runCashReconciliation(targetDate?: Date) {
       const alert = await prisma.systemAlert.create({
         data: { type: 'INFO', source: 'AUTO_TRANS', message: `Updated Cash Reconciliation. Difference of ₹${diff} applied for ${dateStr}.` }
       });
-      socketBroadcast({ type: 'NEW_ALERT', payload: alert });
+      socketBroadcast({ type: 'NEW_ALERT', targetRole: 'SUPER_ADMIN', payload: alert });
       console.log(`🔄 Updated Cash Reconciliation. Difference of ₹${diff} applied for ${dateStr}.`);
       return;
     }
@@ -431,7 +463,7 @@ export async function runCashReconciliation(targetDate?: Date) {
     const alert = await prisma.systemAlert.create({
       data: { type: 'SUCCESS', source: 'AUTO_TRANS', message: `Cash Reconciliation complete. Added ₹${totalCash} to CASH-BALANCE for ${dateStr}.` }
     });
-    socketBroadcast({ type: 'NEW_ALERT', payload: alert });
+    socketBroadcast({ type: 'NEW_ALERT', targetRole: 'SUPER_ADMIN', payload: alert });
 
     console.log(`✅ Cash Reconciliation complete. Added ₹${totalCash} to CASH-BALANCE for ${dateStr}.`);
   } catch (err) {
@@ -489,7 +521,7 @@ export async function runOnlineReconciliation(targetDate?: Date) {
       const alert = await prisma.systemAlert.create({
         data: { type: 'INFO', source: 'AUTO_TRANS', message: `Updated Online Reconciliation. Difference of ₹${diff} applied for ${dateStr}.` }
       });
-      socketBroadcast({ type: 'NEW_ALERT', payload: alert });
+      socketBroadcast({ type: 'NEW_ALERT', targetRole: 'SUPER_ADMIN', payload: alert });
       console.log(`🔄 Updated Online Reconciliation. Difference of ₹${diff} applied for ${dateStr}.`);
       return;
     }
@@ -527,7 +559,7 @@ export async function runOnlineReconciliation(targetDate?: Date) {
     const alert = await prisma.systemAlert.create({
       data: { type: 'SUCCESS', source: 'AUTO_TRANS', message: `Online Reconciliation complete. Added ₹${totalOnline} to CANARA BANK for ${dateStr}.` }
     });
-    socketBroadcast({ type: 'NEW_ALERT', payload: alert });
+    socketBroadcast({ type: 'NEW_ALERT', targetRole: 'SUPER_ADMIN', payload: alert });
 
     console.log(`✅ Online Reconciliation complete. Added ₹${totalOnline} to CANARA BANK for ${dateStr}.`);
   } catch (err) {

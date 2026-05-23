@@ -45,7 +45,7 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
           ipAddress: ip
         }
       });
-      socketBroadcast({ type: 'NEW_ALERT', payload: alert });
+      socketBroadcast({ type: 'NEW_ALERT', targetRole: 'SUPER_ADMIN', payload: alert });
       
       if (attempt.attempts >= 5) {
         if (attempt.pastBlocks >= 1) {

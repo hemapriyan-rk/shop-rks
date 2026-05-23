@@ -65,21 +65,19 @@ export const socketBroadcast = (data: {
   message?: string; 
   userId?: string; 
   excludeRole?: string;
+  targetRole?: string;
+  targetRoles?: string[];
   payload?: any;
 }) => {
   if (!io) return;
 
   if (data.userId) {
-    // Target specific user
     io.to(`user:${data.userId}`).emit('notification', data);
+  } else if (data.targetRole) {
+    io.to(`role:${data.targetRole}`).emit('notification', data);
+  } else if (data.targetRoles) {
+    data.targetRoles.forEach(r => io.to(`role:${r}`).emit('notification', data));
   } else if (data.excludeRole) {
-    // Broadcast to everyone EXCEPT specific role
-    // We can't easily "exclude" a room in Socket.io 4.x without a loop or specific logic
-    // So we'll emit to everyone and handle filtering on frontend OR use rooms
-    // Actually, we can use rooms for roles. 
-    // For simplicity, let's just emit to all and let client filter if it's simpler
-    // OR: emit to all rooms that are NOT the excluded one.
-    // For this app, we only have 3 roles.
     const roles = ['USER', 'ADMIN', 'SUPER_ADMIN'];
     roles.forEach(r => {
       if (r !== data.excludeRole) {
@@ -87,7 +85,6 @@ export const socketBroadcast = (data: {
       }
     });
   } else {
-    // Global broadcast
     io.emit('notification', data);
   }
 };
