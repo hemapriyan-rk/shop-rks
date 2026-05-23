@@ -288,3 +288,33 @@ export async function getAutoTransactions(req: Request, res: Response, next: Nex
     next(err);
   }
 }
+
+// ── System Alerts ───────────────────────────────────────────────────────────
+
+export async function getAlerts(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const alerts = await prisma.systemAlert.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: 100 // Last 100 alerts
+    });
+    sendSuccess(res, alerts);
+  } catch (err) { next(err); }
+}
+
+export async function markAlertRead(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { id } = req.params;
+    const alert = await prisma.systemAlert.update({
+      where: { id },
+      data: { isRead: true }
+    });
+    sendSuccess(res, alert);
+  } catch (err) { next(err); }
+}
+
+export async function clearAlerts(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    await prisma.systemAlert.deleteMany({});
+    sendSuccess(res, null, 200, undefined, 'All alerts cleared');
+  } catch (err) { next(err); }
+}

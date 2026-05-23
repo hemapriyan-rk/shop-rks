@@ -316,3 +316,23 @@ model AutoTransaction {
 
   @@map("auto_transactions")
 }
+
+// ─────────────────────────────────────────────────────────
+// SYSTEM ALERTS & NOTIFICATIONS
+// ─────────────────────────────────────────────────────────
+
+model SystemAlert {
+  id        String   @id @default(uuid())
+  type      String   // INFO, WARNING, ERROR, SUCCESS
+  source    String   // AUTO_TRANS, LOGIN_ATTEMPT, SYSTEM
+  message   String
+  ipAddress String?  @map("ip_address")
+  isRead    Boolean  @default(false) @map("is_read")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@map("system_alerts")
+  @@index([createdAt])
+  @@index([isRead])
+  @@index([source])
+}
+

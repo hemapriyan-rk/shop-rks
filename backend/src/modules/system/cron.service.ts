@@ -1,6 +1,7 @@
 import cron from 'node-cron';
 import { prisma } from '../../config/prisma';
 import * as xlsx from 'xlsx';
+import { socketBroadcast } from '../../config/socket';
 
 /**
  * Snapshot function to preserve 1 year of daily analytics before raw transactions are deleted.
@@ -389,6 +390,10 @@ export async function runCashReconciliation(targetDate?: Date) {
         where: { id: existing.id },
         data: { amount: totalCash }
       });
+      const alert = await prisma.systemAlert.create({
+        data: { type: 'INFO', source: 'AUTO_TRANS', message: `Updated Cash Reconciliation. Difference of ₹${diff} applied for ${dateStr}.` }
+      });
+      socketBroadcast({ type: 'NEW_ALERT', payload: alert });
       console.log(`🔄 Updated Cash Reconciliation. Difference of ₹${diff} applied for ${dateStr}.`);
       return;
     }
@@ -422,6 +427,11 @@ export async function runCashReconciliation(targetDate?: Date) {
         newValue: JSON.parse(JSON.stringify(autoTx))
       }
     });
+
+    const alert = await prisma.systemAlert.create({
+      data: { type: 'SUCCESS', source: 'AUTO_TRANS', message: `Cash Reconciliation complete. Added ₹${totalCash} to CASH-BALANCE for ${dateStr}.` }
+    });
+    socketBroadcast({ type: 'NEW_ALERT', payload: alert });
 
     console.log(`✅ Cash Reconciliation complete. Added ₹${totalCash} to CASH-BALANCE for ${dateStr}.`);
   } catch (err) {
@@ -476,6 +486,10 @@ export async function runOnlineReconciliation(targetDate?: Date) {
         where: { id: existing.id },
         data: { amount: totalOnline }
       });
+      const alert = await prisma.systemAlert.create({
+        data: { type: 'INFO', source: 'AUTO_TRANS', message: `Updated Online Reconciliation. Difference of ₹${diff} applied for ${dateStr}.` }
+      });
+      socketBroadcast({ type: 'NEW_ALERT', payload: alert });
       console.log(`🔄 Updated Online Reconciliation. Difference of ₹${diff} applied for ${dateStr}.`);
       return;
     }
@@ -509,6 +523,11 @@ export async function runOnlineReconciliation(targetDate?: Date) {
         newValue: JSON.parse(JSON.stringify(autoTx))
       }
     });
+
+    const alert = await prisma.systemAlert.create({
+      data: { type: 'SUCCESS', source: 'AUTO_TRANS', message: `Online Reconciliation complete. Added ₹${totalOnline} to CANARA BANK for ${dateStr}.` }
+    });
+    socketBroadcast({ type: 'NEW_ALERT', payload: alert });
 
     console.log(`✅ Online Reconciliation complete. Added ₹${totalOnline} to CANARA BANK for ${dateStr}.`);
   } catch (err) {

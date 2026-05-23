@@ -32,4 +32,9 @@ router.post('/auto-transactions/trigger', authenticate, requireRole(['ADMIN', 'S
 // Billing Log - All Authenticated Users
 router.post('/log-bill', authenticate, controller.logBill);
 
+// System Alerts - Super Admin only
+router.get('/alerts', authenticate, requireRole(['SUPER_ADMIN']), controller.getAlerts);
+router.patch('/alerts/:id/read', authenticate, requireRole(['SUPER_ADMIN']), controller.markAlertRead);
+router.delete('/alerts', authenticate, requireRole(['SUPER_ADMIN']), controller.clearAlerts);
+
 export default router;

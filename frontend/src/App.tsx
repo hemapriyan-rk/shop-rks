@@ -34,6 +34,7 @@ import SalaryPage from './pages/admin/SalaryPage';
 import IncomeManagementPage from './pages/admin/IncomeManagementPage';
 import RenderMaintenancePage from './pages/admin/RenderMaintenancePage';
 import RoleManagementPage from './pages/admin/RoleManagementPage';
+import SystemAlertsPage from './pages/admin/SystemAlertsPage';
 
 export default function App() {
   return (
@@ -97,6 +98,7 @@ export default function App() {
             <Route path="/admin/auto-transactions" element={<AutomaticTransactionsPage />} />
             <Route path="/admin/user-performance" element={<UserPerformancePage />} />
             <Route path="/admin/income-management" element={<IncomeManagementPage />} />
+            <Route path="/admin/alerts" element={<SystemAlertsPage />} />
           </Route>
 
           <Route path="/maintenance" element={<MaintenancePage />} />

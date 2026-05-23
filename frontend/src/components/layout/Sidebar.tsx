@@ -70,6 +70,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     {
       title: 'System & Users',
       items: [
+        { icon: '🔔', labelKey: 'System Alerts', path: '/admin/alerts', superOnly: true },
         { icon: '👥', labelKey: 'nav.users', path: '/users', superOnly: true },
         { icon: '🔐', labelKey: 'Roles', path: '/admin/roles', superOnly: true },
         { icon: '🖥', labelKey: 'nav.serverMgmt', path: '/admin/system', superOnly: true },

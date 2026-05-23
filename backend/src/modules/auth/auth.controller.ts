@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import { prisma } from '../../config/prisma';
 import { env } from '../../config/env';
 import { sendSuccess, sendError, sendUnauthorized } from '../../utils/response';
+import { socketBroadcast } from '../../config/socket';
 
 export async function login(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
@@ -35,6 +36,16 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
         update: { attempts: { increment: 1 } },
         create: { ipAddress: ip, attempts: 1 }
       });
+      
+      const alert = await prisma.systemAlert.create({
+        data: {
+          type: attempt.attempts >= 5 ? 'ERROR' : 'WARNING',
+          source: 'LOGIN_ATTEMPT',
+          message: `Failed login attempt for username: ${username}`,
+          ipAddress: ip
+        }
+      });
+      socketBroadcast({ type: 'NEW_ALERT', payload: alert });
       
       if (attempt.attempts >= 5) {
         if (attempt.pastBlocks >= 1) {

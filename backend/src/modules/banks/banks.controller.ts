@@ -53,7 +53,7 @@ export async function getBankAnalytics(req: Request, res: Response, next: NextFu
     });
 
     const analytics = await Promise.all(banks.map(async (bank) => {
-      const [total, logs] = await Promise.all([
+      const [total, logs, autoTxs] = await Promise.all([
         prisma.expense.aggregate({
           where: { bankId: bank.id, status: 'APPROVED' },
           _sum: { amount: true },
@@ -71,13 +71,36 @@ export async function getBankAnalytics(req: Request, res: Response, next: NextFu
           },
           orderBy: { createdAt: 'desc' },
           take: date ? 50 : 10,
+        }),
+        prisma.autoTransaction.findMany({
+          where: {
+            bankName: bank.name,
+            ...(start && { date: { gte: start, lte: end } })
+          },
+          select: {
+            id: true, type: true, amount: true, createdAt: true,
+          },
+          orderBy: { createdAt: 'desc' },
+          take: date ? 50 : 10,
         })
       ]);
+
+      const formattedAutoTxs = autoTxs.map(tx => ({
+        id: tx.id,
+        action: 'AUTO_TRANS',
+        newValue: { action: tx.type, amount: Number(tx.amount) },
+        createdAt: tx.createdAt,
+        user: { name: 'SYSTEM_AUTO' }
+      }));
+
+      const combinedLogs = [...logs, ...formattedAutoTxs]
+        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+        .slice(0, date ? 50 : 10);
 
       return {
         ...bank,
         totalDeducted: Number(total._sum.amount ?? 0),
-        logs,
+        logs: combinedLogs,
       };
     }));
 

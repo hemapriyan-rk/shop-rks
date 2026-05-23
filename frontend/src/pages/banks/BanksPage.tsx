@@ -198,6 +198,7 @@ export default function BanksPage() {
                             const isExpenseDeduct = val?.action === 'EXPENSE_DEDUCTION';
                             const isAdjustDown = val?.action === 'ADJUST_DOWN';
                             const isAdjustUp = val?.action === 'ADJUST_UP';
+                            const isAutoTrans = log.action === 'AUTO_TRANS';
                             
                             let badgeClass = 'badge-blue', actionLabel = val?.action || 'ADJUST', color = 'var(--color-accent)';
                             let displayAmount = Number(val?.amount || 0) || Number(val?.balance || 0);
@@ -206,6 +207,7 @@ export default function BanksPage() {
                             else if (isExpenseDeduct) { badgeClass = 'badge-red'; actionLabel = 'EXPENSE'; color = 'var(--red)'; }
                             else if (isAdjustDown) { badgeClass = 'badge-red'; actionLabel = 'DEDUCT'; color = 'var(--red)'; displayAmount = Math.abs(displayAmount); }
                             else if (isAdjustUp) { badgeClass = 'badge-green'; actionLabel = 'ADD'; color = 'var(--green)'; }
+                            else if (isAutoTrans) { badgeClass = 'badge-blue'; actionLabel = val?.action === 'CASH_RECONCILIATION' ? 'AUTO_CASH' : 'AUTO_ONLINE'; color = 'var(--color-primary)'; }
                             
                             const isNegative = isExpenseDeduct || isAdjustDown;
                             

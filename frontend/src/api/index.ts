@@ -122,6 +122,9 @@ export const systemApi = {
   logBill: (data: { customerName: string, total: number, items: any[], date: string }) => api.post<ApiResponse<null>>('/system/log-bill', data),
   getAutoTransactions: (params?: { page?: number; limit?: number; date?: string; type?: string }) => api.get<ApiResponse<any[]>>('/system/auto-transactions', { params }),
   triggerReconciliation: () => api.post<ApiResponse<null>>('/system/auto-transactions/trigger'),
+  getAlerts: () => api.get<ApiResponse<any[]>>('/system/alerts'),
+  markAlertRead: (id: string) => api.patch<ApiResponse<any>>(`/system/alerts/${id}/read`),
+  clearAlerts: () => api.delete<ApiResponse<null>>('/system/alerts'),
 };
 
 // ── Exports ───────────────────────────────────────────────────────
