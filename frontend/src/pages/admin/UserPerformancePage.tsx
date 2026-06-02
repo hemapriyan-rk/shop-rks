@@ -104,8 +104,7 @@ export default function UserPerformancePage() {
         <>
           <div className="stat-grid">
             <StatCard label="Total Income Logged" value={daily.income} color="var(--green)" />
-            <StatCard label="SHOP-COMPUTER" value={daily.income - (daily.shopXeroxIncome || 0)} color="#EC4899" />
-            <StatCard label="Cash Collected" value={daily.cashIncome} color="#10B981" />
+            <StatCard label="SHOP-COMPUTER" value={daily.cashIncome} color="#10B981" />
             <StatCard label="Online Collected" value={daily.onlineIncome} color="#3B82F6" />
             <StatCard label="Other Collected" value={daily.otherIncome || 0} color="#F59E0B" />
             <StatCard label="Shop Xerox" value={daily.shopXeroxIncome || 0} color="#8B5CF6" />
@@ -123,8 +122,7 @@ export default function UserPerformancePage() {
         <>
           <div className="stat-grid">
             <StatCard label="Monthly Income Logged" value={monthly.income} color="var(--green)" />
-            <StatCard label="SHOP-COMPUTER" value={monthly.income - (monthly.shopXeroxIncome || 0)} color="#EC4899" />
-            <StatCard label="Monthly Cash" value={monthly.cashIncome} color="#10B981" />
+            <StatCard label="SHOP-COMPUTER" value={monthly.cashIncome} color="#10B981" />
             <StatCard label="Monthly Online" value={monthly.onlineIncome} color="#3B82F6" />
             <StatCard label="Monthly Other" value={monthly.otherIncome || 0} color="#F59E0B" />
             <StatCard label="Shop Xerox" value={monthly.shopXeroxIncome || 0} color="#8B5CF6" />
@@ -146,7 +144,7 @@ export default function UserPerformancePage() {
                   <YAxis tick={{ fontSize: 11, fill: '#606080' }} tickFormatter={v => `₹${(v/1000).toFixed(0)}k`} />
                   <Tooltip formatter={(v: number) => [`₹${v.toLocaleString('en-IN')}`, '']} contentStyle={{ background: '#1A1A24', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8 }} labelStyle={{ color: '#A0A0B8' }} />
                   <Legend wrapperStyle={{ fontSize: 12 }} />
-                  <Bar dataKey="cashIncome" name="Cash Income" stackId="income" fill="#10B981" />
+                  <Bar dataKey="cashIncome" name="SHOP-COMPUTER" stackId="income" fill="#10B981" />
                   <Bar dataKey="onlineIncome" name="Online Income" stackId="income" fill="#3B82F6" />
                   <Bar dataKey="otherIncome" name="Other Income" stackId="income" fill="#F59E0B" />
                   <Bar dataKey="shopXeroxIncome" name="Shop Xerox" stackId="income" fill="#8B5CF6" radius={[4, 4, 0, 0]} />
