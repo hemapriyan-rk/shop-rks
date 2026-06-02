@@ -82,6 +82,40 @@
   --shadow-glow: 0 4px 20px rgba(87, 15, 142, 0.4);
 }
 
+[data-theme="black-gold"] {
+  --color-primary: #D4AF37;
+  --color-primary-light: #F3E5AB;
+  --color-primary-dark: #AA8C2C;
+  --color-primary-glow: rgba(212, 175, 55, 0.5);
+
+  --color-accent: #FFFFFF;
+  --color-accent-light: #F0F0F0;
+  --color-accent-dark: #CCCCCC;
+  --color-accent-glow: rgba(255, 255, 255, 0.3);
+
+  --bg-base: #000000;
+  --bg-surface: #080808;
+  --bg-elevated: #121212;
+  --bg-card: #0A0A0A;
+  --bg-hover: #1A1A1A;
+  --bg-input: #121212;
+  --bg-modal: #121212;
+
+  --text-primary: #F5F5F5;
+  --text-secondary: #E0E0E0;
+  --text-muted: #888888;
+  
+  --border-subtle: rgba(212, 175, 55, 0.15);
+  --border-default: rgba(212, 175, 55, 0.3);
+  --border-focus: #D4AF37;
+  --border-accent: rgba(212, 175, 55, 0.4);
+
+  --shadow-sm: 0 2px 8px rgba(212, 175, 55, 0.1);
+  --shadow-md: 0 4px 20px rgba(212, 175, 55, 0.15);
+  --shadow-lg: 0 8px 40px rgba(212, 175, 55, 0.2);
+  --shadow-glow: 0 0 30px var(--color-primary-glow);
+}
+
 /* ── Reset ─────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { font-size: 15px; }
