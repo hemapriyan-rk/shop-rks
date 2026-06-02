@@ -9,13 +9,63 @@ export default function FloatingCalculator() {
     else setDisplay(prev => prev + val);
   };
 
+  const evaluateExpression = (expr: string): number => {
+    let tokens = [];
+    let numStr = '';
+    for (let i = 0; i < expr.length; i++) {
+      const c = expr[i];
+      if (c === ' ') continue;
+      if (/[0-9.]/.test(c)) {
+        numStr += c;
+      } else {
+        if (numStr !== '') {
+          tokens.push(Number(numStr));
+          numStr = '';
+        }
+        if (c === '-') {
+          if (tokens.length === 0 || typeof tokens[tokens.length - 1] === 'string') {
+            numStr = '-';
+            continue;
+          }
+        }
+        tokens.push(c);
+      }
+    }
+    if (numStr !== '') tokens.push(Number(numStr));
+
+    let nextTokens = [];
+    for (let i = 0; i < tokens.length; i++) {
+      const t = tokens[i];
+      if (t === '*' || t === '/') {
+        const prev = nextTokens.pop() as number;
+        const next = tokens[++i] as number;
+        if (next === undefined) throw new Error();
+        if (t === '*') nextTokens.push(prev * next);
+        else nextTokens.push(prev / next);
+      } else {
+        nextTokens.push(t);
+      }
+    }
+
+    let result = nextTokens[0] as number;
+    for (let i = 1; i < nextTokens.length; i += 2) {
+      const op = nextTokens[i];
+      const next = nextTokens[i+1] as number;
+      if (next === undefined) throw new Error();
+      if (op === '+') result += next;
+      else if (op === '-') result -= next;
+      else throw new Error();
+    }
+
+    if (isNaN(result) || !isFinite(result)) throw new Error();
+    return result;
+  };
+
   const calculate = () => {
     try {
       if (!display) return;
-      // Evaluate basic math safely
-      // Only allow digits, operators, and decimal points
-      if (!/^[0-9+\-*/.() ]+$/.test(display)) throw new Error();
-      const result = new Function('return ' + display)();
+      if (!/^[0-9+\-*/. ]+$/.test(display)) throw new Error();
+      const result = evaluateExpression(display);
       setDisplay(String(Math.round(result * 100) / 100));
     } catch {
       setDisplay('Error');
