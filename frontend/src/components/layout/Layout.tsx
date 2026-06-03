@@ -17,6 +17,23 @@ export default function Layout({ children, title }: LayoutProps) {
   const [broadcast, setBroadcast] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  // Fetch Server Message on Load
+  useEffect(() => {
+    if (!token) return;
+    fetch('/api/system/config')
+      .then(r => r.json())
+      .then(data => {
+        if (data?.data?.serverMessage) {
+          const msg = data.data.serverMessage;
+          const dismissed = localStorage.getItem('dismissed_broadcast');
+          if (dismissed !== msg) {
+            setBroadcast(msg);
+          }
+        }
+      })
+      .catch(err => console.error('Failed to fetch system config', err));
+  }, [token]);
+
   // Socket connection
   useEffect(() => {
     // Register Service Worker for Mobile Notifications
@@ -172,7 +189,10 @@ export default function Layout({ children, title }: LayoutProps) {
                       fontWeight: 700,
                       boxShadow: '0 10px 15px -3px rgba(var(--color-primary-rgb), 0.3)'
                     }}
-                    onClick={() => setBroadcast(null)}
+                    onClick={() => {
+                      if (broadcast) localStorage.setItem('dismissed_broadcast', broadcast);
+                      setBroadcast(null);
+                    }}
                   >
                     Acknowledged
                   </button>

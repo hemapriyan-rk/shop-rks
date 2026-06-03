@@ -73,6 +73,12 @@ export async function createTransaction(req: Request, res: Response, next: NextF
         service = await prisma.service.create({
           data: { name: serviceName, category: 'OTHER', price: customUnitPrice || 0, isActive: true }
         });
+      } else if (!service.isActive) {
+        // Auto-activate if it exists but is inactive, so Quick Entries don't fail
+        service = await prisma.service.update({
+          where: { id: service.id },
+          data: { isActive: true }
+        });
       }
     }
 
