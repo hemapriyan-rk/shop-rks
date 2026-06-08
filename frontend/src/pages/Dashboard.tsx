@@ -10,7 +10,7 @@ import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'rec
 const fmt = (n: number) => '₹' + n.toLocaleString('en-IN', { maximumFractionDigits: 2 });
 
 export default function Dashboard() {
-  const { user, hasPermission, isSuperAdmin } = useAuth();
+  const { user, hasPermission, isSuperAdmin, isAdmin } = useAuth();
   const canViewAnalytics = hasPermission('analytics');
   const { t } = useLanguage();
   const navigate = useNavigate();
@@ -24,12 +24,14 @@ export default function Dashboard() {
       try {
         const [sumRes, txRes, monRes] = await Promise.all([
           analyticsApi.todaySummary(),
-          transactionsApi.list({ limit: 5 }),
-          canViewAnalytics ? analyticsApi.monthly() : Promise.resolve(null)
+          isAdmin ? transactionsApi.list({ limit: 5 }) : Promise.resolve({ data: { data: [] } } as any),
+          isAdmin ? analyticsApi.monthly() : Promise.resolve(null)
         ]);
         setSummary(sumRes.data.data!);
-        setRecentTx(txRes.data.data || []);
-        if (monRes) setMonthlyData(monRes.data.data!);
+        if (isAdmin) {
+          setRecentTx(txRes.data.data || []);
+          if (monRes) setMonthlyData(monRes.data.data!);
+        }
       } catch (err) {
         console.error(err);
       } finally {
@@ -37,7 +39,7 @@ export default function Dashboard() {
       }
     };
     fetchData();
-  }, [canViewAnalytics]);
+  }, [isAdmin]);
 
   const title = t('nav.dashboard' as any);
   const chartData = monthlyData?.daily.map(d => ({
@@ -64,7 +66,7 @@ export default function Dashboard() {
           <div className="stat-sub">{summary?.transactionCount ?? 0} {t('dashboard.transactionsCount' as any)}</div>
         </div>
 
-        {canViewAnalytics && (
+        {isAdmin && (
           <>
             <div className="stat-card" style={{ '--stat-color': 'var(--red)' } as React.CSSProperties}>
               <div className="stat-icon">📤</div>
@@ -83,7 +85,7 @@ export default function Dashboard() {
           </>
         )}
 
-        {canViewAnalytics && summary && summary.pendingExpenseCount > 0 && (
+        {isAdmin && summary && summary.pendingExpenseCount > 0 && (
           <div className="stat-card" style={{ '--stat-color': 'var(--yellow)' } as React.CSSProperties}>
             <div className="stat-icon">⏳</div>
             <div className="stat-label">{t('dashboard.pendingApprovals' as any)}</div>
@@ -94,8 +96,8 @@ export default function Dashboard() {
       </div>
 
       {/* Analytics & Transactions Grid */}
-      <div className="form-grid" style={{ marginBottom: 24, animation: 'slideUpSaaS 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards', animationDelay: '0.2s', opacity: 0 }}>
-        {canViewAnalytics && (
+      {isAdmin && (
+        <div className="form-grid" style={{ marginBottom: 24, animation: 'slideUpSaaS 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards', animationDelay: '0.2s', opacity: 0 }}>
           <div className="card" style={{ padding: '24px 20px 10px 10px' }}>
             <div className="card-header" style={{ paddingLeft: 10 }}>
               <div className="card-title">Revenue & Expenses (This Month)</div>
@@ -125,26 +127,26 @@ export default function Dashboard() {
               </ResponsiveContainer>
             </div>
           </div>
-        )}
-        
-        <div className="card">
-          <div className="card-header">
-            <div className="card-title">Recent Transactions</div>
-            <button className="btn btn-ghost btn-sm" onClick={() => navigate('/transactions')}>View All</button>
-          </div>
-          <div className="service-list" style={{ border: 'none', padding: 0 }}>
-            {loading ? <div style={{ textAlign: 'center', padding: 20 }}><div className="spinner" /></div> : recentTx.length === 0 ? <div className="text-muted" style={{ padding: 20, textAlign: 'center' }}>No transactions today</div> : recentTx.map(tx => (
-              <div key={tx.id} className="service-item" onClick={() => navigate('/transactions')} style={{ borderBottom: '1px solid var(--border-subtle)', borderRadius: 0, padding: '14px 8px' }}>
-                <div>
-                  <div className="service-item-name">{tx.service.name}</div>
-                  <div className="service-item-cat">{tx.paymentMethod} • {new Date(tx.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+          
+          <div className="card">
+            <div className="card-header">
+              <div className="card-title">Recent Transactions</div>
+              <button className="btn btn-ghost btn-sm" onClick={() => navigate('/transactions')}>View All</button>
+            </div>
+            <div className="service-list" style={{ border: 'none', padding: 0 }}>
+              {loading ? <div style={{ textAlign: 'center', padding: 20 }}><div className="spinner" /></div> : recentTx.length === 0 ? <div className="text-muted" style={{ padding: 20, textAlign: 'center' }}>No transactions today</div> : recentTx.map(tx => (
+                <div key={tx.id} className="service-item" onClick={() => navigate('/transactions')} style={{ borderBottom: '1px solid var(--border-subtle)', borderRadius: 0, padding: '14px 8px' }}>
+                  <div>
+                    <div className="service-item-name">{tx.service.name}</div>
+                    <div className="service-item-cat">{tx.paymentMethod} • {new Date(tx.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                  </div>
+                  <div className="service-item-price text-success">+{fmt(tx.totalPrice)}</div>
                 </div>
-                <div className="service-item-price text-success">+{fmt(tx.totalPrice)}</div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Quick Actions */}
       <div className="section-title" style={{ animation: 'slideUpSaaS 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards', animationDelay: '0.3s', opacity: 0 }}>{t('dashboard.quickActions' as any)}</div>
