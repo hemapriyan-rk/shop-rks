@@ -73,8 +73,8 @@ export default function Topbar({ title, onMenuClick }: TopbarProps) {
           {language === 'en' ? 'அ' : 'A'}
         </button>
 
-        <button onClick={() => toggleTheme(role === 'SUPER_ADMIN')} className="btn-icon text-muted" title={t('topbar.toggleTheme')} style={{ fontSize: '18px' }}>
-          {theme === 'light' ? '🌙' : theme === 'dark' ? (role === 'SUPER_ADMIN' ? '✨' : '☀️') : '☀️'}
+        <button onClick={() => toggleTheme(role)} className="btn-icon text-muted" title={t('topbar.toggleTheme')} style={{ fontSize: '18px' }}>
+          {theme === 'light' ? '🌙' : theme === 'dark' ? ((role === 'ADMIN' || role === 'SUPER_ADMIN') ? '🔮' : '☀️') : theme === 'glass' ? (role === 'SUPER_ADMIN' ? '✨' : '☀️') : '☀️'}
         </button>
         <span style={{ fontSize: 13, color: 'var(--text-secondary)', fontWeight: 600 }}>{user?.name}</span>
       </div>

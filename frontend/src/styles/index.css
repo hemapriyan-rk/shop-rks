@@ -116,6 +116,69 @@
   --shadow-glow: 0 0 30px var(--color-primary-glow);
 }
 
+[data-theme="glass"] {
+  --color-primary: #8A2BE2;
+  --color-primary-light: #A855F7;
+  --color-primary-dark: #581C87;
+  --color-primary-glow: rgba(138, 43, 226, 0.5);
+
+  --color-accent: #D4AF37;
+  --color-accent-light: #F3E5AB;
+  --color-accent-dark: #AA8C2C;
+  --color-accent-glow: rgba(212, 175, 55, 0.4);
+
+  --bg-base: linear-gradient(-45deg, #2e0854, #4a148c, #311b92, #1a237e);
+  --bg-surface: rgba(20, 20, 30, 0.4);
+  --bg-elevated: rgba(30, 30, 45, 0.5);
+  --bg-card: rgba(25, 25, 40, 0.3);
+  --bg-hover: rgba(255, 255, 255, 0.1);
+  --bg-input: rgba(0, 0, 0, 0.2);
+  --bg-modal: rgba(20, 20, 30, 0.6);
+
+  --text-primary: #F0F0F8;
+  --text-secondary: #E0E0E0;
+  --text-muted: #A0A0B8;
+
+  --border-subtle: rgba(255, 255, 255, 0.1);
+  --border-default: rgba(255, 255, 255, 0.2);
+  --border-focus: rgba(255, 255, 255, 0.4);
+  --border-accent: rgba(212, 175, 55, 0.4);
+
+  --shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 8px 32px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.4);
+  --shadow-glow: 0 0 30px var(--color-primary-glow);
+}
+
+[data-theme="glass"] body {
+  background-size: 400% 400%;
+  animation: gradientBG 15s ease infinite;
+}
+
+[data-theme="glass"] .sidebar,
+[data-theme="glass"] .topbar,
+[data-theme="glass"] .card,
+[data-theme="glass"] .stat-card,
+[data-theme="glass"] .modal,
+[data-theme="glass"] .login-box,
+[data-theme="glass"] .quick-action-card,
+[data-theme="glass"] .table-wrapper {
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-default);
+  box-shadow: var(--shadow-md);
+}
+
+[data-theme="glass"] .topbar {
+  background: var(--bg-surface);
+}
+
+[data-theme="glass"] .sidebar {
+  background: var(--bg-surface);
+}
+
+
 /* ── Reset ─────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { font-size: 15px; }
@@ -611,6 +674,11 @@ tbody tr:last-child td { border-bottom: none; }
   to   { opacity: 1; transform: translateY(0); }
 }
 @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.5; } }
+@keyframes gradientBG {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
 
 /* ── Utils ─────────────────────────────────────────────────────── */
 .flex { display: flex; }

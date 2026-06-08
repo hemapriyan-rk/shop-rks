@@ -1,10 +1,10 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-type Theme = 'light' | 'dark' | 'black-gold';
+type Theme = 'light' | 'dark' | 'black-gold' | 'glass';
 
 interface ThemeContextType {
   theme: Theme;
-  toggleTheme: (isSuperAdmin?: boolean) => void;
+  toggleTheme: (role?: string | null) => void;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -12,7 +12,7 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>(() => {
     const saved = localStorage.getItem('rks_theme') as Theme | null;
-    if (saved === 'light' || saved === 'dark' || saved === 'black-gold') return saved;
+    if (saved === 'light' || saved === 'dark' || saved === 'black-gold' || saved === 'glass') return saved;
     return 'light'; // default theme
   });
 
@@ -21,9 +21,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
 
-  const toggleTheme = (isSuperAdmin: boolean = false) => {
+  const toggleTheme = (role: string | null = null) => {
     setTheme(prev => {
-      if (prev === 'dark') return isSuperAdmin ? 'black-gold' : 'light';
+      const isAdmin = role === 'ADMIN' || role === 'SUPER_ADMIN';
+      const isSuperAdmin = role === 'SUPER_ADMIN';
+
+      if (prev === 'dark') return isAdmin ? 'glass' : 'light';
+      if (prev === 'glass') return isSuperAdmin ? 'black-gold' : 'light';
       if (prev === 'black-gold') return 'light';
       return 'dark'; // prev === 'light'
     });
