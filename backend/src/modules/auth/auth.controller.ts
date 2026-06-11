@@ -255,3 +255,56 @@ export async function changePassword(req: Request, res: Response, next: NextFunc
     next(err);
   }
 }
+
+export async function verifyDownload(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { username, password } = req.body;
+    const ip = req.ip || req.socket.remoteAddress || 'unknown';
+
+    if (!username || !password) {
+      sendError(res, 'Username and password are required', 400);
+      return;
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { username: username.toLowerCase().trim() }
+    });
+
+    if (!user || !user.isActive || user.isSuspended) {
+      sendUnauthorized(res, 'Invalid credentials or account suspended');
+      return;
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+    if (!isPasswordValid) {
+      sendUnauthorized(res, 'Invalid credentials');
+      return;
+    }
+
+    // Check for Maintenance Mode
+    const config = await prisma.systemConfig.findUnique({ where: { id: 1 } });
+    if (config?.maintenanceMode && user.role !== 'SUPER_ADMIN') {
+      res.status(503).json({
+        success: false,
+        error: config.maintenanceMessage || 'Server is under maintenance. Downloads disabled.',
+        maintenance: true
+      });
+      return;
+    }
+
+    // Log the download event
+    const alert = await prisma.systemAlert.create({
+      data: {
+        type: 'INFO',
+        source: 'SYSTEM',
+        message: `User ${user.username} downloaded the Android App.`,
+        ipAddress: ip
+      }
+    });
+    socketBroadcast({ type: 'NEW_ALERT', targetRole: 'SUPER_ADMIN', payload: alert });
+
+    sendSuccess(res, { apkUrl: '/ShopRKS.apk?v=1.0.6' }, 200, undefined, 'Verification successful. Download started.');
+  } catch (err) {
+    next(err);
+  }
+}
