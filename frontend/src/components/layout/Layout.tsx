@@ -4,6 +4,8 @@ import Sidebar from './Sidebar';
 import Topbar from './Topbar';
 import { useAuth } from '../../context/AuthContext';
 import { io, Socket } from 'socket.io-client';
+import { Capacitor } from '@capacitor/core';
+import { LocalNotifications } from '@capacitor/local-notifications';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -36,7 +38,12 @@ export default function Layout({ children, title }: LayoutProps) {
 
   // Socket connection
   useEffect(() => {
-    // Register Service Worker for Mobile Notifications
+    // Request Native Notification Permissions
+    if (Capacitor.isNativePlatform()) {
+      LocalNotifications.requestPermissions().catch(console.error);
+    }
+    
+    // Register Service Worker for Mobile Notifications (Web)
     if ('serviceWorker' in navigator && 'Notification' in window) {
       navigator.serviceWorker.register('/sw.js').catch(console.error);
       if (Notification.permission === 'default') {
@@ -61,7 +68,26 @@ export default function Layout({ children, title }: LayoutProps) {
       console.log('[SOCKET] Received notification:', data);
       
       const fireBrowserNotification = async (title: string, body: string) => {
-        if ('Notification' in window && Notification.permission === 'granted') {
+        if (Capacitor.isNativePlatform()) {
+          try {
+            await LocalNotifications.schedule({
+              notifications: [
+                {
+                  title,
+                  body,
+                  id: new Date().getTime(),
+                  schedule: { at: new Date(Date.now() + 1000) },
+                  sound: null,
+                  attachments: null,
+                  actionTypeId: '',
+                  extra: null
+                }
+              ]
+            });
+          } catch (e) {
+            console.error('Native notification failed', e);
+          }
+        } else if ('Notification' in window && Notification.permission === 'granted') {
           try {
             if ('serviceWorker' in navigator) {
               const reg = await navigator.serviceWorker.ready;
@@ -70,7 +96,7 @@ export default function Layout({ children, title }: LayoutProps) {
               new Notification(title, { body, icon: '/logo.png' });
             }
           } catch (e) {
-            console.error('Notification failed', e);
+            console.error('Web notification failed', e);
           }
         }
       };
@@ -82,7 +108,14 @@ export default function Layout({ children, title }: LayoutProps) {
         fireBrowserNotification('System Alert', data.payload?.message || 'New system alert received');
       } else if (data.type === 'PERIODIC_UPDATE') {
         const { income, expenses, profit } = data.payload || {};
-        fireBrowserNotification('Daily Financial Update', `Income: ₹${income || 0} | Expenses: ₹${expenses || 0} | Profit: ₹${profit || 0}`);
+        const title = '💰 Daily Financial Update';
+        const body = `Income: ₹${income || 0}\nExpenses: ₹${expenses || 0}\nProfit: ₹${profit || 0}`;
+        
+        // Show structured popup in-app
+        setBroadcast(`${title}\n\n${body}`);
+        
+        // Trigger native mobile notification
+        fireBrowserNotification(title, `Income: ₹${income || 0} | Expenses: ₹${expenses || 0} | Profit: ₹${profit || 0}`);
       } else if (data.type === 'KICK') {
         alert(data.message || 'Your session has been terminated.');
         logout();
@@ -173,7 +206,8 @@ export default function Layout({ children, title }: LayoutProps) {
                       margin: 0, 
                       color: 'var(--text-primary)',
                       fontWeight: 500,
-                      wordBreak: 'break-word'
+                      wordBreak: 'break-word',
+                      whiteSpace: 'pre-line'
                     }}>
                       {broadcast}
                     </p>

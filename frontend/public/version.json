@@ -1,5 +1,5 @@
 {
-  "version": "1.0.10",
-  "apkUrl": "/ShopRKS.apk?v=1.0.10",
-  "releaseNotes": "Testing Update: This 1.0.10 release exists to test the secure in-app username/password prompt introduced in 1.0.9."
+  "version": "1.0.11",
+  "apkUrl": "/ShopRKS.apk?v=1.0.11",
+  "releaseNotes": "Feature: Integrated native mobile notifications and structured in-app popup for periodic financial updates."
 }
