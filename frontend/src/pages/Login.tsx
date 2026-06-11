@@ -32,13 +32,34 @@ export default function LoginPage() {
 
   if (Capacitor.isNativePlatform()) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: '#0f172a', fontFamily: 'Inter, sans-serif', padding: '24px', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ width: '100%', maxWidth: '400px', background: 'linear-gradient(145deg, #1e293b, #0f172a)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '24px', padding: '40px 32px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <div style={{ 
+        display: 'flex', flexDirection: 'column', minHeight: '100vh', 
+        background: 'var(--bg-base)', fontFamily: 'Inter, sans-serif', 
+        padding: '24px', alignItems: 'center', justifyContent: 'center' 
+      }}>
+        <style>{`
+          @keyframes fadeSlideIn {
+            from { opacity: 0; transform: translateY(20px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+          }
+          .app-entry-anim {
+            animation: fadeSlideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+          }
+        `}</style>
+        
+        <div className="app-entry-anim" style={{ 
+          width: '100%', maxWidth: '400px', 
+          background: 'var(--bg-surface)', 
+          border: '1px solid var(--border-color)', 
+          borderRadius: '24px', padding: '40px 32px', 
+          boxShadow: '0 25px 50px -12px rgba(0,0,0,0.15)', 
+          display: 'flex', flexDirection: 'column', alignItems: 'center' 
+        }}>
           
-          <img src="/app-logo.png" alt="App Logo" style={{ height: '100px', width: '100px', objectFit: 'contain', borderRadius: '24px', marginBottom: '24px', background: 'rgba(255,255,255,0.05)', padding: '10px', boxShadow: '0 10px 25px rgba(0,0,0,0.3)' }} />
+          <img src="/app-logo.png" alt="App Logo" style={{ height: '110px', width: '110px', objectFit: 'contain', borderRadius: '50%', marginBottom: '24px', background: '#fff', padding: '5px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }} />
           
-          <h2 style={{ fontSize: '24px', fontWeight: 800, color: '#f8fafc', marginBottom: '8px' }}>Welcome Back</h2>
-          <p style={{ color: '#94a3b8', fontSize: '14px', marginBottom: '32px', textAlign: 'center' }}>Sign in to continue to Shop RKS</p>
+          <h2 style={{ fontSize: '24px', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '8px' }}>Welcome Back</h2>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '32px', textAlign: 'center' }}>Sign in to continue to Shop RKS</p>
 
           <form onSubmit={handleSubmit} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '20px' }}>
             {error && !isSuspendedError && (
@@ -48,30 +69,30 @@ export default function LoginPage() {
             )}
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <label style={{ fontSize: '14px', fontWeight: 600, color: '#cbd5e1' }}>Username</label>
+              <label style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-secondary)' }}>Username</label>
               <input
                 type="text"
                 placeholder="Enter username"
                 value={username}
                 onChange={e => setUsername(e.target.value)}
-                style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '16px', outline: 'none' }}
+                style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', background: 'var(--bg-base)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', fontSize: '16px', outline: 'none' }}
                 autoComplete="username"
               />
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <label style={{ fontSize: '14px', fontWeight: 600, color: '#cbd5e1' }}>Password</label>
+              <label style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-secondary)' }}>Password</label>
               <input
                 type="password"
                 placeholder="••••••••"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '16px', outline: 'none' }}
+                style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', background: 'var(--bg-base)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', fontSize: '16px', outline: 'none' }}
                 autoComplete="current-password"
               />
             </div>
 
-            <button type="submit" disabled={loading} style={{ width: '100%', padding: '16px', background: '#6366f1', color: '#fff', border: 'none', borderRadius: '12px', fontSize: '16px', fontWeight: 700, marginTop: '8px', cursor: 'pointer', transition: 'background 0.2s', boxShadow: '0 10px 15px -3px rgba(99, 102, 241, 0.4)' }}>
+            <button type="submit" disabled={loading} style={{ width: '100%', padding: '16px', background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: '12px', fontSize: '16px', fontWeight: 700, marginTop: '8px', cursor: 'pointer', transition: 'transform 0.2s, opacity 0.2s', opacity: loading ? 0.7 : 1, boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.3)' }}>
               {loading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
@@ -79,8 +100,8 @@ export default function LoginPage() {
         </div>
 
         <div style={{ marginTop: 'auto', paddingTop: '40px', paddingBottom: '20px', textAlign: 'center' }}>
-          <p style={{ color: '#64748b', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>
-            Development company: <span style={{ color: '#94a3b8', fontWeight: 800 }}>RKS SOFTWARE CELL</span>
+          <p style={{ color: 'var(--text-muted)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>
+            Development company: <span style={{ color: 'var(--text-primary)', fontWeight: 800 }}>RKS SOFTWARE CELL</span>
           </p>
         </div>
       </div>

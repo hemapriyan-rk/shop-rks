@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { App as CapacitorApp } from '@capacitor/app';
+import { Capacitor } from '@capacitor/core';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './routes/ProtectedRoute';
 
@@ -40,7 +41,10 @@ import DownloadAppPage from './pages/DownloadAppPage';
 import AppUpdater from './components/AppUpdater';
 
 export default function App() {
+  const [isAnimating, setIsAnimating] = React.useState(true);
+
   useEffect(() => {
+    // Hardware back button
     CapacitorApp.addListener('backButton', ({ canGoBack }) => {
       if (!canGoBack) {
         CapacitorApp.exitApp();
@@ -48,22 +52,42 @@ export default function App() {
         window.history.back();
       }
     });
+
+    // App state change (background/foreground)
+    CapacitorApp.addListener('appStateChange', ({ isActive }) => {
+      if (isActive && Capacitor.isNativePlatform()) {
+        setIsAnimating(false);
+        // Force reflow to restart animation
+        setTimeout(() => setIsAnimating(true), 10);
+      }
+    });
+
     return () => {
       CapacitorApp.removeAllListeners();
     };
   }, []);
 
   return (
-    <AuthProvider>
-      <AppUpdater />
-      <BrowserRouter>
-        <Routes>
+    <div className={Capacitor.isNativePlatform() && isAnimating ? "app-global-entry" : ""} style={{ minHeight: '100vh' }}>
+      <style>{`
+        @keyframes globalFadeScale {
+          from { opacity: 0; transform: scale(0.98); }
+          to { opacity: 1; transform: scale(1); }
+        }
+        .app-global-entry {
+          animation: globalFadeScale 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+      `}</style>
+      <AuthProvider>
+        <AppUpdater />
+        <BrowserRouter>
+          <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/developer" element={<DeveloperPage />} />
           <Route path="/open" element={<LandingPage />} />
           <Route path="/download" element={<DownloadAppPage />} />
-          <Route path="/" element={<Navigate to="/open" replace />} />
+          <Route path="/" element={<Navigate to={Capacitor.isNativePlatform() ? "/login" : "/open"} replace />} />
 
           {/* All authenticated users */}
           <Route element={<ProtectedRoute />}>
@@ -125,5 +149,6 @@ export default function App() {
         </Routes>
       </BrowserRouter>
     </AuthProvider>
+    </div>
   );
 }
