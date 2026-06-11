@@ -1,5 +1,5 @@
 {
-  "version": "1.0.3",
-  "apkUrl": "/ShopRKS.apk",
-  "releaseNotes": "Major Optimization Update: 60% smaller app size, fixed icon alignment, UI animations, and direct login routing."
+  "version": "1.0.4",
+  "apkUrl": "/ShopRKS.apk?v=1.0.4",
+  "releaseNotes": "Critical fix: Bypassed server cache to ensure latest UI updates and animations are delivered."
 }

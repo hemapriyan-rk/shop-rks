@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
 
-const CURRENT_VERSION = '1.0.3';
+const CURRENT_VERSION = '1.0.4';
 
 export default function AppUpdater() {
   const [updateAvailable, setUpdateAvailable] = useState(false);
@@ -15,7 +15,7 @@ export default function AppUpdater() {
 
     const checkForUpdates = async () => {
       try {
-        const response = await fetch('https://shop-rks.onrender.com/version.json', { cache: 'no-store' });
+        const response = await fetch(`https://shop-rks.onrender.com/version.json?t=${Date.now()}`, { cache: 'no-store' });
         if (!response.ok) return;
 
         const data = await response.json();

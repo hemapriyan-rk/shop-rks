@@ -125,8 +125,14 @@ if (env.NODE_ENV === 'production') {
 
   // Serve static assets (JS, CSS, images, fonts)
   app.use(express.static(frontendPath, {
-    maxAge: '1y',       // long-term cache for hashed assets
     etag: true,
+    setHeaders: (res, pathStr) => {
+      if (pathStr.includes('/assets/') || pathStr.includes('\\assets\\')) {
+        res.setHeader('Cache-Control', 'public, max-age=31536000');
+      } else {
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      }
+    }
   }));
 
   // SPA fallback — any non-API GET route serves index.html
