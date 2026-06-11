@@ -76,11 +76,7 @@ export default function Layout({ children, title }: LayoutProps) {
                   title,
                   body,
                   id: new Date().getTime(),
-                  schedule: { at: new Date(Date.now() + 1000) },
-                  sound: null,
-                  attachments: null,
-                  actionTypeId: '',
-                  extra: null
+                  schedule: { at: new Date(Date.now() + 1000) }
                 }
               ]
             });

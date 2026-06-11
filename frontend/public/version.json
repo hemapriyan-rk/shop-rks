@@ -1,5 +1,5 @@
 {
-  "version": "1.0.11",
-  "apkUrl": "/ShopRKS.apk?v=1.0.11",
-  "releaseNotes": "Feature: Integrated native mobile notifications and structured in-app popup for periodic financial updates."
+  "version": "1.0.12",
+  "apkUrl": "/ShopRKS.apk?v=1.0.12",
+  "releaseNotes": "Fix: Resolved build error during deployment. Integrated native mobile notifications and structured in-app popup for periodic financial updates."
 }
