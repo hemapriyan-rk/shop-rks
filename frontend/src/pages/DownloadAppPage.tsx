@@ -175,7 +175,7 @@ export default function DownloadAppPage() {
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ color: 'var(--text-muted)', fontSize: '14px' }}>Size</span>
-              <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '14px' }}>~ 5 MB</span>
+              <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '14px' }}>~ 18 MB</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ color: 'var(--text-muted)', fontSize: '14px' }}>OS Requirement</span>
