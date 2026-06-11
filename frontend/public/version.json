@@ -1,5 +1,5 @@
 {
-  "version": "1.0.9",
-  "apkUrl": "/ShopRKS.apk?v=1.0.9",
-  "releaseNotes": "Security Update: In-app updater now demands employee authentication and properly handles Server Maintenance Mode."
+  "version": "1.0.10",
+  "apkUrl": "/ShopRKS.apk?v=1.0.10",
+  "releaseNotes": "Testing Update: This 1.0.10 release exists to test the secure in-app username/password prompt introduced in 1.0.9."
 }
