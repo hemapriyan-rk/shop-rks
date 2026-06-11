@@ -1,5 +1,5 @@
 {
-  "version": "1.0.8",
-  "apkUrl": "/ShopRKS.apk?v=1.0.8",
-  "releaseNotes": "Optimization: App size significantly reduced and optimized. Version correctly matches 1.0.8 everywhere."
+  "version": "1.0.9",
+  "apkUrl": "/ShopRKS.apk?v=1.0.9",
+  "releaseNotes": "Security Update: In-app updater now demands employee authentication and properly handles Server Maintenance Mode."
 }
