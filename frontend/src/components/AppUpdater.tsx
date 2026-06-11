@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
 
-const CURRENT_VERSION = '1.0.0';
+const CURRENT_VERSION = '1.0.2';
 
 export default function AppUpdater() {
   const [updateAvailable, setUpdateAvailable] = useState(false);
