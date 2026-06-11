@@ -1,5 +1,5 @@
 {
-  "version": "1.0.7",
-  "apkUrl": "/ShopRKS.apk?v=1.0.7",
-  "releaseNotes": "UX Upgrade: Added a sleek, animated YouTube-style Web Splash Screen that plays smoothly on fresh start."
+  "version": "1.0.8",
+  "apkUrl": "/ShopRKS.apk?v=1.0.8",
+  "releaseNotes": "Optimization: App size significantly reduced and optimized. Version correctly matches 1.0.8 everywhere."
 }
