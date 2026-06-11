@@ -1,5 +1,5 @@
 {
-  "version": "1.0.2",
+  "version": "1.0.3",
   "apkUrl": "/ShopRKS.apk",
-  "releaseNotes": "Fixed update loop and applied new app logo."
+  "releaseNotes": "Major Optimization Update: 60% smaller app size, fixed icon alignment, UI animations, and direct login routing."
 }
