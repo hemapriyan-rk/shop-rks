@@ -37,6 +37,7 @@ import RenderMaintenancePage from './pages/admin/RenderMaintenancePage';
 import RoleManagementPage from './pages/admin/RoleManagementPage';
 import SystemAlertsPage from './pages/admin/SystemAlertsPage';
 import DownloadAppPage from './pages/DownloadAppPage';
+import AppUpdater from './components/AppUpdater';
 
 export default function App() {
   useEffect(() => {
@@ -54,6 +55,7 @@ export default function App() {
 
   return (
     <AuthProvider>
+      <AppUpdater />
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
