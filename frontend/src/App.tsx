@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { App as CapacitorApp } from '@capacitor/app';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './routes/ProtectedRoute';
 
@@ -35,8 +36,22 @@ import IncomeManagementPage from './pages/admin/IncomeManagementPage';
 import RenderMaintenancePage from './pages/admin/RenderMaintenancePage';
 import RoleManagementPage from './pages/admin/RoleManagementPage';
 import SystemAlertsPage from './pages/admin/SystemAlertsPage';
+import DownloadAppPage from './pages/DownloadAppPage';
 
 export default function App() {
+  useEffect(() => {
+    CapacitorApp.addListener('backButton', ({ canGoBack }) => {
+      if (!canGoBack) {
+        CapacitorApp.exitApp();
+      } else {
+        window.history.back();
+      }
+    });
+    return () => {
+      CapacitorApp.removeAllListeners();
+    };
+  }, []);
+
   return (
     <AuthProvider>
       <BrowserRouter>
@@ -45,6 +60,7 @@ export default function App() {
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/developer" element={<DeveloperPage />} />
           <Route path="/open" element={<LandingPage />} />
+          <Route path="/download" element={<DownloadAppPage />} />
           <Route path="/" element={<Navigate to="/open" replace />} />
 
           {/* All authenticated users */}

@@ -1,7 +1,12 @@
 import axios from 'axios';
+import { Capacitor } from '@capacitor/core';
+
+const baseURL = Capacitor.isNativePlatform() 
+  ? 'https://shop-rks.onrender.com/api' 
+  : '/api';
 
 const api = axios.create({
-  baseURL: '/api',
+  baseURL,
   timeout: 15000,
   headers: { 'Content-Type': 'application/json' },
 });
