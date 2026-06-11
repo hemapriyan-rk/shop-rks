@@ -58,8 +58,53 @@ function RootRedirect() {
   return <Navigate to={Capacitor.isNativePlatform() ? "/login" : "/open"} replace />;
 }
 
+function CustomSplashScreen({ onComplete }: { onComplete: () => void }) {
+  const [fading, setFading] = useState(false);
+
+  useEffect(() => {
+    // Show splash for 1.5 seconds, then start fading out
+    const timer = setTimeout(() => {
+      setFading(true);
+      // Wait 0.5s for the fade animation to complete before unmounting
+      setTimeout(onComplete, 500);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [onComplete]);
+
+  return (
+    <div style={{
+      position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+      background: 'var(--bg-base)', zIndex: 99999,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      opacity: fading ? 0 : 1, transition: 'opacity 0.5s ease-in-out',
+      pointerEvents: 'none'
+    }}>
+      <style>{`
+        @keyframes pulseLogo {
+          0% { transform: scale(0.85); opacity: 0; }
+          40% { transform: scale(1.05); opacity: 1; }
+          100% { transform: scale(1); opacity: 1; }
+        }
+        .splash-logo-anim {
+          animation: pulseLogo 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+      `}</style>
+      <img 
+        src="/app-logo.png" 
+        alt="Logo" 
+        className="splash-logo-anim"
+        style={{ 
+          width: '130px', height: '130px', objectFit: 'contain', 
+          borderRadius: '50%', background: '#fff', padding: '8px', 
+          boxShadow: '0 15px 35px rgba(0,0,0,0.15)' 
+        }} 
+      />
+    </div>
+  );
+}
+
 export default function App() {
-  const [isAnimating, setIsAnimating] = useState(true);
+  const [showSplash, setShowSplash] = useState(Capacitor.isNativePlatform());
 
   useEffect(() => {
     // Hardware back button
@@ -71,32 +116,15 @@ export default function App() {
       }
     });
 
-    // App state change (background/foreground)
-    CapacitorApp.addListener('appStateChange', ({ isActive }) => {
-      if (isActive && Capacitor.isNativePlatform()) {
-        setIsAnimating(false);
-        // Force reflow to restart animation
-        setTimeout(() => setIsAnimating(true), 10);
-      }
-    });
-
     return () => {
       CapacitorApp.removeAllListeners();
     };
   }, []);
 
   return (
-    <div className={Capacitor.isNativePlatform() && isAnimating ? "app-global-entry" : ""} style={{ minHeight: '100vh', background: 'var(--bg-base)' }}>
-      <style>{`
-        @keyframes globalFadeScale {
-          from { opacity: 0; transform: scale(0.95); }
-          to { opacity: 1; transform: scale(1); }
-        }
-        .app-global-entry {
-          animation: globalFadeScale 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-          animation-delay: 0.1s; /* Small delay to wait for splash screen to hide */
-        }
-      `}</style>
+    <>
+      {showSplash && <CustomSplashScreen onComplete={() => setShowSplash(false)} />}
+      <div style={{ minHeight: '100vh', background: 'var(--bg-base)' }}>
       <AuthProvider>
         <AppUpdater />
         <BrowserRouter>
@@ -169,5 +197,6 @@ export default function App() {
       </BrowserRouter>
     </AuthProvider>
     </div>
+    </>
   );
 }

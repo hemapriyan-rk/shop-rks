@@ -292,16 +292,20 @@ export async function verifyDownload(req: Request, res: Response, next: NextFunc
       return;
     }
 
-    // Log the download event
-    const alert = await prisma.systemAlert.create({
-      data: {
-        type: 'INFO',
-        source: 'SYSTEM',
-        message: `User ${user.username} downloaded the Android App.`,
-        ipAddress: ip
-      }
-    });
-    socketBroadcast({ type: 'NEW_ALERT', targetRole: 'SUPER_ADMIN', payload: alert });
+    // Log the download event (non-blocking)
+    try {
+      const alert = await prisma.systemAlert.create({
+        data: {
+          type: 'INFO',
+          source: 'SYSTEM',
+          message: `User ${user.username} downloaded the Android App.`,
+          ipAddress: ip
+        }
+      });
+      socketBroadcast({ type: 'NEW_ALERT', targetRole: 'SUPER_ADMIN', payload: alert });
+    } catch (logErr) {
+      console.error('[verifyDownload] Failed to log download event:', logErr);
+    }
 
     sendSuccess(res, { apkUrl: '/ShopRKS.apk?v=1.0.6' }, 200, undefined, 'Verification successful. Download started.');
   } catch (err) {

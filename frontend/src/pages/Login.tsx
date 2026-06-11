@@ -142,9 +142,16 @@ export default function LoginPage() {
           <h1 style={{ fontSize: '3rem', fontWeight: 900, lineHeight: 1.1, marginBottom: 16 }}>
             RKS Internal<br/>Management System
           </h1>
-          <p style={{ fontSize: '1.2rem', opacity: 0.9, maxWidth: 400, lineHeight: 1.5 }}>
+          <p style={{ fontSize: '1.2rem', opacity: 0.9, maxWidth: 400, lineHeight: 1.5, marginBottom: 32 }}>
             Secure portal for staff and administrators. Manage billing, transactions, and analytics seamlessly.
           </p>
+
+          {!Capacitor.isNativePlatform() && (
+            <Link to="/download" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.3)', color: '#fff', padding: '12px 24px', borderRadius: '12px', textDecoration: 'none', fontWeight: 700, marginBottom: 40 }}>
+              <span style={{ fontSize: '20px' }}>📱</span>
+              <span>Download Android App</span>
+            </Link>
+          )}
         </div>
 
         {/* Developer Badge */}

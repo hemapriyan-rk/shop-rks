@@ -77,7 +77,7 @@ export default function DownloadAppPage() {
           </h1>
           
           <p style={{ fontSize: '18px', color: 'var(--text-secondary)', lineHeight: 1.6, maxWidth: '450px' }}>
-            Manage inventory, track billing, and review reports directly from your Android device. Fast, secure, and built exclusively for RKS employees.
+            Built exclusively for RKS employees.
           </p>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'var(--text-secondary)', fontSize: '14px', marginTop: '8px' }}>
