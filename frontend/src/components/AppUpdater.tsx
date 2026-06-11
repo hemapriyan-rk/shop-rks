@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
 
-const CURRENT_VERSION = '1.0.5';
+const CURRENT_VERSION = '1.0.6';
 
 export default function AppUpdater() {
   const [updateAvailable, setUpdateAvailable] = useState(false);
@@ -70,13 +70,13 @@ export default function AppUpdater() {
       padding: '24px'
     }}>
       <div style={{
-        background: 'linear-gradient(145deg, #1e293b, #0f172a)',
-        border: '1px solid rgba(255,255,255,0.1)',
+        background: 'var(--bg-surface)',
+        border: '1px solid var(--border-color)',
         borderRadius: '24px',
         padding: '32px',
         maxWidth: '400px',
         width: '100%',
-        color: '#fff',
+        color: 'var(--text-primary)',
         boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
       }}>
         <div style={{ 
@@ -88,13 +88,13 @@ export default function AppUpdater() {
           <span style={{ fontSize: '32px' }}>🚀</span>
         </div>
         <h2 style={{ fontSize: '24px', fontWeight: 800, marginBottom: '12px' }}>Update Required</h2>
-        <p style={{ color: '#94a3b8', marginBottom: '16px', lineHeight: 1.6 }}>
+        <p style={{ color: 'var(--text-secondary)', marginBottom: '16px', lineHeight: 1.6 }}>
           A new version of Shop RKS is available. Please update to continue using the application securely.
         </p>
         
         {releaseNotes && (
-          <div style={{ background: 'rgba(0,0,0,0.3)', padding: '16px', borderRadius: '12px', marginBottom: '24px', borderLeft: '3px solid #6366f1' }}>
-            <p style={{ fontSize: '13px', color: '#cbd5e1', margin: 0 }}>{releaseNotes}</p>
+          <div style={{ background: 'var(--bg-base)', padding: '16px', borderRadius: '12px', marginBottom: '24px', borderLeft: '3px solid var(--color-primary)' }}>
+            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0 }}>{releaseNotes}</p>
           </div>
         )}
         
@@ -103,7 +103,7 @@ export default function AppUpdater() {
           style={{
             width: '100%',
             padding: '16px',
-            backgroundColor: '#6366f1',
+            backgroundColor: 'var(--color-primary)',
             color: '#fff',
             border: 'none',
             borderRadius: '12px',

@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { App as CapacitorApp } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import ProtectedRoute from './routes/ProtectedRoute';
 
 import LandingPage from './pages/LandingPage';
@@ -40,8 +40,26 @@ import SystemAlertsPage from './pages/admin/SystemAlertsPage';
 import DownloadAppPage from './pages/DownloadAppPage';
 import AppUpdater from './components/AppUpdater';
 
+function RootRedirect() {
+  const { isAuthenticated, isLoading } = useAuth();
+  
+  if (isLoading) {
+    return (
+      <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-base)', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="spinner spinner-lg" />
+      </div>
+    );
+  }
+  
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
+  }
+  
+  return <Navigate to={Capacitor.isNativePlatform() ? "/login" : "/open"} replace />;
+}
+
 export default function App() {
-  const [isAnimating, setIsAnimating] = React.useState(true);
+  const [isAnimating, setIsAnimating] = useState(true);
 
   useEffect(() => {
     // Hardware back button
@@ -68,14 +86,15 @@ export default function App() {
   }, []);
 
   return (
-    <div className={Capacitor.isNativePlatform() && isAnimating ? "app-global-entry" : ""} style={{ minHeight: '100vh' }}>
+    <div className={Capacitor.isNativePlatform() && isAnimating ? "app-global-entry" : ""} style={{ minHeight: '100vh', background: 'var(--bg-base)' }}>
       <style>{`
         @keyframes globalFadeScale {
-          from { opacity: 0; transform: scale(0.98); }
+          from { opacity: 0; transform: scale(0.95); }
           to { opacity: 1; transform: scale(1); }
         }
         .app-global-entry {
-          animation: globalFadeScale 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+          animation: globalFadeScale 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+          animation-delay: 0.1s; /* Small delay to wait for splash screen to hide */
         }
       `}</style>
       <AuthProvider>
@@ -87,7 +106,7 @@ export default function App() {
           <Route path="/developer" element={<DeveloperPage />} />
           <Route path="/open" element={<LandingPage />} />
           <Route path="/download" element={<DownloadAppPage />} />
-          <Route path="/" element={<Navigate to={Capacitor.isNativePlatform() ? "/login" : "/open"} replace />} />
+          <Route path="/" element={<RootRedirect />} />
 
           {/* All authenticated users */}
           <Route element={<ProtectedRoute />}>

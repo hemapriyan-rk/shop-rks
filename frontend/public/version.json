@@ -1,5 +1,5 @@
 {
-  "version": "1.0.5",
-  "apkUrl": "/ShopRKS.apk?v=1.0.5",
-  "releaseNotes": "Final APK Sync Fix: App assets fully synchronized."
+  "version": "1.0.6",
+  "apkUrl": "/ShopRKS.apk?v=1.0.6",
+  "releaseNotes": "Final Polish: Fixed app background animations, added persistent session routing, updated theme, and corrected Android Settings version number."
 }

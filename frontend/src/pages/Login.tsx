@@ -1,16 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 import { Capacitor } from '@capacitor/core';
 
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -100,8 +106,10 @@ export default function LoginPage() {
         </div>
 
         <div style={{ marginTop: 'auto', paddingTop: '40px', paddingBottom: '20px', textAlign: 'center' }}>
-          <p style={{ color: 'var(--text-muted)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>
-            Development company: <span style={{ color: 'var(--text-primary)', fontWeight: 800 }}>RKS SOFTWARE CELL</span>
+          <p style={{ color: 'var(--text-muted)', fontSize: '12px', lineHeight: '1.6' }}>
+            &copy; {new Date().getFullYear()} RKS Software Cell.<br />
+            All Rights Reserved.<br />
+            Unauthorized access is strictly prohibited.
           </p>
         </div>
       </div>
