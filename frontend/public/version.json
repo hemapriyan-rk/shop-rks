@@ -1,5 +1,5 @@
 {
-  "version": "1.0.14",
-  "apkUrl": "/ShopRKS.apk?v=1.0.14",
-  "releaseNotes": "Native Feel Update: Added haptic feedback vibrations, immersive status bar, physical back-button support, and removed web highlights."
+  "version": "1.0.15",
+  "apkUrl": "/ShopRKS.apk?v=1.0.15",
+  "releaseNotes": "Aesthetic Update: Replaced all OS emojis with beautiful, uniform Flat Color SVG icons for a consistent cross-platform experience."
 }

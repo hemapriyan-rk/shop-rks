@@ -2,9 +2,16 @@ import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
+import { 
+  FcHome, FcPlus, FcFile, FcRules, FcList, FcMoneyTransfer, 
+  FcComboChart, FcOpenedFolder, FcSurvey, FcBriefcase, FcLibrary, 
+  FcServices, FcBookmark, FcKindle, FcNews, FcProcess, FcPackage, 
+  FcAdvertising, FcConferenceCall, FcPrivacy, FcGlobe, FcDatabase, 
+  FcDataBackup, FcUpRight, FcLineChart, FcMindMap, FcImport
+} from 'react-icons/fc';
 
 interface NavItem {
-  icon: string;
+  icon: React.ReactNode;
   labelKey: string;
   path: string;
   permKey?: string;
@@ -31,52 +38,52 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     {
       title: 'Main',
       items: [
-        { icon: '⊞', labelKey: 'nav.dashboard', path: '/dashboard' },
-        { icon: '＋', labelKey: 'nav.newEntry', path: '/transactions/new' },
-        { icon: '📄', labelKey: 'nav.billing', path: '/billing' },
-        { icon: '⚖️', labelKey: 'nav.terms', path: '/terms' },
-        { icon: '📋', labelKey: 'nav.myTransactions', path: '/transactions' },
-        { icon: '💸', labelKey: 'nav.myExpenses', path: '/expenses' },
+        { icon: <FcHome size={18} />, labelKey: 'nav.dashboard', path: '/dashboard' },
+        { icon: <FcPlus size={18} />, labelKey: 'nav.newEntry', path: '/transactions/new' },
+        { icon: <FcFile size={18} />, labelKey: 'nav.billing', path: '/billing' },
+        { icon: <FcRules size={18} />, labelKey: 'nav.terms', path: '/terms' },
+        { icon: <FcList size={18} />, labelKey: 'nav.myTransactions', path: '/transactions' },
+        { icon: <FcMoneyTransfer size={18} />, labelKey: 'nav.myExpenses', path: '/expenses' },
       ]
     },
     {
       title: 'Finance & Analytics',
       items: [
-        { icon: '📊', labelKey: 'nav.analytics', path: '/analytics', permKey: 'analytics' },
-        { icon: '📂', labelKey: 'nav.allTransactions', path: '/admin/transactions', permKey: 'allRecords' },
-        { icon: '📑', labelKey: 'nav.allExpenses', path: '/admin/expenses', permKey: 'allRecords' },
-        { icon: '💼', labelKey: 'nav.salary', path: '/admin/salary', permKey: 'salaryLogs' },
-        { icon: '🏦', labelKey: 'nav.banks', path: '/banks', permKey: 'banks' },
-        { icon: '⚙️', labelKey: 'nav.bankConfig', path: '/admin/bank-config', permKey: 'banks' },
-        { icon: '📊', labelKey: 'User Perf', path: '/admin/user-performance', adminOnly: true },
+        { icon: <FcComboChart size={18} />, labelKey: 'nav.analytics', path: '/analytics', permKey: 'analytics' },
+        { icon: <FcOpenedFolder size={18} />, labelKey: 'nav.allTransactions', path: '/admin/transactions', permKey: 'allRecords' },
+        { icon: <FcSurvey size={18} />, labelKey: 'nav.allExpenses', path: '/admin/expenses', permKey: 'allRecords' },
+        { icon: <FcBriefcase size={18} />, labelKey: 'nav.salary', path: '/admin/salary', permKey: 'salaryLogs' },
+        { icon: <FcLibrary size={18} />, labelKey: 'nav.banks', path: '/banks', permKey: 'banks' },
+        { icon: <FcServices size={18} />, labelKey: 'nav.bankConfig', path: '/admin/bank-config', permKey: 'banks' },
+        { icon: <FcLineChart size={18} />, labelKey: 'User Perf', path: '/admin/user-performance', adminOnly: true },
       ]
     },
     {
       title: 'Services & Config',
       items: [
-        { icon: '🛠', labelKey: 'nav.services', path: '/services', permKey: 'services' },
-        { icon: '🏷', labelKey: 'nav.expenseCats', path: '/admin/expense-categories', permKey: 'expenseCategories' },
+        { icon: <FcServices size={18} />, labelKey: 'nav.services', path: '/services', permKey: 'services' },
+        { icon: <FcBookmark size={18} />, labelKey: 'nav.expenseCats', path: '/admin/expense-categories', permKey: 'expenseCategories' },
       ]
     },
     {
       title: 'Logs & Reports',
       items: [
-        { icon: '📜', labelKey: 'nav.auditLogs', path: '/logs', permKey: 'salaryLogs' },
-        { icon: '📄', labelKey: 'nav.billLogs', path: '/admin/bill-logs', permKey: 'salaryLogs' },
-        { icon: '⚙️', labelKey: 'Auto Tx', path: '/admin/auto-transactions', adminOnly: true },
-        { icon: '📦', labelKey: 'nav.dataExports', path: '/admin/exports', permKey: 'analytics' },
+        { icon: <FcKindle size={18} />, labelKey: 'nav.auditLogs', path: '/logs', permKey: 'salaryLogs' },
+        { icon: <FcNews size={18} />, labelKey: 'nav.billLogs', path: '/admin/bill-logs', permKey: 'salaryLogs' },
+        { icon: <FcProcess size={18} />, labelKey: 'Auto Tx', path: '/admin/auto-transactions', adminOnly: true },
+        { icon: <FcPackage size={18} />, labelKey: 'nav.dataExports', path: '/admin/exports', permKey: 'analytics' },
       ]
     },
     {
       title: 'System & Users',
       items: [
-        { icon: '🔔', labelKey: 'System Alerts', path: '/admin/alerts', superOnly: true },
-        { icon: '👥', labelKey: 'nav.users', path: '/users', superOnly: true },
-        { icon: '🔐', labelKey: 'Roles', path: '/admin/roles', superOnly: true },
-        { icon: '🖥', labelKey: 'nav.serverMgmt', path: '/admin/system', superOnly: true },
-        { icon: '💾', labelKey: 'nav.storageMgmt', path: '/admin/storage', superOnly: true },
-        { icon: '☁️', labelKey: 'nav.renderMgmt', path: '/admin/render', superOnly: true },
-        { icon: '📈', labelKey: 'nav.incomeMgmt', path: '/admin/income-management', superOnly: true },
+        { icon: <FcAdvertising size={18} />, labelKey: 'System Alerts', path: '/admin/alerts', superOnly: true },
+        { icon: <FcConferenceCall size={18} />, labelKey: 'nav.users', path: '/users', superOnly: true },
+        { icon: <FcPrivacy size={18} />, labelKey: 'Roles', path: '/admin/roles', superOnly: true },
+        { icon: <FcGlobe size={18} />, labelKey: 'nav.serverMgmt', path: '/admin/system', superOnly: true },
+        { icon: <FcDatabase size={18} />, labelKey: 'nav.storageMgmt', path: '/admin/storage', superOnly: true },
+        { icon: <FcDataBackup size={18} />, labelKey: 'nav.renderMgmt', path: '/admin/render', superOnly: true },
+        { icon: <FcUpRight size={18} />, labelKey: 'nav.incomeMgmt', path: '/admin/income-management', superOnly: true },
       ]
     }
   ];
@@ -130,14 +137,14 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
         <div className="nav-section" style={{ marginTop: 'auto' }}>
           <NavLink to="/developer" className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`} onClick={onClose}>
-            <span className="nav-icon">👨‍💻</span>
+            <span className="nav-icon"><FcMindMap size={18} /></span>
             Developer Info
           </NavLink>
         </div>
 
         <div className="nav-section">
           <button className="nav-item" style={{ color: 'var(--red)' }} onClick={handleLogout}>
-            <span className="nav-icon">⇥</span>
+            <span className="nav-icon"><FcImport size={18} /></span>
             {t('nav.logout')}
           </button>
         </div>

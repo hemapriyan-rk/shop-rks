@@ -7,6 +7,7 @@ import { useAuth } from '../../context/AuthContext';
 import { io, Socket } from 'socket.io-client';
 import { Capacitor } from '@capacitor/core';
 import { LocalNotifications } from '@capacitor/local-notifications';
+import { FcAdvertising } from 'react-icons/fc';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -206,7 +207,7 @@ export default function Layout({ children, title }: LayoutProps) {
                     fontSize: 56, 
                     marginBottom: 16,
                     filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.2))'
-                  }}>📢</div>
+                  }}><FcAdvertising size={56} /></div>
                   <h2 style={{ 
                     margin: 0, 
                     fontSize: 24, 
