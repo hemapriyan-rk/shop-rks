@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Topbar from './Topbar';
+import BottomNav from './BottomNav';
 import { useAuth } from '../../context/AuthContext';
 import { io, Socket } from 'socket.io-client';
 import { Capacitor } from '@capacitor/core';
@@ -237,6 +238,7 @@ export default function Layout({ children, title }: LayoutProps) {
           {children}
         </main>
       </div>
+      <BottomNav />
     </div>
   );
 }

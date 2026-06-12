@@ -1,5 +1,5 @@
 {
-  "version": "1.0.12",
-  "apkUrl": "/ShopRKS.apk?v=1.0.12",
-  "releaseNotes": "Fix: Resolved build error during deployment. Integrated native mobile notifications and structured in-app popup for periodic financial updates."
+  "version": "1.0.13",
+  "apkUrl": "/ShopRKS.apk?v=1.0.13",
+  "releaseNotes": "UX Overhaul: Added a modern Mobile Bottom Navigation Bar with a prominent quick-entry floating action button."
 }
