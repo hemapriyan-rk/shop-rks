@@ -307,7 +307,7 @@ export async function verifyDownload(req: Request, res: Response, next: NextFunc
       console.error('[verifyDownload] Failed to log download event:', logErr);
     }
 
-    sendSuccess(res, { apkUrl: '/ShopRKS.apk?v=1.0.13' }, 200, undefined, 'Verification successful. Download started.');
+    sendSuccess(res, { apkUrl: '/ShopRKS.apk?v=1.0.14' }, 200, undefined, 'Verification successful. Download started.');
   } catch (err) {
     next(err);
   }

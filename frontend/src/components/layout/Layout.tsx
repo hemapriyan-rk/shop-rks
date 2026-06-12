@@ -125,6 +125,32 @@ export default function Layout({ children, title }: LayoutProps) {
     };
   }, [token, logout, navigate]);
 
+  // Native hardware integrations
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+
+    import('@capacitor/app').then(({ App }) => {
+      App.addListener('backButton', ({ canGoBack }) => {
+        if (isMobileMenuOpen) {
+          setIsMobileMenuOpen(false);
+        } else if (broadcast) {
+          setBroadcast(null);
+        } else if (canGoBack) {
+          window.history.back();
+        } else {
+          // At root level
+          App.exitApp();
+        }
+      });
+    });
+
+    import('@capacitor/status-bar').then(({ StatusBar, Style }) => {
+      StatusBar.setStyle({ style: Style.Dark }).catch(() => {});
+      StatusBar.setBackgroundColor({ color: '#13131A' }).catch(() => {});
+    });
+
+  }, [isMobileMenuOpen, broadcast]);
+
   const isLoginPage = location.pathname === '/login';
 
   if (isLoginPage) {

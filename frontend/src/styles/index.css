@@ -199,10 +199,19 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
+  /* Native App Feel */
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 a { color: inherit; text-decoration: none; }
 button { cursor: pointer; border: none; background: none; font-family: inherit; }
-input, select, textarea { font-family: inherit; }
+input, select, textarea { 
+  font-family: inherit; 
+  -webkit-user-select: auto;
+  user-select: auto;
+}
 ul, ol { list-style: none; }
 img { max-width: 100%; display: block; }
 
