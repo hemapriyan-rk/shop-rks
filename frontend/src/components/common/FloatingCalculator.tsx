@@ -75,13 +75,16 @@ export default function FloatingCalculator() {
   const clear = () => setDisplay('');
   const backspace = () => setDisplay(prev => prev === 'Error' ? '' : prev.slice(0, -1));
 
+  const isMobile = window.innerWidth <= 768;
+  const bottomPos = isMobile ? 100 : 24;
+
   if (!isOpen) {
     return (
       <button 
         onClick={() => setIsOpen(true)}
         style={{
           position: 'fixed',
-          bottom: 24,
+          bottom: bottomPos,
           right: 24,
           width: 56,
           height: 56,
@@ -95,7 +98,7 @@ export default function FloatingCalculator() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          zIndex: 9999
+          zIndex: 999
         }}
       >
         🧮
@@ -106,14 +109,14 @@ export default function FloatingCalculator() {
   return (
     <div style={{
       position: 'fixed',
-      bottom: 24,
+      bottom: bottomPos,
       right: 24,
       width: 280,
       background: 'var(--bg-surface)',
       borderRadius: 16,
       boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
       padding: 16,
-      zIndex: 9999,
+      zIndex: 999,
       border: '1px solid var(--border-color)'
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>

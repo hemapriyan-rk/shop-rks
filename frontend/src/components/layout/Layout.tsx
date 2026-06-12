@@ -150,6 +150,15 @@ export default function Layout({ children, title }: LayoutProps) {
       StatusBar.setBackgroundColor({ color: '#13131A' }).catch(() => {});
     });
 
+    import('@capacitor/keyboard').then(({ Keyboard }) => {
+      Keyboard.addListener('keyboardWillShow', () => {
+        document.body.classList.add('keyboard-open');
+      });
+      Keyboard.addListener('keyboardWillHide', () => {
+        document.body.classList.remove('keyboard-open');
+      });
+    });
+
   }, [isMobileMenuOpen, broadcast]);
 
   const isLoginPage = location.pathname === '/login';

@@ -1,5 +1,5 @@
 {
-  "version": "1.0.16",
-  "apkUrl": "/ShopRKS.apk?v=1.0.16",
-  "releaseNotes": "UI Polish: Redesigned bottom navigation with a curvy glassmorphic arch, fixed top status bar overlapping, and prevented accidental browser-like scrolling behavior."
+  "version": "1.0.17",
+  "apkUrl": "/ShopRKS.apk?v=1.0.17",
+  "releaseNotes": "Fix: Floating calculator now intelligently moves out of the way on mobile. The bottom navigation bar automatically hides when your keyboard is open."
 }

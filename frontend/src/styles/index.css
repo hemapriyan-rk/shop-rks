@@ -891,3 +891,8 @@ tbody tr:last-child td { border-bottom: none; }
     padding-bottom: 90px !important;
   }
 }
+
+/* Hide Bottom Nav when Keyboard is open */
+body.keyboard-open .bottom-nav {
+  display: none !important;
+}
