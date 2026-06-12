@@ -1,5 +1,5 @@
 {
-  "version": "1.0.15",
-  "apkUrl": "/ShopRKS.apk?v=1.0.15",
-  "releaseNotes": "Aesthetic Update: Replaced all OS emojis with beautiful, uniform Flat Color SVG icons for a consistent cross-platform experience."
+  "version": "1.0.16",
+  "apkUrl": "/ShopRKS.apk?v=1.0.16",
+  "releaseNotes": "UI Polish: Redesigned bottom navigation with a curvy glassmorphic arch, fixed top status bar overlapping, and prevented accidental browser-like scrolling behavior."
 }

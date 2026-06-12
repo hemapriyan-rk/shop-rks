@@ -191,7 +191,10 @@
 
 /* ── Reset ─────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { font-size: 15px; }
+html { 
+  font-size: 15px; 
+  overscroll-behavior-y: none;
+}
 body {
   font-family: 'Inter', system-ui, sans-serif;
   background: var(--bg-base);
@@ -199,6 +202,7 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
+  overscroll-behavior-y: none;
   /* Native App Feel */
   -webkit-touch-callout: none;
   -webkit-user-select: none;
@@ -243,6 +247,7 @@ img { max-width: 100%; display: block; }
   top: 0; left: 0;
   width: var(--sidebar-width);
   height: 100vh;
+  padding-top: env(safe-area-inset-top, 0px);
   background: var(--bg-surface);
   border-right: 2px solid var(--border-subtle);
   display: flex;
@@ -316,11 +321,11 @@ img { max-width: 100%; display: block; }
 
 /* ── Topbar ────────────────────────────────────────────────────── */
 .topbar {
-  height: var(--topbar-height);
+  height: calc(var(--topbar-height) + env(safe-area-inset-top, 0px));
   background: var(--bg-surface);
   border-bottom: 2px solid var(--border-subtle);
   display: flex; align-items: center;
-  padding: 0 32px;
+  padding: env(safe-area-inset-top, 0px) 32px 0 32px;
   gap: 16px;
   flex-shrink: 0;
 }
@@ -784,12 +789,16 @@ tbody tr:last-child td { border-bottom: none; }
   right: 0;
   height: 70px;
   background: var(--bg-surface);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid var(--border-default);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-top-left-radius: 32px;
+  border-top-right-radius: 32px;
+  border-top: 1px solid var(--border-subtle);
+  border-left: 1px solid var(--border-subtle);
+  border-right: 1px solid var(--border-subtle);
   z-index: 1000;
   padding-bottom: env(safe-area-inset-bottom, 0px);
-  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.25);
 }
 
 .bottom-nav-container {

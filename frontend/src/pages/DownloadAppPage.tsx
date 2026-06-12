@@ -171,7 +171,7 @@ export default function DownloadAppPage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ color: 'var(--text-muted)', fontSize: '14px' }}>Version</span>
-              <span style={{ fontWeight: 600, color: 'var(--color-primary)', background: 'rgba(99, 102, 241, 0.1)', padding: '4px 12px', borderRadius: '8px', fontSize: '13px' }}>v1.0.15</span>
+              <span style={{ fontWeight: 600, color: 'var(--color-primary)', background: 'rgba(99, 102, 241, 0.1)', padding: '4px 12px', borderRadius: '8px', fontSize: '13px' }}>v1.0.16</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ color: 'var(--text-muted)', fontSize: '14px' }}>Size</span>
