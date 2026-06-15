@@ -97,6 +97,7 @@ export const createTransactionSchema = z.object({
   notes: z.string().max(500).optional(),
   unitPrice: nonNegativeDecimal.optional(),
   paymentMethod: z.enum(['CASH', 'ONLINE', 'OTHER', 'SHOP_XEROX']),
+  shop: z.enum(['SHOP_COMPUTER', 'SHOP_XEROX']).optional(),
 }).refine(data => data.serviceId || data.serviceName, {
   message: "Either serviceId or serviceName must be provided",
 });
@@ -114,6 +115,7 @@ export const createExpenseSchema = z.object({
   category: z.string().min(1, 'Category is required'),
   note: z.string().max(500).optional(),
   bankId: z.string().uuid('Invalid bank ID').optional(),
+  shop: z.enum(['SHOP_COMPUTER', 'SHOP_XEROX']).optional(),
 });
 
 export const updateExpenseSchema = z.object({
