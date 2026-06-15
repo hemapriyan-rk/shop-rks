@@ -38,6 +38,7 @@ export interface Transaction {
   notes?: string;
   createdAt: string;
   updatedAt: string;
+  shop?: Shop;
   user: { id: string; name: string; username: string };
   service: { id: string; name: string; category: ServiceCategory };
 }

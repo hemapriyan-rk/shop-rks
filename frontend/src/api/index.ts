@@ -1,6 +1,6 @@
 import api from './client';
 export const apiClient = api;
-import type { ApiResponse, User, Service, Transaction, Expense, Log, DailyAnalytics, MonthlyAnalytics, TodaySummary, BankAccount, Session, SystemConfig } from '../types';
+import type { ApiResponse, User, Service, Transaction, Expense, Log, DailyAnalytics, MonthlyAnalytics, TodaySummary, BankAccount, Session, SystemConfig, Shop } from '../types';
 
 // ── Auth ────────────────────────────────────────────────────────
 export const authApi = {
@@ -16,7 +16,7 @@ export const authApi = {
 export const usersApi = {
   list: () => api.get<ApiResponse<User[]>>('/users'),
   get: (id: string) => api.get<ApiResponse<User>>(`/users/${id}`),
-  create: (data: { name: string; username: string; password: string; role: string; isActive?: boolean; customRoleId?: string }) =>
+  create: (data: { name: string; username: string; password: string; role: string; isActive?: boolean; customRoleId?: string; shopAccess?: Shop[] }) =>
     api.post<ApiResponse<User>>('/users', data),
   update: (id: string, data: Partial<User> & { password?: string }) =>
     api.patch<ApiResponse<User>>(`/users/${id}`, data),
@@ -36,9 +36,9 @@ export const servicesApi = {
 
 // ── Transactions ──────────────────────────────────────────────────
 export const transactionsApi = {
-  list: (params?: { date?: string; userId?: string; page?: number; limit?: number; paymentMethod?: string }) =>
+  list: (params?: { date?: string; userId?: string; page?: number; limit?: number; paymentMethod?: string; shop?: string }) =>
     api.get<ApiResponse<Transaction[]>>('/transactions', { params }),
-  create: (data: { serviceId?: string; serviceName?: string; quantity: number; unitPrice?: number; paymentMethod: string; notes?: string }) =>
+  create: (data: { serviceId?: string; serviceName?: string; quantity: number; unitPrice?: number; paymentMethod: string; notes?: string; shop?: string }) =>
     api.post<ApiResponse<Transaction>>('/transactions', data),
   update: (id: string, data: { updatedAt: string; quantity?: number; notes?: string }) =>
     api.patch<ApiResponse<Transaction>>(`/transactions/${id}`, data),

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Layout from '../../components/layout/Layout';
 import { usersApi, apiClient } from '../../api';
-import type { User, Role } from '../../types';
+import type { User, Role, Shop } from '../../types';
 
 interface UserModalProps { user?: User; onClose: () => void; onSave: () => void; }
 
@@ -13,7 +13,7 @@ function UserModal({ user, onClose, onSave }: UserModalProps) {
   const [isActive, setIsActive] = useState(user?.isActive ?? true);
   const [isSuspended, setIsSuspended] = useState(user?.isSuspended ?? false);
   const [customRoleId, setCustomRoleId] = useState<string>(user?.customRoleId ?? '');
-  const [shopAccess, setShopAccess] = useState<string[]>(user?.shopAccess ?? ['SHOP_COMPUTER']);
+  const [shopAccess, setShopAccess] = useState<Shop[]>(user?.shopAccess ?? ['SHOP_COMPUTER']);
   const [customRoles, setCustomRoles] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');

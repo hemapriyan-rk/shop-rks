@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Layout from '../../components/layout/Layout';
 import { transactionsApi } from '../../api';
-import type { Transaction } from '../../types';
+import type { Transaction, User } from '../../types';
 import { useAuth } from '../../context/AuthContext';
 
 function isToday(dateStr: string) {
@@ -10,19 +10,20 @@ function isToday(dateStr: string) {
 }
 
 export default function TransactionsList() {
-  const { hasPermission } = useAuth();
+  const { hasPermission, user } = useAuth();
   const canManage = hasPermission('allRecords');
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [date, setDate] = useState(new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' }));
   const [paymentMethod, setPaymentMethod] = useState('');
+  const [shop, setShop] = useState('');
   const [total, setTotal] = useState(0);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [error, setError] = useState('');
 
   const load = () => {
     setLoading(true);
-    transactionsApi.list({ date, ...(paymentMethod && { paymentMethod }) })
+    transactionsApi.list({ date, ...(paymentMethod && { paymentMethod }), ...(shop && { shop }) })
       .then(r => {
         const data = r.data.data ?? [];
         setTransactions(data);
@@ -31,7 +32,7 @@ export default function TransactionsList() {
       .finally(() => setLoading(false));
   };
 
-  useEffect(() => { load(); }, [date, paymentMethod]);
+  useEffect(() => { load(); }, [date, paymentMethod, shop]);
 
   const handleDelete = async (id: string) => {
     try {
@@ -56,8 +57,14 @@ export default function TransactionsList() {
             <option value="CASH">Cash Only</option>
             <option value="ONLINE">Online Only</option>
             <option value="OTHER">Other Only</option>
-            <option value="SHOP_XEROX">Shop Xerox Only</option>
           </select>
+          {user?.shopAccess && user.shopAccess.length > 1 && (
+            <select className="form-select" value={shop} onChange={e => setShop(e.target.value)}>
+              <option value="">All Shops</option>
+              <option value="SHOP_COMPUTER">Computer Only</option>
+              <option value="SHOP_XEROX">Xerox Only</option>
+            </select>
+          )}
           {canManage ? (
             <input type="date" className="form-input" style={{ width: 160 }} value={date} onChange={e => setDate(e.target.value)} max={new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' })} />
           ) : (
@@ -79,7 +86,7 @@ export default function TransactionsList() {
         <div className="table-wrapper">
           <table>
             <thead><tr>
-              <th>Service</th><th>Category</th><th>Method</th><th>Qty</th><th>Unit Price</th><th>Total</th>
+              <th>Service</th><th>Category</th><th>Method</th><th>Shop</th><th>Qty</th><th>Unit Price</th><th>Total</th>
               <th>By</th><th>Time</th><th>Actions</th>
             </tr></thead>
             <tbody>
@@ -91,8 +98,12 @@ export default function TransactionsList() {
                     <td><span className="badge badge-purple">{t.service?.category}</span></td>
                     <td title={t.paymentMethod}>
                       {t.paymentMethod === 'ONLINE' ? '💳 Online' : 
-                       t.paymentMethod === 'CASH' ? '💵 Cash' : 
-                       t.paymentMethod === 'SHOP_XEROX' ? '🖨️ Shop Xerox' : '🔧 Other'}
+                       t.paymentMethod === 'CASH' ? '💵 Cash' : '🔧 Other'}
+                    </td>
+                    <td>
+                      <span className="badge" style={{ background: t.shop === 'SHOP_XEROX' ? '#fde68a' : '#bfdbfe', color: '#1f2937' }}>
+                        {t.shop?.replace('SHOP_', '') || 'COMPUTER'}
+                      </span>
                     </td>
                     <td>{t.quantity}</td>
                     <td>₹{Number(t.unitPrice).toFixed(2)}</td>
