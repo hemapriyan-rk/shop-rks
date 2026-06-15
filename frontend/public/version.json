@@ -1,5 +1,5 @@
 {
-  "version": "1.0.17",
-  "apkUrl": "/ShopRKS.apk?v=1.0.17",
-  "releaseNotes": "Fix: Floating calculator now intelligently moves out of the way on mobile. The bottom navigation bar automatically hides when your keyboard is open."
+  "version": "1.0.19",
+  "apkUrl": "/Shop_RKS_v1.0.19.apk",
+  "releaseNotes": "Critical Update: Restricted access rules, navigation menu modifications, and system stability improvements."
 }
