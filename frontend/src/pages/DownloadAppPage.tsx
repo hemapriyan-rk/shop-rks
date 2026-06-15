@@ -46,7 +46,7 @@ export default function DownloadAppPage() {
       // Trigger download
       const a = document.createElement('a');
       a.href = data.data.apkUrl;
-      a.download = 'ShopRKS.apk';
+      a.download = 'Shop_RKS_v1.0.18.apk';
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -171,11 +171,11 @@ export default function DownloadAppPage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ color: 'var(--text-muted)', fontSize: '14px' }}>Version</span>
-              <span style={{ fontWeight: 600, color: 'var(--color-primary)', background: 'rgba(99, 102, 241, 0.1)', padding: '4px 12px', borderRadius: '8px', fontSize: '13px' }}>v1.0.17</span>
+              <span style={{ fontWeight: 600, color: 'var(--color-primary)', background: 'rgba(99, 102, 241, 0.1)', padding: '4px 12px', borderRadius: '8px', fontSize: '13px' }}>v1.0.18</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ color: 'var(--text-muted)', fontSize: '14px' }}>Size</span>
-              <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '14px' }}>~ 18 MB</span>
+              <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '14px' }}>~ 22 MB</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ color: 'var(--text-muted)', fontSize: '14px' }}>OS Requirement</span>
