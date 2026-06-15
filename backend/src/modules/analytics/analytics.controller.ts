@@ -14,13 +14,15 @@ export async function getTodaySummary(req: Request, res: Response, next: NextFun
   try {
     const today = toISTDateString();
     const { start, end } = getISTDayBounds(today);
+    const { shop } = req.query;
     const isAdmin = isAdminOrAbove(req.user!, 'analytics');
     const userId = isAdmin ? undefined : req.user!.userId;
+    const shopFilter = shop ? (shop as any) : { in: req.user!.shopAccess };
 
     const [txGroups, expAgg, pendingExpenses] = await Promise.all([
       prisma.transaction.groupBy({
         by: ['paymentMethod'],
-        where: { createdAt: { gte: start, lte: end }, ...(userId && { userId }) },
+        where: { createdAt: { gte: start, lte: end }, ...(userId && { userId }), shop: shopFilter },
         _sum: { totalPrice: true },
         _count: true,
       }),
@@ -29,12 +31,13 @@ export async function getTodaySummary(req: Request, res: Response, next: NextFun
           createdAt: { gte: start, lte: end },
           status: 'APPROVED',  // Fix #3: Only APPROVED
           ...(userId && { userId }),
+          shop: shopFilter,
         },
         _sum: { amount: true },
         _count: true,
       }),
       isAdmin ? prisma.expense.count({
-        where: { createdAt: { gte: start, lte: end }, status: 'PENDING' },
+        where: { createdAt: { gte: start, lte: end }, status: 'PENDING', shop: shopFilter },
       }) : Promise.resolve(0),
     ]);
 
@@ -73,25 +76,27 @@ export async function getDailyAnalytics(req: Request, res: Response, next: NextF
     const targetDate = (req.query.date as string) || toISTDateString();
     const { start, end } = getISTDayBounds(targetDate);
     const isAdmin = isAdminOrAbove(req.user!, 'analytics');
+    const { shop } = req.query;
     const targetUserId = isAdmin && req.query.userId ? (req.query.userId as string) : undefined;
     const userIdFilter = targetUserId ? { userId: targetUserId } : {};
+    const shopFilter = shop ? (shop as any) : { in: req.user!.shopAccess };
 
     const [txGroups, expAgg, topServices, userBreakdown] = await Promise.all([
       prisma.transaction.groupBy({
         by: ['paymentMethod'],
-        where: { createdAt: { gte: start, lte: end }, ...userIdFilter },
+        where: { createdAt: { gte: start, lte: end }, ...userIdFilter, shop: shopFilter },
         _sum: { totalPrice: true },
         _count: true,
       }),
       prisma.expense.aggregate({
-        where: { createdAt: { gte: start, lte: end }, status: 'APPROVED', ...userIdFilter },
+        where: { createdAt: { gte: start, lte: end }, status: 'APPROVED', ...userIdFilter, shop: shopFilter },
         _sum: { amount: true },
         _count: true,
       }),
       // Top services by revenue
       prisma.transaction.groupBy({
         by: ['serviceId'],
-        where: { createdAt: { gte: start, lte: end }, ...userIdFilter },
+        where: { createdAt: { gte: start, lte: end }, ...userIdFilter, shop: shopFilter },
         _sum: { totalPrice: true },
         _count: true,
         orderBy: { _sum: { totalPrice: 'desc' } },
@@ -100,7 +105,7 @@ export async function getDailyAnalytics(req: Request, res: Response, next: NextF
       // Per-user breakdown
       prisma.transaction.groupBy({
         by: ['userId'],
-        where: { createdAt: { gte: start, lte: end }, ...userIdFilter },
+        where: { createdAt: { gte: start, lte: end }, ...userIdFilter, shop: shopFilter },
         _sum: { totalPrice: true },
         _count: true,
         orderBy: { _sum: { totalPrice: 'desc' } },
@@ -126,7 +131,7 @@ export async function getDailyAnalytics(req: Request, res: Response, next: NextF
     // Expense categories breakdown
     const expenseCategories = await prisma.expense.groupBy({
       by: ['category'],
-      where: { createdAt: { gte: start, lte: end }, status: 'APPROVED', ...userIdFilter },
+      where: { createdAt: { gte: start, lte: end }, status: 'APPROVED', ...userIdFilter, shop: shopFilter },
       _sum: { amount: true },
     });
 
@@ -138,11 +143,11 @@ export async function getDailyAnalytics(req: Request, res: Response, next: NextF
       let snapshot: any = null;
       if (targetUserId) {
         snapshot = await prisma.userDailyAnalyticsSnapshot.findUnique({
-          where: { userId_date: { userId: targetUserId, date: new Date(`${targetDate}T00:00:00Z`) } }
+          where: { userId_date_shop: { userId: targetUserId, date: new Date(`${targetDate}T00:00:00Z`), shop: shop ? (shop as any) : 'SHOP_COMPUTER' } }
         });
       } else {
         snapshot = await prisma.dailyAnalyticsSnapshot.findUnique({
-          where: { date: new Date(`${targetDate}T00:00:00Z`) }
+          where: { date_shop: { date: new Date(`${targetDate}T00:00:00Z`), shop: shop ? (shop as any) : 'SHOP_COMPUTER' } }
         });
       }
       
@@ -205,18 +210,20 @@ export async function getMonthlyAnalytics(req: Request, res: Response, next: Nex
 
     const { start, end } = getISTMonthBounds(year, month);
     const isAdmin = isAdminOrAbove(req.user!, 'analytics');
+    const { shop } = req.query;
     const targetUserId = isAdmin && req.query.userId ? (req.query.userId as string) : undefined;
     const userIdFilter = targetUserId ? { userId: targetUserId } : {};
+    const shopFilter = shop ? (shop as any) : { in: req.user!.shopAccess };
 
     const [txGroups, expAgg] = await Promise.all([
       prisma.transaction.groupBy({
         by: ['paymentMethod'],
-        where: { createdAt: { gte: start, lte: end }, ...userIdFilter },
+        where: { createdAt: { gte: start, lte: end }, ...userIdFilter, shop: shopFilter },
         _sum: { totalPrice: true },
         _count: true,
       }),
       prisma.expense.aggregate({
-        where: { createdAt: { gte: start, lte: end }, status: 'APPROVED', ...userIdFilter },
+        where: { createdAt: { gte: start, lte: end }, status: 'APPROVED', ...userIdFilter, shop: shopFilter },
         _sum: { amount: true },
         _count: true,
       }),
@@ -237,6 +244,7 @@ export async function getMonthlyAnalytics(req: Request, res: Response, next: Nex
       FROM transactions
       WHERE created_at >= ${start} AND created_at <= ${end}
       ${targetUserId ? Prisma.sql`AND user_id = ${targetUserId}` : Prisma.empty}
+      ${shop ? Prisma.sql`AND shop = ${shop}::"Shop"` : Prisma.sql`AND shop = ANY(${req.user!.shopAccess}::"Shop"[])`}
       GROUP BY day
       ORDER BY day ASC
     `;
@@ -251,6 +259,7 @@ export async function getMonthlyAnalytics(req: Request, res: Response, next: Nex
       WHERE created_at >= ${start} AND created_at <= ${end}
         AND status = 'APPROVED'
         ${targetUserId ? Prisma.sql`AND user_id = ${targetUserId}` : Prisma.empty}
+        ${shop ? Prisma.sql`AND shop = ${shop}::"Shop"` : Prisma.sql`AND shop = ANY(${req.user!.shopAccess}::"Shop"[])`}
       GROUP BY day
       ORDER BY day ASC
     `;
@@ -283,11 +292,11 @@ export async function getMonthlyAnalytics(req: Request, res: Response, next: Nex
       let snapshots: any[] = [];
       if (targetUserId) {
         snapshots = await prisma.userDailyAnalyticsSnapshot.findMany({
-          where: { userId: targetUserId, date: { gte: start, lte: end } }
+          where: { userId: targetUserId, date: { gte: start, lte: end }, shop: shopFilter }
         });
       } else {
         snapshots = await prisma.dailyAnalyticsSnapshot.findMany({
-          where: { date: { gte: start, lte: end } }
+          where: { date: { gte: start, lte: end }, shop: shopFilter }
         });
       }
       for (const snap of snapshots) {

@@ -17,7 +17,7 @@ const TX_SELECT = {
 
 export async function getTransactions(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { date, userId: queryUserId, paymentMethod, page = '1', limit = '50' } = req.query;
+    const { date, userId: queryUserId, paymentMethod, shop, page = '1', limit = '50' } = req.query;
     const pageNum = Math.max(1, parseInt(page as string));
     const limitNum = Math.min(100, Math.max(1, parseInt(limit as string)));
     const skip = (pageNum - 1) * limitNum;
@@ -39,6 +39,7 @@ export async function getTransactions(req: Request, res: Response, next: NextFun
       ...(filterUserId && { userId: filterUserId }),
       ...dateFilter,
       ...(paymentMethod && { paymentMethod }),
+      shop: shop ? shop : { in: req.user!.shopAccess },
     };
 
     const [transactions, total, sumAgg] = await Promise.all([
@@ -60,8 +61,8 @@ export async function getTransactions(req: Request, res: Response, next: NextFun
 
 export async function createTransaction(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { serviceId, serviceName, quantity, notes, unitPrice: customUnitPrice, paymentMethod } = req.body as {
-      serviceId?: string; serviceName?: string; quantity: number; notes?: string; unitPrice?: number; paymentMethod: 'CASH' | 'ONLINE' | 'OTHER' | 'SHOP_XEROX';
+    const { serviceId, serviceName, quantity, notes, unitPrice: customUnitPrice, paymentMethod, shop = 'SHOP_COMPUTER' } = req.body as {
+      serviceId?: string; serviceName?: string; quantity: number; notes?: string; unitPrice?: number; paymentMethod: 'CASH' | 'ONLINE' | 'OTHER' | 'SHOP_XEROX'; shop?: 'SHOP_COMPUTER' | 'SHOP_XEROX';
     };
 
     let service;
@@ -90,6 +91,11 @@ export async function createTransaction(req: Request, res: Response, next: NextF
     const unitPrice = customUnitPrice !== undefined ? Number(customUnitPrice) : Number(service.price);
     const totalPrice = unitPrice * quantity;
 
+    if (!req.user!.shopAccess.includes(shop as string)) {
+      sendForbidden(res, 'You do not have access to this shop context');
+      return;
+    }
+
     const transaction = await withAuditLog(
       prisma, req.user!.userId, 'CREATE', 'transactions',
       (t) => t.id, null,
@@ -102,6 +108,7 @@ export async function createTransaction(req: Request, res: Response, next: NextF
           unitPrice,
           totalPrice,
           paymentMethod,
+          shop,
           notes,
         },
         select: TX_SELECT,

@@ -5,12 +5,13 @@ import { sendSuccess, sendCreated, sendNotFound, sendError } from '../../utils/r
 
 export async function getAllServices(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { category, active } = req.query;
+    const { category, active, shop } = req.query;
 
     const services = await prisma.service.findMany({
       where: {
         ...(category && { category: category as any }),
         ...(active !== undefined && { isActive: active === 'true' }),
+        shop: shop ? (shop as any) : { in: req.user!.shopAccess },
       },
       orderBy: [{ category: 'asc' }, { name: 'asc' }],
     });

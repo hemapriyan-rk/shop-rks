@@ -34,9 +34,6 @@ export default function NewTransaction() {
   const [othersPayment, setOthersPayment] = useState<'CASH' | 'ONLINE' | 'OTHER' | ''>('');
   const [othersSubmitting, setOthersSubmitting] = useState(false);
 
-  // Quick Entry: SHOP-XEROX
-  const [shopXeroxAmount, setShopXeroxAmount] = useState<number | ''>('');
-  const [shopXeroxSubmitting, setShopXeroxSubmitting] = useState(false);
 
   const searchRef = useRef<HTMLInputElement>(null);
   const qtyRef = useRef<HTMLInputElement>(null);
@@ -124,26 +121,7 @@ export default function NewTransaction() {
     } finally { setOthersSubmitting(false); }
   };
 
-  const handleShopXeroxSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!shopXeroxAmount || shopXeroxAmount <= 0) { setError('Please enter a valid amount'); return; }
 
-    setShopXeroxSubmitting(true);
-    setError('');
-    try {
-      await transactionsApi.create({
-        serviceName: 'SHOP-XEROX',
-        quantity: 1,
-        unitPrice: Number(shopXeroxAmount),
-        paymentMethod: 'SHOP_XEROX',
-      });
-      setSuccess(`✓ Shop Xerox recorded — ₹${shopXeroxAmount}`);
-      setShopXeroxAmount('');
-      setTimeout(() => setSuccess(''), 4000);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to save Shop Xerox entry');
-    } finally { setShopXeroxSubmitting(false); }
-  };
 
   const total = selected && unitPrice !== '' ? Number(unitPrice) * (Number(quantity) || 0) : 0;
 
@@ -294,24 +272,7 @@ export default function NewTransaction() {
             </form>
           </div>
 
-          {/* SHOP XEROX CARD */}
-          {canManage && (
-            <div className="card" style={{ display: 'flex', flexDirection: 'column' }}>
-              <h4 style={{ marginBottom: 16 }}>SHOP-XEROX</h4>
-              <form onSubmit={handleShopXeroxSubmit} style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-                <div className="form-group">
-                  <input className="form-input" placeholder="Amount (₹)" type="number" min={0} step="0.01" value={shopXeroxAmount} onChange={e => setShopXeroxAmount(e.target.value === '' ? '' : Math.max(0, parseFloat(e.target.value)))} required />
-                </div>
-                <div style={{ color: 'var(--text-muted)', fontSize: 13, marginBottom: 16, padding: 8, background: 'var(--bg-elevated)', borderRadius: 8 }}>
-                  * No custom name required.<br />
-                  * Payment method is auto-stored as SHOP_XEROX.
-                </div>
-                <button type="submit" className="btn btn-primary btn-full" disabled={!shopXeroxAmount || shopXeroxSubmitting} style={{ marginTop: 'auto' }}>
-                  {shopXeroxSubmitting ? 'Saving...' : 'Save SHOP-XEROX'}
-                </button>
-              </form>
-            </div>
-          )}
+
         </div>
 
       </div>

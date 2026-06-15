@@ -1,4 +1,5 @@
 export type Role = 'USER' | 'MANAGER' | 'ADMIN' | 'SUPER_ADMIN' | 'CUSTOM';
+export type Shop = 'SHOP_COMPUTER' | 'SHOP_XEROX';
 export type ServiceCategory = 'GOVT' | 'PRINTING' | 'CARDS' | 'OTHER';
 export type ExpenseStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 export type AuditAction = 'CREATE' | 'UPDATE' | 'DELETE';
@@ -10,6 +11,7 @@ export interface User {
   role: Role;
   customRoleId?: string | null;
   customPermissions?: Record<string, { read: boolean; write: boolean }>;
+  shopAccess: Shop[];
   isActive: boolean;
   isSuspended: boolean;
   createdAt: string;

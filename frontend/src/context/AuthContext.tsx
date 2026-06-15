@@ -1,12 +1,13 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { authApi } from '../api';
-import type { User, Role } from '../types';
+import type { User, Role, Shop } from '../types';
 
 interface AuthState {
   user: User | null;
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  activeShop: Shop | null;
 }
 
 interface AuthContextType extends AuthState {
@@ -17,6 +18,7 @@ interface AuthContextType extends AuthState {
   isSuperAdmin: boolean;
   refreshUser: () => Promise<void>;
   hasPermission: (module: string, action?: 'read' | 'write') => boolean;
+  setActiveShop: (shop: Shop) => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -27,13 +29,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     token: localStorage.getItem('rks_token'),
     isAuthenticated: false,
     isLoading: true,
+    activeShop: (localStorage.getItem('rks_activeShop') as Shop) || null,
   });
 
   const logout = useCallback(() => {
     authApi.logout().catch(() => {}); // Notify backend, ignore errors
     localStorage.removeItem('rks_token');
     localStorage.removeItem('rks_user');
-    setState({ user: null, token: null, isAuthenticated: false, isLoading: false });
+    setState({ user: null, token: null, isAuthenticated: false, isLoading: false, activeShop: null });
   }, []);
 
   const refreshUser = useCallback(async () => {
@@ -42,7 +45,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (res.data.data) {
         const user = res.data.data as unknown as User;
         localStorage.setItem('rks_user', JSON.stringify(user));
-        setState(s => ({ ...s, user, isAuthenticated: true, isLoading: false }));
+        
+        let newActiveShop = state.activeShop;
+        if (!newActiveShop || !user.shopAccess.includes(newActiveShop)) {
+          newActiveShop = user.shopAccess[0] || 'SHOP_COMPUTER';
+          localStorage.setItem('rks_activeShop', newActiveShop);
+        }
+
+        setState(s => ({ ...s, user, isAuthenticated: true, isLoading: false, activeShop: newActiveShop }));
       }
     } catch {
       logout();
@@ -62,9 +72,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (username: string, password: string) => {
     const res = await authApi.login(username, password);
     const { token, user } = res.data.data!;
+    const castUser = user as unknown as User;
+    
+    let shop = localStorage.getItem('rks_activeShop') as Shop;
+    if (!shop || !castUser.shopAccess.includes(shop)) {
+      shop = castUser.shopAccess[0] || 'SHOP_COMPUTER';
+    }
+
     localStorage.setItem('rks_token', token);
-    localStorage.setItem('rks_user', JSON.stringify(user));
-    setState({ user: user as unknown as User, token, isAuthenticated: true, isLoading: false });
+    localStorage.setItem('rks_user', JSON.stringify(castUser));
+    localStorage.setItem('rks_activeShop', shop);
+    
+    setState({ user: castUser, token, isAuthenticated: true, isLoading: false, activeShop: shop });
   };
 
   const role = state.user?.role ?? null;
@@ -79,6 +98,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return false;
   }, [role, state.user?.customPermissions]);
 
+  const setActiveShop = useCallback((shop: Shop) => {
+    if (state.user?.shopAccess.includes(shop)) {
+      localStorage.setItem('rks_activeShop', shop);
+      setState(s => ({ ...s, activeShop: shop }));
+    }
+  }, [state.user?.shopAccess]);
+
   return (
     <AuthContext.Provider value={{
       ...state,
@@ -89,6 +115,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isSuperAdmin: role === 'SUPER_ADMIN',
       refreshUser,
       hasPermission,
+      setActiveShop,
     }}>
       {children}
     </AuthContext.Provider>

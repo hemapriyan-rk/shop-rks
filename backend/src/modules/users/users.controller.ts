@@ -9,7 +9,7 @@ export async function getAllUsers(req: Request, res: Response, next: NextFunctio
     const users = await prisma.user.findMany({
       select: {
         id: true, name: true, username: true, role: true,
-        isActive: true, isSuspended: true, createdAt: true, updatedAt: true,
+        isActive: true, isSuspended: true, createdAt: true, updatedAt: true, shopAccess: true,
         _count: { select: { transactions: true } },
       },
       orderBy: { createdAt: 'asc' },
@@ -24,7 +24,7 @@ export async function getUserById(req: Request, res: Response, next: NextFunctio
       where: { id: req.params.id },
       select: {
         id: true, name: true, username: true, role: true,
-        isActive: true, isSuspended: true, createdAt: true, updatedAt: true,
+        isActive: true, isSuspended: true, createdAt: true, updatedAt: true, shopAccess: true,
         _count: { select: { transactions: true, expenses: true } },
       },
     });
@@ -35,7 +35,7 @@ export async function getUserById(req: Request, res: Response, next: NextFunctio
 
 export async function createUser(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { name, username, password, role, isActive, customRoleId } = req.body;
+    const { name, username, password, role, isActive, customRoleId, shopAccess } = req.body;
 
     const existing = await prisma.user.findUnique({ where: { username: username.toLowerCase() } });
     if (existing) {
@@ -54,8 +54,8 @@ export async function createUser(req: Request, res: Response, next: NextFunction
       null,
       (u) => ({ id: u.id, name: u.name, username: u.username, role: u.role }),
       (tx) => tx.user.create({
-        data: { name, username: username.toLowerCase(), passwordHash, role, isActive: isActive ?? true, customRoleId: role === 'CUSTOM' ? customRoleId : null },
-        select: { id: true, name: true, username: true, role: true, isActive: true, createdAt: true, customRoleId: true },
+        data: { name, username: username.toLowerCase(), passwordHash, role, isActive: isActive ?? true, customRoleId: role === 'CUSTOM' ? customRoleId : null, shopAccess: shopAccess || ['SHOP_COMPUTER'] },
+        select: { id: true, name: true, username: true, role: true, isActive: true, createdAt: true, customRoleId: true, shopAccess: true },
       })
     );
 
@@ -126,6 +126,9 @@ export async function updateUser(req: Request, res: Response, next: NextFunction
     if (req.body.username) {
       updateData.username = req.body.username.toLowerCase();
     }
+    if (req.body.shopAccess) {
+      updateData.shopAccess = req.body.shopAccess;
+    }
 
     const updated = await withAuditLog(
       prisma, req.user!.userId, 'UPDATE', 'users',
@@ -135,7 +138,7 @@ export async function updateUser(req: Request, res: Response, next: NextFunction
       (tx) => tx.user.update({
         where: { id: req.params.id },
         data: updateData,
-        select: { id: true, name: true, username: true, role: true, isActive: true, isSuspended: true, updatedAt: true, customRoleId: true },
+        select: { id: true, name: true, username: true, role: true, isActive: true, isSuspended: true, updatedAt: true, customRoleId: true, shopAccess: true },
       })
     );
 

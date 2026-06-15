@@ -12,6 +12,7 @@ export interface AuthPayload {
   name: string;
   sessionId?: string;
   customPermissions?: Record<string, { read: boolean; write: boolean }>;
+  shopAccess: string[];
 }
 
 // Extend Express Request to include authenticated user
@@ -59,7 +60,7 @@ export async function authenticate(
     // 1. Verify user still exists and is active
     const user = await prisma.user.findUnique({
       where: { id: payload.userId },
-      select: { id: true, isActive: true, role: true, name: true, username: true, bannedUntil: true },
+      select: { id: true, isActive: true, role: true, name: true, username: true, bannedUntil: true, shopAccess: true },
     });
 
     console.log(`[AUTH DEBUG] User: ${user?.username}, Active: ${user?.isActive}, Role: ${user?.role}, SessionID: ${payload.sessionId}`);
@@ -121,7 +122,8 @@ export async function authenticate(
       username: user.username,
       role: user.role,
       name: user.name,
-      sessionId: payload.sessionId
+      sessionId: payload.sessionId,
+      shopAccess: user.shopAccess
     };
 
     next();

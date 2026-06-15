@@ -284,14 +284,30 @@ export default function BillingPage() {
         /* Print Styles */
         @media print {
           @page { size: A4 portrait; margin: 15mm; }
-          body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; background: #fff !important; margin: 0; padding: 0; }
+          body { 
+            -webkit-print-color-adjust: exact !important; 
+            print-color-adjust: exact !important; 
+            background: #fff !important; 
+            margin: 0; 
+            padding: 0; 
+          }
           
-          /* Hide everything except the invoice */
-          #root > *:not(.app-layout) { display: none !important; }
-          .sidebar, .topbar, .no-print, .alert { display: none !important; }
-          .main-content { margin: 0 !important; padding: 0 !important; max-width: none !important; width: 100% !important; background: #fff !important; }
-
-          .print-only { display: block !important; }
+          body * {
+            visibility: hidden;
+          }
+          
+          .print-only, .print-only * {
+            visibility: visible;
+          }
+          
+          .print-only { 
+            display: block !important; 
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            margin: 0;
+          }
           
           .invoice-container {
             width: 100%;

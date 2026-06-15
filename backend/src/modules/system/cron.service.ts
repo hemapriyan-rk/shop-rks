@@ -11,12 +11,12 @@ async function createAnalyticsSnapshots(endDate: Date) {
   // Aggregate transactions by date up to endDate
   const transactions = await prisma.transaction.findMany({
     where: { createdAt: { lt: endDate } },
-    select: { createdAt: true, paymentMethod: true, totalPrice: true, userId: true }
+    select: { createdAt: true, paymentMethod: true, totalPrice: true, userId: true, shop: true }
   });
 
   const expenses = await prisma.expense.findMany({
     where: { createdAt: { lt: endDate }, status: 'APPROVED' },
-    select: { createdAt: true, amount: true, userId: true }
+    select: { createdAt: true, amount: true, userId: true, shop: true }
   });
 
   const snapshotMap = new Map<string, any>();
@@ -24,17 +24,19 @@ async function createAnalyticsSnapshots(endDate: Date) {
 
   for (const t of transactions) {
     const dStr = t.createdAt.toISOString().split('T')[0];
-    const userKey = `${t.userId}_${dStr}`;
+    const shop = t.shop;
+    const globalKey = `${dStr}_${shop}`;
+    const userKey = `${t.userId}_${dStr}_${shop}`;
     
     // Global
-    if (!snapshotMap.has(dStr)) {
-      snapshotMap.set(dStr, { income: 0, cashIncome: 0, onlineIncome: 0, otherIncome: 0, shopXeroxIncome: 0, expenses: 0, transactionCount: 0 });
+    if (!snapshotMap.has(globalKey)) {
+      snapshotMap.set(globalKey, { dateStr: dStr, shop, income: 0, cashIncome: 0, onlineIncome: 0, otherIncome: 0, shopXeroxIncome: 0, expenses: 0, transactionCount: 0 });
     }
-    const day = snapshotMap.get(dStr)!;
+    const day = snapshotMap.get(globalKey)!;
     
     // User
     if (!userSnapshotMap.has(userKey)) {
-      userSnapshotMap.set(userKey, { userId: t.userId, dateStr: dStr, income: 0, cashIncome: 0, onlineIncome: 0, otherIncome: 0, shopXeroxIncome: 0, expenses: 0, transactionCount: 0 });
+      userSnapshotMap.set(userKey, { userId: t.userId, dateStr: dStr, shop, income: 0, cashIncome: 0, onlineIncome: 0, otherIncome: 0, shopXeroxIncome: 0, expenses: 0, transactionCount: 0 });
     }
     const userDay = userSnapshotMap.get(userKey)!;
 
@@ -53,30 +55,33 @@ async function createAnalyticsSnapshots(endDate: Date) {
 
   for (const e of expenses) {
     const dStr = e.createdAt.toISOString().split('T')[0];
-    const userKey = `${e.userId}_${dStr}`;
+    const shop = e.shop;
+    const globalKey = `${dStr}_${shop}`;
+    const userKey = `${e.userId}_${dStr}_${shop}`;
     
     // Global
-    if (!snapshotMap.has(dStr)) {
-      snapshotMap.set(dStr, { income: 0, cashIncome: 0, onlineIncome: 0, otherIncome: 0, shopXeroxIncome: 0, expenses: 0, transactionCount: 0 });
+    if (!snapshotMap.has(globalKey)) {
+      snapshotMap.set(globalKey, { dateStr: dStr, shop, income: 0, cashIncome: 0, onlineIncome: 0, otherIncome: 0, shopXeroxIncome: 0, expenses: 0, transactionCount: 0 });
     }
-    const day = snapshotMap.get(dStr)!;
+    const day = snapshotMap.get(globalKey)!;
     day.expenses += Number(e.amount);
 
     // User
     if (!userSnapshotMap.has(userKey)) {
-      userSnapshotMap.set(userKey, { userId: e.userId, dateStr: dStr, income: 0, cashIncome: 0, onlineIncome: 0, otherIncome: 0, shopXeroxIncome: 0, expenses: 0, transactionCount: 0 });
+      userSnapshotMap.set(userKey, { userId: e.userId, dateStr: dStr, shop, income: 0, cashIncome: 0, onlineIncome: 0, otherIncome: 0, shopXeroxIncome: 0, expenses: 0, transactionCount: 0 });
     }
     const userDay = userSnapshotMap.get(userKey)!;
     userDay.expenses += Number(e.amount);
   }
 
   // Save to database
-  for (const [dateStr, stats] of snapshotMap.entries()) {
-    const dateObj = new Date(dateStr);
+  for (const [key, stats] of snapshotMap.entries()) {
+    const dateObj = new Date(stats.dateStr);
+    const { dateStr, ...updateData } = stats;
     await prisma.dailyAnalyticsSnapshot.upsert({
-      where: { date: dateObj },
-      update: { ...stats, profit: stats.income - stats.expenses },
-      create: { date: dateObj, ...stats, profit: stats.income - stats.expenses }
+      where: { date_shop: { date: dateObj, shop: stats.shop } },
+      update: { ...updateData, profit: stats.income - stats.expenses },
+      create: { date: dateObj, ...updateData, profit: stats.income - stats.expenses }
     });
   }
 
@@ -85,7 +90,7 @@ async function createAnalyticsSnapshots(endDate: Date) {
     const dateObj = new Date(stats.dateStr);
     const { userId, dateStr, ...updateData } = stats;
     await prisma.userDailyAnalyticsSnapshot.upsert({
-      where: { userId_date: { userId, date: dateObj } },
+      where: { userId_date_shop: { userId, date: dateObj, shop: stats.shop } },
       update: { ...updateData, profit: stats.income - stats.expenses },
       create: { userId, date: dateObj, ...updateData, profit: stats.income - stats.expenses }
     });

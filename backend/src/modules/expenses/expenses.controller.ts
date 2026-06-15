@@ -16,7 +16,7 @@ const EXP_SELECT = {
 
 export async function getExpenses(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { date, status } = req.query;
+    const { date, status, shop } = req.query;
     const isAdmin = isAdminOrAbove(req.user!, 'allRecords');
     const filterUserId = isAdmin ? (req.query.userId as string | undefined) : req.user!.userId;
 
@@ -32,6 +32,7 @@ export async function getExpenses(req: Request, res: Response, next: NextFunctio
         ...(filterUserId && { userId: filterUserId }),
         createdAt: { gte: start, lte: end },
         ...(status && { status: status as any }),
+        shop: shop ? (shop as any) : { in: req.user!.shopAccess },
       },
       select: EXP_SELECT,
       orderBy: { createdAt: 'desc' },
@@ -43,8 +44,13 @@ export async function getExpenses(req: Request, res: Response, next: NextFunctio
 
 export async function createExpense(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { amount, category, note, bankId } = req.body;
+    const { amount, category, note, bankId, shop = 'SHOP_COMPUTER' } = req.body;
     const isAdmin = isAdminOrAbove(req.user!, 'allRecords');
+
+    if (!req.user!.shopAccess.includes(shop as string)) {
+      sendForbidden(res, 'You do not have access to this shop context');
+      return;
+    }
 
     // Admin/SuperAdmin expenses → APPROVED automatically, deduct from bank
     // User expenses → PENDING, no bank deduction yet
@@ -69,7 +75,7 @@ export async function createExpense(req: Request, res: Response, next: NextFunct
     // Create expense and optionally deduct from bank in a transaction
     const result = await prisma.$transaction(async (tx) => {
       const expense = await tx.expense.create({
-        data: { userId: req.user!.userId, amount, category, note, status, bankId: isAdmin ? bankId : null },
+        data: { userId: req.user!.userId, amount, category, note, status, bankId: isAdmin ? bankId : null, shop: shop as any },
         select: EXP_SELECT,
       });
 
