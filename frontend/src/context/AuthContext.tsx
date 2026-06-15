@@ -103,6 +103,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (state.user?.shopAccess.includes(shop)) {
       localStorage.setItem('rks_activeShop', shop);
       setState(s => ({ ...s, activeShop: shop }));
+      window.location.reload();
     }
   }, [state.user?.shopAccess]);
 
