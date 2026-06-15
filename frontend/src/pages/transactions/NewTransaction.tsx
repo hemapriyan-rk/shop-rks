@@ -12,7 +12,7 @@ const CAT_LABELS: Record<ServiceCategory, string> = { GOVT: '🏛 Govt', PRINTIN
 
 export default function NewTransaction() {
   const { t } = useLanguage();
-  const { hasPermission } = useAuth();
+  const { hasPermission, user, activeShop } = useAuth();
   const canManage = hasPermission('allRecords', 'write');
   const navigate = useNavigate();
   const [services, setServices] = useState<Service[]>([]);
@@ -65,8 +65,8 @@ export default function NewTransaction() {
     setTimeout(() => qtyRef.current?.focus(), 50);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: React.FormEvent, targetShop?: string) => {
+    if (e) e.preventDefault();
     if (!selected) { setError(t('newTx.errorSelect' as any)); return; }
     if (quantity === '' || quantity < 1) { setError(t('newTx.errorQuantity' as any)); return; }
     if (unitPrice === '' || unitPrice < 0) { setError(t('newTx.errorPrice' as any)); return; }
@@ -80,6 +80,7 @@ export default function NewTransaction() {
         quantity: Number(quantity), 
         unitPrice: Number(unitPrice),
         paymentMethod,
+        shop: targetShop || activeShop || 'SHOP_COMPUTER',
         notes: notes || undefined 
       });
       setSuccess(`✓ ${selected.name} × ${quantity} recorded — ₹${(Number(unitPrice) * Number(quantity)).toFixed(2)}`);
@@ -96,8 +97,8 @@ export default function NewTransaction() {
     } finally { setSubmitting(false); }
   };
 
-  const handleOthersSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleOthersSubmit = async (e?: React.FormEvent, targetShop?: string) => {
+    if (e) e.preventDefault();
     if (!othersAmount || othersAmount <= 0) { setError('Please enter a valid amount'); return; }
     if (!othersPayment) { setError('Please select a payment method'); return; }
 
@@ -109,6 +110,7 @@ export default function NewTransaction() {
         quantity: 1,
         unitPrice: Number(othersAmount),
         paymentMethod: othersPayment,
+        shop: targetShop || activeShop || 'SHOP_COMPUTER',
         notes: othersName || undefined,
       });
       setSuccess(`✓ Others entry recorded — ₹${othersAmount}`);
@@ -242,9 +244,20 @@ export default function NewTransaction() {
             </div>
           )}
 
-          <button type="submit" className="btn btn-primary btn-lg btn-full" disabled={!selected || !paymentMethod || submitting}>
-            {submitting ? <><span className="spinner" style={{ width: 16, height: 16 }} /> {t('newTx.saving' as any)}</> : `${t('newTx.saveBtn' as any)}${selected ? ` — ₹${total.toFixed(2)}` : ''}`}
-          </button>
+          {user?.shopAccess && user.shopAccess.length > 1 ? (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <button type="button" onClick={() => handleSubmit(undefined, 'SHOP_XEROX')} className="btn btn-secondary btn-lg btn-full" disabled={!selected || !paymentMethod || submitting}>
+                + NEW ENTRY-XEROX
+              </button>
+              <button type="button" onClick={() => handleSubmit(undefined, 'SHOP_COMPUTER')} className="btn btn-primary btn-lg btn-full" disabled={!selected || !paymentMethod || submitting}>
+                + NEW ENTRY-COMPUTER
+              </button>
+            </div>
+          ) : (
+            <button type="button" onClick={(e) => handleSubmit(e, activeShop as string)} className="btn btn-primary btn-lg btn-full" disabled={!selected || !paymentMethod || submitting}>
+              {submitting ? <><span className="spinner" style={{ width: 16, height: 16 }} /> {t('newTx.saving' as any)}</> : `${t('newTx.saveBtn' as any)}${selected ? ` — ₹${total.toFixed(2)}` : ''}`}
+            </button>
+          )}
         </form>
 
         <hr style={{ margin: '32px 0', borderColor: 'var(--border-color)' }} />
@@ -266,9 +279,20 @@ export default function NewTransaction() {
                 <button type="button" className={`btn btn-sm ${othersPayment === 'ONLINE' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setOthersPayment('ONLINE')}>Online</button>
                 <button type="button" className={`btn btn-sm ${othersPayment === 'OTHER' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setOthersPayment('OTHER')}>Other</button>
               </div>
-              <button type="submit" className="btn btn-primary btn-full" disabled={!othersAmount || !othersPayment || othersSubmitting} style={{ marginTop: 'auto' }}>
-                {othersSubmitting ? 'Saving...' : 'Save Others'}
-              </button>
+              {user?.shopAccess && user.shopAccess.length > 1 ? (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 'auto' }}>
+                  <button type="button" onClick={() => handleOthersSubmit(undefined, 'SHOP_XEROX')} className="btn btn-secondary btn-full" disabled={!othersAmount || !othersPayment || othersSubmitting}>
+                    XEROX
+                  </button>
+                  <button type="button" onClick={() => handleOthersSubmit(undefined, 'SHOP_COMPUTER')} className="btn btn-primary btn-full" disabled={!othersAmount || !othersPayment || othersSubmitting}>
+                    COMPUTER
+                  </button>
+                </div>
+              ) : (
+                <button type="button" onClick={(e) => handleOthersSubmit(e, activeShop as string)} className="btn btn-primary btn-full" disabled={!othersAmount || !othersPayment || othersSubmitting} style={{ marginTop: 'auto' }}>
+                  {othersSubmitting ? 'Saving...' : 'Save Others'}
+                </button>
+              )}
             </form>
           </div>
 

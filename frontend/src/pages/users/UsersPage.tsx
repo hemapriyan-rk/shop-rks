@@ -13,6 +13,7 @@ function UserModal({ user, onClose, onSave }: UserModalProps) {
   const [isActive, setIsActive] = useState(user?.isActive ?? true);
   const [isSuspended, setIsSuspended] = useState(user?.isSuspended ?? false);
   const [customRoleId, setCustomRoleId] = useState<string>(user?.customRoleId ?? '');
+  const [shopAccess, setShopAccess] = useState<string[]>(user?.shopAccess ?? ['SHOP_COMPUTER']);
   const [customRoles, setCustomRoles] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -28,9 +29,9 @@ function UserModal({ user, onClose, onSave }: UserModalProps) {
     setLoading(true);
     try {
       if (user) {
-        await usersApi.update(user.id, { name, role, isActive, isSuspended, customRoleId, ...(password && { password }) });
+        await usersApi.update(user.id, { name, role, isActive, isSuspended, customRoleId, shopAccess, ...(password && { password }) });
       } else {
-        await usersApi.create({ name, username, password, role, isActive, customRoleId });
+        await usersApi.create({ name, username, password, role, isActive, customRoleId, shopAccess });
       }
       onSave();
     } catch (err: any) {
@@ -82,7 +83,37 @@ function UserModal({ user, onClose, onSave }: UserModalProps) {
                   </select>
                 </div>
               )}
-              <div className="form-group" style={{ justifyContent: 'flex-end' }}>
+              {role !== 'SUPER_ADMIN' && role !== 'ADMIN' && (
+                <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                  <label className="form-label">Shop Access</label>
+                  <div style={{ display: 'flex', gap: 16 }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                      <input 
+                        type="checkbox" 
+                        checked={shopAccess.includes('SHOP_COMPUTER')}
+                        onChange={e => {
+                          if (e.target.checked) setShopAccess(prev => [...prev, 'SHOP_COMPUTER']);
+                          else setShopAccess(prev => prev.filter(s => s !== 'SHOP_COMPUTER'));
+                        }}
+                      />
+                      <span>SHOP-COMPUTER</span>
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                      <input 
+                        type="checkbox" 
+                        checked={shopAccess.includes('SHOP_XEROX')}
+                        onChange={e => {
+                          if (e.target.checked) setShopAccess(prev => [...prev, 'SHOP_XEROX']);
+                          else setShopAccess(prev => prev.filter(s => s !== 'SHOP_XEROX'));
+                        }}
+                      />
+                      <span>SHOP-XEROX</span>
+                    </label>
+                  </div>
+                  {shopAccess.length === 0 && <span style={{ fontSize: 12, color: 'var(--red)' }}>Must select at least one shop</span>}
+                </div>
+              )}
+              <div className="form-group" style={{ justifyContent: 'flex-end', gridColumn: '1 / -1' }}>
                 <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', marginTop: 26 }}>
                   <input type="checkbox" checked={isActive} onChange={e => setIsActive(e.target.checked)} />
                   <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Active</span>
@@ -166,6 +197,11 @@ export default function UsersPage() {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                       {u.isActive ? <span className="badge badge-green">Active</span> : <span className="badge badge-red">Inactive</span>}
                       {u.isSuspended && <span className="badge badge-red" style={{ background: '#ff3333', color: 'white' }}>Suspended</span>}
+                      {u.shopAccess?.length > 1 ? (
+                        <span className="badge" style={{ background: '#e0e7ff', color: '#3730a3', fontSize: 10 }}>BOTH SHOPS</span>
+                      ) : (
+                        <span className="badge" style={{ background: '#f3f4f6', color: '#4b5563', fontSize: 10 }}>{u.shopAccess?.[0]?.replace('SHOP_', '')}</span>
+                      )}
                     </div>
                   </td>
                   <td style={{ color: 'var(--text-muted)' }}>{u._count?.transactions ?? 0}</td>
