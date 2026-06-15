@@ -46,9 +46,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const user = res.data.data as unknown as User;
         localStorage.setItem('rks_user', JSON.stringify(user));
         
+        const shopAccess = user.shopAccess || ['SHOP_COMPUTER'];
         let newActiveShop = state.activeShop;
-        if (!newActiveShop || !user.shopAccess.includes(newActiveShop)) {
-          newActiveShop = user.shopAccess[0] || 'SHOP_COMPUTER';
+        if (!newActiveShop || !shopAccess.includes(newActiveShop)) {
+          newActiveShop = shopAccess[0] || 'SHOP_COMPUTER';
           localStorage.setItem('rks_activeShop', newActiveShop);
         }
 
@@ -73,10 +74,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const res = await authApi.login(username, password);
     const { token, user } = res.data.data!;
     const castUser = user as unknown as User;
-    
+    const shopAccess = castUser.shopAccess || ['SHOP_COMPUTER'];
     let shop = localStorage.getItem('rks_activeShop') as Shop;
-    if (!shop || !castUser.shopAccess.includes(shop)) {
-      shop = castUser.shopAccess[0] || 'SHOP_COMPUTER';
+    if (!shop || !shopAccess.includes(shop)) {
+      shop = shopAccess[0] || 'SHOP_COMPUTER';
     }
 
     localStorage.setItem('rks_token', token);

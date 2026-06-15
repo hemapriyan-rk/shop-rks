@@ -143,6 +143,7 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
         name: user.name,
         username: user.username,
         role: user.role,
+        shopAccess: user.shopAccess,
       },
     }, 200, undefined, 'Login successful');
   } catch (err) {
@@ -159,6 +160,7 @@ export async function getMe(req: Request, res: Response, next: NextFunction): Pr
         name: true,
         username: true,
         role: true,
+        shopAccess: true,
         isActive: true,
         createdAt: true,
         customRole: true,
