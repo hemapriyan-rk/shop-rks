@@ -14,7 +14,6 @@ export default function NewExpense() {
   const [customCat, setCustomCat] = useState('');
   const [note, setNote] = useState('');
   const [bankId, setBankId] = useState('');
-  const [shop, setShop] = useState<Shop>('SHOP_COMPUTER');
   const [banks, setBanks] = useState<BankAccount[]>([]);
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
   const [submitting, setSubmitting] = useState(false);
@@ -30,8 +29,8 @@ export default function NewExpense() {
 
   const finalCategory = category === '__custom__' ? customCat : category;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: React.FormEvent, targetShop?: Shop) => {
+    if (e) e.preventDefault();
     const amt = parseFloat(amount);
     if (!amt || amt <= 0) { setError('Enter a valid amount'); return; }
     if (!finalCategory.trim()) { setError('Category is required'); return; }
@@ -43,7 +42,7 @@ export default function NewExpense() {
         category: finalCategory,
         note: note || undefined,
         bankId: canManage ? bankId : undefined,
-        shop
+        shop: targetShop || 'SHOP_COMPUTER'
       });
       setSuccess(canManage ? 'Expense recorded and deducted from bank!' : 'Expense recorded! Pending admin approval.');
       setAmount(''); setCategory(''); setCustomCat(''); setNote(''); setBankId('');
@@ -87,13 +86,7 @@ export default function NewExpense() {
                 <input className="form-input" type="text" placeholder="Enter category name" value={customCat} onChange={e => setCustomCat(e.target.value)} />
               </div>
             )}
-            <div className="form-group">
-              <label className="form-label">Shop</label>
-              <select className="form-select" value={shop} onChange={e => setShop(e.target.value as Shop)}>
-                <option value="SHOP_COMPUTER">Shop Computer</option>
-                <option value="SHOP_XEROX">Shop Xerox</option>
-              </select>
-            </div>
+
             {canManage && (
               <div className="form-group">
                 <label className="form-label">Deduct from Bank</label>
@@ -109,9 +102,14 @@ export default function NewExpense() {
               <label className="form-label">Note (optional)</label>
               <input className="form-input" type="text" placeholder="Description or reference..." value={note} onChange={e => setNote(e.target.value)} />
             </div>
-            <button type="submit" className="btn btn-primary btn-lg btn-full" disabled={submitting}>
-              {submitting ? 'Saving...' : 'Record Expense'}
-            </button>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <button type="button" onClick={() => handleSubmit(undefined, 'SHOP_XEROX')} className="btn btn-secondary btn-lg btn-full" disabled={submitting}>
+                + EXPENSE XEROX
+              </button>
+              <button type="button" onClick={() => handleSubmit(undefined, 'SHOP_COMPUTER')} className="btn btn-primary btn-lg btn-full" disabled={submitting}>
+                + EXPENSE COMPUTER
+              </button>
+            </div>
           </form>
         </div>
       </div>

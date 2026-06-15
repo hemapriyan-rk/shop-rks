@@ -16,14 +16,6 @@ api.interceptors.request.use((config) => {
   const token = localStorage.getItem('rks_token');
   if (token) config.headers.Authorization = `Bearer ${token}`;
 
-  const shop = localStorage.getItem('rks_activeShop');
-  if (shop) {
-    if (config.method?.toUpperCase() === 'GET') {
-      config.params = { shop, ...config.params };
-    } else if (config.data && typeof config.data === 'object' && !(config.data instanceof FormData)) {
-      config.data = { shop, ...config.data };
-    }
-  }
 
   return config;
 });
