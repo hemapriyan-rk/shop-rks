@@ -14,6 +14,11 @@ export async function getAllUsers(req: Request, res: Response, next: NextFunctio
       },
       orderBy: { createdAt: 'asc' },
     });
+    users.forEach(u => {
+      if (u.role === 'ADMIN' || u.role === 'SUPER_ADMIN') {
+        u.shopAccess = ['SHOP_COMPUTER', 'SHOP_XEROX'];
+      }
+    });
     sendSuccess(res, users);
   } catch (err) { next(err); }
 }
@@ -29,6 +34,9 @@ export async function getUserById(req: Request, res: Response, next: NextFunctio
       },
     });
     if (!user) { sendNotFound(res, 'User'); return; }
+    if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') {
+      user.shopAccess = ['SHOP_COMPUTER', 'SHOP_XEROX'];
+    }
     sendSuccess(res, user);
   } catch (err) { next(err); }
 }
@@ -58,6 +66,10 @@ export async function createUser(req: Request, res: Response, next: NextFunction
         select: { id: true, name: true, username: true, role: true, isActive: true, createdAt: true, customRoleId: true, shopAccess: true },
       })
     );
+
+    if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') {
+      user.shopAccess = ['SHOP_COMPUTER', 'SHOP_XEROX'];
+    }
 
     sendCreated(res, user, 'User created successfully');
   } catch (err) { next(err); }
@@ -141,6 +153,10 @@ export async function updateUser(req: Request, res: Response, next: NextFunction
         select: { id: true, name: true, username: true, role: true, isActive: true, isSuspended: true, updatedAt: true, customRoleId: true, shopAccess: true },
       })
     );
+
+    if (updated.role === 'ADMIN' || updated.role === 'SUPER_ADMIN') {
+      updated.shopAccess = ['SHOP_COMPUTER', 'SHOP_XEROX'];
+    }
 
     sendSuccess(res, updated, 200, undefined, 'User updated');
   } catch (err) { next(err); }

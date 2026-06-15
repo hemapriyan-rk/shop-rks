@@ -143,7 +143,7 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
         name: user.name,
         username: user.username,
         role: user.role,
-        shopAccess: user.shopAccess,
+        shopAccess: (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') ? ['SHOP_COMPUTER', 'SHOP_XEROX'] : user.shopAccess,
       },
     }, 200, undefined, 'Login successful');
   } catch (err) {
@@ -208,6 +208,7 @@ export async function getMe(req: Request, res: Response, next: NextFunction): Pr
 
     const responseData = {
       ...user,
+      shopAccess: (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') ? ['SHOP_COMPUTER', 'SHOP_XEROX'] : user.shopAccess,
       totalRevenue: totalRevenue._sum.totalPrice || 0,
       todayStats: {
         transactions: todayTransactions._count,

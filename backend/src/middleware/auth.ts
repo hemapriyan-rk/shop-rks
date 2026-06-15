@@ -123,7 +123,7 @@ export async function authenticate(
       role: user.role,
       name: user.name,
       sessionId: payload.sessionId,
-      shopAccess: user.shopAccess
+      shopAccess: (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') ? ['SHOP_COMPUTER', 'SHOP_XEROX'] : user.shopAccess
     };
 
     next();
