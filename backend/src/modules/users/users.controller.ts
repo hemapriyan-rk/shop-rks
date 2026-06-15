@@ -139,7 +139,7 @@ export async function updateUser(req: Request, res: Response, next: NextFunction
       updateData.username = req.body.username.toLowerCase();
     }
     if (req.body.shopAccess) {
-      updateData.shopAccess = req.body.shopAccess;
+      updateData.shopAccess = { set: req.body.shopAccess };
     }
 
     const updated = await withAuditLog(
