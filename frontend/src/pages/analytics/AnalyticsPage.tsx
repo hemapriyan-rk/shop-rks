@@ -16,16 +16,17 @@ export default function AnalyticsPage() {
   const [month, setMonth] = useState(nowIST.getMonth() + 1);
   const [daily, setDaily] = useState<DailyAnalytics | null>(null);
   const [monthly, setMonthly] = useState<MonthlyAnalytics | null>(null);
+  const [shopFilter, setShopFilter] = useState('');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     setLoading(true);
     if (tab === 'daily') {
-      analyticsApi.daily(date).then(r => setDaily(r.data.data!)).finally(() => setLoading(false));
+      analyticsApi.daily(date, undefined, shopFilter).then(r => setDaily(r.data.data!)).finally(() => setLoading(false));
     } else {
-      analyticsApi.monthly(year, month).then(r => setMonthly(r.data.data!)).finally(() => setLoading(false));
+      analyticsApi.monthly(year, month, undefined, shopFilter).then(r => setMonthly(r.data.data!)).finally(() => setLoading(false));
     }
-  }, [tab, date, year, month]);
+  }, [tab, date, year, month, shopFilter]);
 
   const StatCard = ({ label, value, color }: { label: string; value: number; color: string }) => (
     <div className="stat-card" style={{ '--stat-color': color } as React.CSSProperties}>
@@ -42,7 +43,12 @@ export default function AnalyticsPage() {
     <Layout title="Analytics">
       <div className="page-header">
         <div className="page-header-title">Financial Analytics</div>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <select className="form-select" value={shopFilter} onChange={e => setShopFilter(e.target.value)} style={{ minWidth: 150 }}>
+            <option value="">Overall (All Shops)</option>
+            <option value="SHOP_COMPUTER">Shop Computer</option>
+            <option value="SHOP_XEROX">Shop Xerox</option>
+          </select>
           <button className={`btn ${tab === 'daily' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setTab('daily')}>Daily</button>
           <button className={`btn ${tab === 'monthly' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setTab('monthly')}>Monthly</button>
         </div>
@@ -74,10 +80,10 @@ export default function AnalyticsPage() {
         <>
           <div className="stat-grid">
             <StatCard label="Total Income" value={daily.income} color="var(--green)" />
-            <StatCard label="SHOP-COMPUTER" value={daily.cashIncome} color="#10B981" />
-            <StatCard label="Online Income" value={daily.onlineIncome} color="#3B82F6" />
+            <StatCard label="Shop Computer Income" value={daily.cashIncome} color="#10B981" />
+            <StatCard label="Shop Xerox Income" value={daily.shopXeroxIncome || 0} color="#8B5CF6" />
+            <StatCard label="Online Payments" value={daily.onlineIncome} color="#3B82F6" />
             <StatCard label="Other Income" value={daily.otherIncome || 0} color="#F59E0B" />
-            <StatCard label="Shop Xerox" value={daily.shopXeroxIncome || 0} color="#8B5CF6" />
             <StatCard label="Expenses (Approved)" value={daily.expenses} color="var(--red)" />
             <StatCard label={`Profit ${daily.profit < 0 ? '(Loss)' : ''}`} value={daily.profit} color={daily.profit >= 0 ? 'var(--green)' : 'var(--red)'} />
             <div className="stat-card" style={{ '--stat-color': 'var(--blue)' } as React.CSSProperties}>
@@ -134,10 +140,10 @@ export default function AnalyticsPage() {
         <>
           <div className="stat-grid">
             <StatCard label="Monthly Income" value={monthly.income} color="var(--green)" />
-            <StatCard label="SHOP-COMPUTER" value={monthly.cashIncome} color="#10B981" />
+            <StatCard label="Shop Computer Income" value={monthly.cashIncome} color="#10B981" />
+            <StatCard label="Shop Xerox Income" value={monthly.shopXeroxIncome || 0} color="#8B5CF6" />
             <StatCard label="Monthly Online" value={monthly.onlineIncome} color="#3B82F6" />
             <StatCard label="Monthly Other" value={monthly.otherIncome || 0} color="#F59E0B" />
-            <StatCard label="Shop Xerox" value={monthly.shopXeroxIncome || 0} color="#8B5CF6" />
             <StatCard label="Monthly Expenses" value={monthly.expenses} color="var(--red)" />
             <StatCard label="Monthly Profit" value={monthly.profit} color={monthly.profit >= 0 ? 'var(--green)' : 'var(--red)'} />
             <div className="stat-card" style={{ '--stat-color': 'var(--blue)' } as React.CSSProperties}>
@@ -156,10 +162,10 @@ export default function AnalyticsPage() {
                   <YAxis tick={{ fontSize: 11, fill: '#606080' }} tickFormatter={v => `₹${(v/1000).toFixed(0)}k`} />
                   <Tooltip formatter={(v: number) => [`₹${v.toLocaleString('en-IN')}`, '']} contentStyle={{ background: '#1A1A24', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8 }} labelStyle={{ color: '#A0A0B8' }} />
                   <Legend wrapperStyle={{ fontSize: 12 }} />
-                  <Bar dataKey="cashIncome" name="SHOP-COMPUTER" stackId="income" fill="#10B981" />
-                  <Bar dataKey="onlineIncome" name="Online Income" stackId="income" fill="#3B82F6" />
-                  <Bar dataKey="otherIncome" name="Other Income" stackId="income" fill="#F59E0B" />
-                  <Bar dataKey="shopXeroxIncome" name="Shop Xerox" stackId="income" fill="#8B5CF6" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="cashIncome" name="Shop Computer Income" stackId="income" fill="#10B981" />
+                  <Bar dataKey="shopXeroxIncome" name="Shop Xerox Income" stackId="income" fill="#8B5CF6" />
+                  <Bar dataKey="onlineIncome" name="Online Payments" stackId="income" fill="#3B82F6" />
+                  <Bar dataKey="otherIncome" name="Other Income" stackId="income" fill="#F59E0B" radius={[4, 4, 0, 0]} />
                   <Bar dataKey="expenses" name="Expenses" fill="#EF4444" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>

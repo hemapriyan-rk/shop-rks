@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Layout from '../../components/layout/Layout';
 import { expensesApi, banksApi, expenseCategoriesApi } from '../../api';
 import { useAuth } from '../../context/AuthContext';
-import { BankAccount } from '../../types';
+import { BankAccount, Shop } from '../../types';
 
 export default function NewExpense() {
   const { hasPermission } = useAuth();
@@ -14,6 +14,7 @@ export default function NewExpense() {
   const [customCat, setCustomCat] = useState('');
   const [note, setNote] = useState('');
   const [bankId, setBankId] = useState('');
+  const [shop, setShop] = useState<Shop>('SHOP_COMPUTER');
   const [banks, setBanks] = useState<BankAccount[]>([]);
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
   const [submitting, setSubmitting] = useState(false);
@@ -41,7 +42,8 @@ export default function NewExpense() {
         amount: amt, 
         category: finalCategory,
         note: note || undefined,
-        bankId: canManage ? bankId : undefined
+        bankId: canManage ? bankId : undefined,
+        shop
       });
       setSuccess(canManage ? 'Expense recorded and deducted from bank!' : 'Expense recorded! Pending admin approval.');
       setAmount(''); setCategory(''); setCustomCat(''); setNote(''); setBankId('');
@@ -85,6 +87,13 @@ export default function NewExpense() {
                 <input className="form-input" type="text" placeholder="Enter category name" value={customCat} onChange={e => setCustomCat(e.target.value)} />
               </div>
             )}
+            <div className="form-group">
+              <label className="form-label">Shop</label>
+              <select className="form-select" value={shop} onChange={e => setShop(e.target.value as Shop)}>
+                <option value="SHOP_COMPUTER">Shop Computer</option>
+                <option value="SHOP_XEROX">Shop Xerox</option>
+              </select>
+            </div>
             {canManage && (
               <div className="form-group">
                 <label className="form-label">Deduct from Bank</label>

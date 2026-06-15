@@ -27,9 +27,9 @@ export const usersApi = {
 export const servicesApi = {
   list: (params?: { category?: string; active?: boolean }) =>
     api.get<ApiResponse<Service[]>>('/services', { params }),
-  create: (data: { name: string; category: string; price: number; isActive?: boolean }) =>
+  create: (data: { name: string; category: string; price: number; isActive?: boolean; shop?: Shop }) =>
     api.post<ApiResponse<Service>>('/services', data),
-  update: (id: string, data: Partial<Service>) =>
+  update: (id: string, data: Partial<Service> & { shop?: Shop }) =>
     api.patch<ApiResponse<Service>>(`/services/${id}`, data),
   delete: (id: string) => api.delete<ApiResponse<null>>(`/services/${id}`),
 };
@@ -49,9 +49,9 @@ export const transactionsApi = {
 export const expensesApi = {
   list: (params?: { date?: string; status?: string; userId?: string }) =>
     api.get<ApiResponse<Expense[]>>('/expenses', { params }),
-  create: (data: { amount: number; category: string; note?: string; bankId?: string }) =>
+  create: (data: { amount: number; category: string; note?: string; bankId?: string; shop?: Shop }) =>
     api.post<ApiResponse<Expense>>('/expenses', data),
-  update: (id: string, data: { updatedAt: string; amount?: number; category?: string; note?: string }) =>
+  update: (id: string, data: { updatedAt: string; amount?: number; category?: string; note?: string; shop?: Shop }) =>
     api.patch<ApiResponse<Expense>>(`/expenses/${id}`, data),
   approve: (id: string, status: 'APPROVED' | 'REJECTED', bankId?: string) =>
     api.patch<ApiResponse<Expense>>(`/expenses/${id}/approve`, { status, bankId }),
@@ -83,8 +83,8 @@ export const banksApi = {
 // ── Analytics ──────────────────────────────────────────────────────
 export const analyticsApi = {
   todaySummary: () => api.get<ApiResponse<TodaySummary>>('/analytics/today-summary'),
-  daily: (date?: string, userId?: string) => api.get<ApiResponse<DailyAnalytics>>('/analytics/daily', { params: { date, userId } }),
-  monthly: (year?: number, month?: number, userId?: string) => api.get<ApiResponse<MonthlyAnalytics>>('/analytics/monthly', { params: { year, month, userId } }),
+  daily: (date?: string, userId?: string, shop?: string) => api.get<ApiResponse<DailyAnalytics>>('/analytics/daily', { params: { date, userId, shop } }),
+  monthly: (year?: number, month?: number, userId?: string, shop?: string) => api.get<ApiResponse<MonthlyAnalytics>>('/analytics/monthly', { params: { year, month, userId, shop } }),
   manualAdjust: (data: { date: string, type: 'INCOME' | 'EXPENSE', amount: number, note?: string }) =>
     api.post<ApiResponse<any>>('/analytics/adjust', data),
 };

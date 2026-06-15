@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Layout from '../../components/layout/Layout';
 import { servicesApi } from '../../api';
 import { useLanguage } from '../../context/LanguageContext';
-import type { Service, ServiceCategory } from '../../types';
+import type { Service, ServiceCategory, Shop } from '../../types';
 
 const CATS: ServiceCategory[] = ['GOVT', 'PRINTING', 'CARDS', 'OTHER'];
 
@@ -17,6 +17,7 @@ function ServiceModal({ service, onClose, onSave }: ServiceModalProps) {
   const [category, setCategory] = useState<ServiceCategory>(service?.category ?? 'OTHER');
   const [price, setPrice] = useState(service?.price?.toString() ?? '');
   const [isActive, setIsActive] = useState(service?.isActive ?? true);
+  const [shop, setShop] = useState<Shop>(service?.shop ?? 'SHOP_COMPUTER');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const { t } = useLanguage();
@@ -29,9 +30,9 @@ function ServiceModal({ service, onClose, onSave }: ServiceModalProps) {
     setLoading(true);
     try {
       if (service) {
-        await servicesApi.update(service.id, { name, category, price: p, isActive });
+        await servicesApi.update(service.id, { name, category, price: p, isActive, shop });
       } else {
-        await servicesApi.create({ name, category, price: p, isActive });
+        await servicesApi.create({ name, category, price: p, isActive, shop });
       }
       onSave();
     } catch (err: any) {
@@ -63,6 +64,13 @@ function ServiceModal({ service, onClose, onSave }: ServiceModalProps) {
               <div className="form-group">
                 <label className="form-label">{t('services.price' as any)} (₹)</label>
                 <input className="form-input" type="number" min="0" step="0.01" value={price} onChange={e => setPrice(e.target.value)} placeholder="0.00" />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Shop</label>
+                <select className="form-select" value={shop} onChange={e => setShop(e.target.value as Shop)}>
+                  <option value="SHOP_COMPUTER">Shop Computer</option>
+                  <option value="SHOP_XEROX">Shop Xerox</option>
+                </select>
               </div>
             </div>
             <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
@@ -136,11 +144,16 @@ export default function ServicesPage() {
             <div className="section-title">{cat}</div>
             <div className="table-wrapper">
               <table>
-                <thead><tr><th>{t('services.name' as any)}</th><th>{t('services.price' as any)}</th><th>{t('services.status' as any)}</th><th>{t('services.actions' as any)}</th></tr></thead>
+                <thead><tr><th>{t('services.name' as any)}</th><th>Shop</th><th>{t('services.price' as any)}</th><th>{t('services.status' as any)}</th><th>{t('services.actions' as any)}</th></tr></thead>
                 <tbody>
                   {items.map(s => (
                     <tr key={s.id}>
                       <td style={{ fontWeight: 500 }}>{s.name}</td>
+                      <td>
+                        <span className="badge" style={{ background: s.shop === 'SHOP_XEROX' ? '#fde68a' : '#bfdbfe', color: '#1f2937' }}>
+                          {s.shop?.replace('SHOP_', '') || 'COMPUTER'}
+                        </span>
+                      </td>
                       <td style={{ fontWeight: 700, color: 'var(--color-accent)' }}>₹{Number(s.price).toFixed(2)}</td>
                       <td>{s.isActive ? <span className="badge badge-green">{t('services.statusActive' as any)}</span> : <span className="badge badge-red">{t('services.statusInactive' as any)}</span>}</td>
                       <td>

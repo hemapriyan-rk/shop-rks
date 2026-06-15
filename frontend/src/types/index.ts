@@ -25,6 +25,7 @@ export interface Service {
   category: ServiceCategory;
   price: number;
   isActive: boolean;
+  shop?: Shop;
   createdAt: string;
   updatedAt: string;
 }
@@ -73,6 +74,7 @@ export interface Expense {
   status: ExpenseStatus;
   bankId?: string | null;
   bank?: { id: string; name: string } | null;
+  shop?: Shop;
   createdAt: string;
   updatedAt: string;
   user: { id: string; name: string; username: string };
