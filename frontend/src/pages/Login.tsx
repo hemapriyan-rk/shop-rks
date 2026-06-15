@@ -15,6 +15,11 @@ export default function LoginPage() {
   useEffect(() => {
     if (isAuthenticated) {
       navigate('/dashboard', { replace: true });
+    } else {
+      const savedUser = localStorage.getItem('rks_savedUsername');
+      const savedPass = localStorage.getItem('rks_savedPassword');
+      if (savedUser) setUsername(savedUser);
+      if (savedPass) setPassword(savedPass);
     }
   }, [isAuthenticated, navigate]);
 
@@ -25,6 +30,8 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await login(username.trim(), password);
+      localStorage.setItem('rks_savedUsername', username.trim());
+      localStorage.setItem('rks_savedPassword', password);
       navigate('/dashboard');
     } catch (err: any) {
       console.error("Login Error:", err);

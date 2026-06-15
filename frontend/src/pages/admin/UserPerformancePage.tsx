@@ -100,14 +100,18 @@ export default function UserPerformancePage() {
         </div>
       )}
 
-      {!loading && selectedUserId && tab === 'daily' && daily && (
-        <>
+      {!loading && selectedUserId && tab === 'daily' && daily && (() => {
+        const selectedUser = users.find(u => u.id === selectedUserId);
+        const hasComputer = selectedUser?.shopAccess?.includes('SHOP_COMPUTER') || selectedUser?.role === 'ADMIN' || selectedUser?.role === 'SUPER_ADMIN';
+        const hasXerox = selectedUser?.shopAccess?.includes('SHOP_XEROX') || selectedUser?.role === 'ADMIN' || selectedUser?.role === 'SUPER_ADMIN';
+
+        return (
           <div className="stat-grid">
             <StatCard label="Total Income Logged" value={daily.income} color="var(--green)" />
-            <StatCard label="SHOP-COMPUTER" value={daily.cashIncome} color="#10B981" />
+            {hasComputer && <StatCard label="SHOP-COMPUTER" value={daily.cashIncome} color="#10B981" />}
             <StatCard label="Online Collected" value={daily.onlineIncome} color="#3B82F6" />
             <StatCard label="Other Collected" value={daily.otherIncome || 0} color="#F59E0B" />
-            <StatCard label="Shop Xerox" value={daily.shopXeroxIncome || 0} color="#8B5CF6" />
+            {hasXerox && <StatCard label="Shop Xerox" value={daily.shopXeroxIncome || 0} color="#8B5CF6" />}
             <StatCard label="Expenses Approved" value={daily.expenses} color="var(--red)" />
             <StatCard label={`Net Profit ${daily.profit < 0 ? '(Loss)' : ''}`} value={daily.profit} color={daily.profit >= 0 ? 'var(--green)' : 'var(--red)'} />
             <div className="stat-card" style={{ '--stat-color': 'var(--blue)' } as React.CSSProperties}>
@@ -115,17 +119,22 @@ export default function UserPerformancePage() {
               <div className="stat-value">{daily.transactionCount}</div>
             </div>
           </div>
-        </>
-      )}
+        );
+      })()}
 
-      {!loading && selectedUserId && tab === 'monthly' && monthly && (
+      {!loading && selectedUserId && tab === 'monthly' && monthly && (() => {
+        const selectedUser = users.find(u => u.id === selectedUserId);
+        const hasComputer = selectedUser?.shopAccess?.includes('SHOP_COMPUTER') || selectedUser?.role === 'ADMIN' || selectedUser?.role === 'SUPER_ADMIN';
+        const hasXerox = selectedUser?.shopAccess?.includes('SHOP_XEROX') || selectedUser?.role === 'ADMIN' || selectedUser?.role === 'SUPER_ADMIN';
+
+        return (
         <>
           <div className="stat-grid">
             <StatCard label="Monthly Income Logged" value={monthly.income} color="var(--green)" />
-            <StatCard label="SHOP-COMPUTER" value={monthly.cashIncome} color="#10B981" />
+            {hasComputer && <StatCard label="SHOP-COMPUTER" value={monthly.cashIncome} color="#10B981" />}
             <StatCard label="Monthly Online" value={monthly.onlineIncome} color="#3B82F6" />
             <StatCard label="Monthly Other" value={monthly.otherIncome || 0} color="#F59E0B" />
-            <StatCard label="Shop Xerox" value={monthly.shopXeroxIncome || 0} color="#8B5CF6" />
+            {hasXerox && <StatCard label="Shop Xerox" value={monthly.shopXeroxIncome || 0} color="#8B5CF6" />}
             <StatCard label="Monthly Expenses" value={monthly.expenses} color="var(--red)" />
             <StatCard label="Monthly Profit" value={monthly.profit} color={monthly.profit >= 0 ? 'var(--green)' : 'var(--red)'} />
             <div className="stat-card" style={{ '--stat-color': 'var(--blue)' } as React.CSSProperties}>
@@ -154,7 +163,8 @@ export default function UserPerformancePage() {
             </div>
           )}
         </>
-      )}
+        );
+      })()}
 
       <FloatingCalculator />
     </Layout>

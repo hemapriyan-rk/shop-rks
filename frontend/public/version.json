@@ -1,5 +1,5 @@
 {
-  "version": "1.0.19",
-  "apkUrl": "/Shop_RKS_v1.0.19.apk",
-  "releaseNotes": "Critical Update: Restricted access rules, navigation menu modifications, and system stability improvements."
+  "version": "1.0.20",
+  "apkUrl": "/Shop_RKS_v1.0.20.apk",
+  "releaseNotes": "Update 1.0.20: Easy auto-login implemented. User performance cards now intelligently filter based on shop access to simplify metrics."
 }
