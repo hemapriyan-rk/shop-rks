@@ -67,6 +67,7 @@ export const createUserSchema = z.object({
   customRoleId: z.string().optional().nullable(),
   isActive: z.boolean().optional().default(true),
   isSuspended: z.boolean().optional().default(false),
+  shopAccess: z.array(z.enum(['SHOP_COMPUTER', 'SHOP_XEROX'])).optional(),
 });
 
 export const updateUserSchema = createUserSchema
