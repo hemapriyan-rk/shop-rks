@@ -104,22 +104,13 @@ export default function NewTransaction() {
 
     setOthersSubmitting(true);
     setError('');
-    let actualShop = targetShop;
-    if (!actualShop) {
-      if (user?.shopAccess && user.shopAccess.length === 1) {
-        actualShop = user.shopAccess[0];
-      } else {
-        actualShop = 'SHOP_COMPUTER';
-      }
-    }
-
     try {
       await transactionsApi.create({
         serviceName: 'Others',
         quantity: 1,
         unitPrice: Number(othersAmount),
         paymentMethod: othersPayment,
-        shop: actualShop,
+        shop: targetShop || activeShop || 'SHOP_COMPUTER',
         notes: othersName || undefined,
       });
       setSuccess(`✓ Others entry recorded — ₹${othersAmount}`);
@@ -253,20 +244,9 @@ export default function NewTransaction() {
             </div>
           )}
 
-          {user?.shopAccess && user.shopAccess.length > 1 ? (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-              <button type="button" onClick={() => handleSubmit(undefined, 'SHOP_XEROX')} className="btn btn-secondary btn-lg btn-full" disabled={!selected || !paymentMethod || submitting}>
-                + NEW ENTRY-XEROX
-              </button>
-              <button type="button" onClick={() => handleSubmit(undefined, 'SHOP_COMPUTER')} className="btn btn-primary btn-lg btn-full" disabled={!selected || !paymentMethod || submitting}>
-                + NEW ENTRY-COMPUTER
-              </button>
-            </div>
-          ) : (
-            <button type="button" onClick={(e) => handleSubmit(e)} className="btn btn-primary btn-lg btn-full" disabled={!selected || !paymentMethod || submitting}>
-              {submitting ? <><span className="spinner" style={{ width: 16, height: 16 }} /> {t('newTx.saving' as any)}</> : `${t('newTx.saveBtn' as any)}${selected ? ` — ₹${total.toFixed(2)}` : ''}`}
-            </button>
-          )}
+          <button type="button" onClick={(e) => handleSubmit(e, activeShop as string)} className="btn btn-primary btn-lg btn-full" disabled={!selected || !paymentMethod || submitting}>
+            {submitting ? <><span className="spinner" style={{ width: 16, height: 16 }} /> {t('newTx.saving' as any)}</> : `${t('newTx.saveBtn' as any)}${selected ? ` — ₹${total.toFixed(2)}` : ''}`}
+          </button>
         </form>
 
         <hr style={{ margin: '32px 0', borderColor: 'var(--border-color)' }} />
@@ -288,20 +268,9 @@ export default function NewTransaction() {
                 <button type="button" className={`btn btn-sm ${othersPayment === 'ONLINE' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setOthersPayment('ONLINE')}>Online</button>
                 <button type="button" className={`btn btn-sm ${othersPayment === 'OTHER' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setOthersPayment('OTHER')}>Other</button>
               </div>
-              {user?.shopAccess && user.shopAccess.length > 1 ? (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 'auto' }}>
-                  <button type="button" onClick={() => handleOthersSubmit(undefined, 'SHOP_XEROX')} className="btn btn-secondary btn-full" disabled={!othersAmount || !othersPayment || othersSubmitting}>
-                    XEROX
-                  </button>
-                  <button type="button" onClick={() => handleOthersSubmit(undefined, 'SHOP_COMPUTER')} className="btn btn-primary btn-full" disabled={!othersAmount || !othersPayment || othersSubmitting}>
-                    COMPUTER
-                  </button>
-                </div>
-              ) : (
-                <button type="button" onClick={(e) => handleOthersSubmit(e)} className="btn btn-primary btn-full" disabled={!othersAmount || !othersPayment || othersSubmitting} style={{ marginTop: 'auto' }}>
-                  {othersSubmitting ? 'Saving...' : 'Save Others'}
-                </button>
-              )}
+              <button type="button" onClick={(e) => handleOthersSubmit(e, activeShop as string)} className="btn btn-primary btn-full" disabled={!othersAmount || !othersPayment || othersSubmitting} style={{ marginTop: 'auto' }}>
+                {othersSubmitting ? 'Saving...' : 'Save Others'}
+              </button>
             </form>
           </div>
 

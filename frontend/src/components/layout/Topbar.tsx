@@ -60,6 +60,22 @@ export default function Topbar({ title, onMenuClick }: TopbarProps) {
       <span className="topbar-title">{title}</span>
       
       <div className="flex-center gap-12" style={{ marginLeft: 'auto' }}>
+        {user && user.shopAccess.length > 1 && (
+          <select 
+            value={activeShop || ''} 
+            onChange={(e) => setActiveShop(e.target.value as Shop)}
+            className="input"
+            style={{ padding: '4px 8px', fontSize: '12px', minWidth: '130px', height: '28px', backgroundColor: 'var(--surface)', border: '1px solid var(--border)' }}
+          >
+            <option value="SHOP_COMPUTER">SHOP COMPUTER</option>
+            <option value="SHOP_XEROX">SHOP XEROX</option>
+          </select>
+        )}
+        {user && user.shopAccess.length === 1 && (
+          <span style={{ fontSize: '11px', padding: '4px 8px', borderRadius: '12px', backgroundColor: 'var(--primary)', color: '#fff', fontWeight: 'bold', letterSpacing: '0.5px' }}>
+            {activeShop?.replace('_', ' ')}
+          </span>
+        )}
         {renderStats && (
           <div className="render-stats-widget">
             <span className="render-stats-label">RENDER FREE TIER</span>
