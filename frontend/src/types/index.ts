@@ -94,10 +94,12 @@ export interface Log {
 export interface DailyAnalytics {
   date: string;
   income: number;
-  cashIncome: number;
-  onlineIncome: number;
+  computerCash: number;
+  computerOnline: number;
+  xeroxCash: number;
+  xeroxOnline: number;
   otherIncome: number;
-  shopXeroxIncome: number;
+  shopXeroxDirect: number;
   expenses: number;
   profit: number;
   transactionCount: number;
@@ -111,24 +113,28 @@ export interface MonthlyAnalytics {
   year: number;
   month: number;
   income: number;
-  cashIncome: number;
-  onlineIncome: number;
+  computerCash: number;
+  computerOnline: number;
+  xeroxCash: number;
+  xeroxOnline: number;
   otherIncome: number;
-  shopXeroxIncome: number;
+  shopXeroxDirect: number;
   expenses: number;
   profit: number;
   transactionCount: number;
   expenseCount: number;
-  daily: Array<{ date: string; income: number; cashIncome: number; onlineIncome: number; otherIncome: number; shopXeroxIncome: number; expenses: number; profit: number; count: number }>;
+  daily: Array<{ date: string; income: number; computerCash: number; computerOnline: number; xeroxCash: number; xeroxOnline: number; otherIncome: number; shopXeroxDirect: number; expenses: number; profit: number; count: number }>;
 }
 
 export interface TodaySummary {
   date: string;
   income: number;
-  cashIncome: number;
-  onlineIncome: number;
+  computerCash: number;
+  computerOnline: number;
+  xeroxCash: number;
+  xeroxOnline: number;
   otherIncome: number;
-  shopXeroxIncome: number;
+  shopXeroxDirect: number;
   expenses: number;
   profit: number;
   transactionCount: number;

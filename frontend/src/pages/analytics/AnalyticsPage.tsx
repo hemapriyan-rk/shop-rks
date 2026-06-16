@@ -80,10 +80,12 @@ export default function AnalyticsPage() {
         <>
           <div className="stat-grid">
             <StatCard label="Total Income" value={daily.income} color="var(--green)" />
-            <StatCard label="Cash Income" value={daily.cashIncome} color="#10B981" />
-            <StatCard label="Shop Xerox (Direct)" value={daily.shopXeroxIncome || 0} color="#8B5CF6" />
-            <StatCard label="Online Payments" value={daily.onlineIncome} color="#3B82F6" />
-            <StatCard label="Other Income" value={daily.otherIncome || 0} color="#F59E0B" />
+            <StatCard label="Shop Computer Cash" value={daily.computerCash || 0} color="#10B981" />
+              <StatCard label="Shop Computer Online" value={daily.computerOnline || 0} color="#3B82F6" />
+              <StatCard label="Shop Xerox Cash" value={daily.xeroxCash || 0} color="#059669" />
+              <StatCard label="Shop Xerox Online" value={daily.xeroxOnline || 0} color="#2563EB" />
+              <StatCard label="Shop Xerox (Direct)" value={daily.shopXeroxDirect || 0} color="#8B5CF6" />
+              <StatCard label="Other Income" value={daily.otherIncome || 0} color="#F59E0B" />
             <StatCard label="Expenses (Approved)" value={daily.expenses} color="var(--red)" />
             <StatCard label={`Profit ${daily.profit < 0 ? '(Loss)' : ''}`} value={daily.profit} color={daily.profit >= 0 ? 'var(--green)' : 'var(--red)'} />
             <div className="stat-card" style={{ '--stat-color': 'var(--blue)' } as React.CSSProperties}>
@@ -140,10 +142,12 @@ export default function AnalyticsPage() {
         <>
           <div className="stat-grid">
             <StatCard label="Monthly Income" value={monthly.income} color="var(--green)" />
-            <StatCard label="Cash Income" value={monthly.cashIncome} color="#10B981" />
-            <StatCard label="Shop Xerox (Direct)" value={monthly.shopXeroxIncome || 0} color="#8B5CF6" />
-            <StatCard label="Monthly Online" value={monthly.onlineIncome} color="#3B82F6" />
-            <StatCard label="Monthly Other" value={monthly.otherIncome || 0} color="#F59E0B" />
+            <StatCard label="Shop Computer Cash" value={monthly.computerCash || 0} color="#10B981" />
+              <StatCard label="Shop Computer Online" value={monthly.computerOnline || 0} color="#3B82F6" />
+              <StatCard label="Shop Xerox Cash" value={monthly.xeroxCash || 0} color="#059669" />
+              <StatCard label="Shop Xerox Online" value={monthly.xeroxOnline || 0} color="#2563EB" />
+              <StatCard label="Shop Xerox (Direct)" value={monthly.shopXeroxDirect || 0} color="#8B5CF6" />
+              <StatCard label="Monthly Other" value={monthly.otherIncome || 0} color="#F59E0B" />
             <StatCard label="Monthly Expenses" value={monthly.expenses} color="var(--red)" />
             <StatCard label="Monthly Profit" value={monthly.profit} color={monthly.profit >= 0 ? 'var(--green)' : 'var(--red)'} />
             <div className="stat-card" style={{ '--stat-color': 'var(--blue)' } as React.CSSProperties}>
@@ -162,9 +166,11 @@ export default function AnalyticsPage() {
                   <YAxis tick={{ fontSize: 11, fill: '#606080' }} tickFormatter={v => `₹${(v/1000).toFixed(0)}k`} />
                   <Tooltip formatter={(v: number) => [`₹${v.toLocaleString('en-IN')}`, '']} contentStyle={{ background: '#1A1A24', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8 }} labelStyle={{ color: '#A0A0B8' }} />
                   <Legend wrapperStyle={{ fontSize: 12 }} />
-                  <Bar dataKey="cashIncome" name="Cash Income" stackId="income" fill="#10B981" />
-                  <Bar dataKey="shopXeroxIncome" name="Shop Xerox (Direct)" stackId="income" fill="#8B5CF6" />
-                  <Bar dataKey="onlineIncome" name="Online Payments" stackId="income" fill="#3B82F6" />
+                  <Bar dataKey="computerCash" name="Computer Cash" stackId="income" fill="#10B981" />
+                  <Bar dataKey="computerOnline" name="Computer Online" stackId="income" fill="#3B82F6" />
+                  <Bar dataKey="xeroxCash" name="Xerox Cash" stackId="income" fill="#059669" />
+                  <Bar dataKey="xeroxOnline" name="Xerox Online" stackId="income" fill="#2563EB" />
+                  <Bar dataKey="shopXeroxDirect" name="Xerox (Direct)" stackId="income" fill="#8B5CF6" />
                   <Bar dataKey="otherIncome" name="Other Income" stackId="income" fill="#F59E0B" radius={[4, 4, 0, 0]} />
                   <Bar dataKey="expenses" name="Expenses" fill="#EF4444" radius={[4, 4, 0, 0]} />
                 </BarChart>
