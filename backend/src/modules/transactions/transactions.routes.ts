@@ -14,6 +14,6 @@ router.use(authenticate);
 router.get('/', getTransactions);
 router.post('/', validate(createTransactionSchema), createTransaction);
 router.patch('/:id', validate(updateTransactionSchema), updateTransaction);
-router.delete('/:id', requireRole(['ADMIN', 'SUPER_ADMIN']), deleteTransaction);
+router.delete('/:id', deleteTransaction);
 
 export default router;

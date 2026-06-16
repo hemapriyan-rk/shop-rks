@@ -23,7 +23,7 @@ export async function getLogs(req: Request, res: Response, next: NextFunction): 
 
     const where = {
       ...(userId && { userId: userId as string }),
-      ...(action && { action: action as any }),
+      ...(action && { action: (action as string).includes(',') ? { in: (action as string).split(',') } : action as any }),
       ...(tableName && { tableName: tableName as string }),
       ...dateFilter,
     };

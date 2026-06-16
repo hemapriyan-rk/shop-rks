@@ -7,7 +7,7 @@ import {
   FcComboChart, FcOpenedFolder, FcSurvey, FcBriefcase, FcLibrary, 
   FcServices, FcBookmark, FcKindle, FcNews, FcProcess, FcPackage, 
   FcAdvertising, FcConferenceCall, FcPrivacy, FcGlobe, FcDatabase, 
-  FcDataBackup, FcUpRight, FcLineChart, FcMindMap, FcImport
+  FcDataBackup, FcUpRight, FcLineChart, FcMindMap, FcImport, FcTimeline
 } from 'react-icons/fc';
 
 interface NavItem {
@@ -68,6 +68,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     {
       title: 'Logs & Reports',
       items: [
+        { icon: <FcTimeline size={18} />, labelKey: 'Transaction Logs', path: '/admin/audit-logs', permKey: 'allRecords' },
         { icon: <FcKindle size={18} />, labelKey: 'nav.auditLogs', path: '/logs', permKey: 'salaryLogs' },
         { icon: <FcNews size={18} />, labelKey: 'nav.billLogs', path: '/admin/bill-logs', permKey: 'salaryLogs' },
         { icon: <FcProcess size={18} />, labelKey: 'Auto Tx', path: '/admin/auto-transactions', adminOnly: true },

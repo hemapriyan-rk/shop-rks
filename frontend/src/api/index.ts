@@ -91,7 +91,7 @@ export const analyticsApi = {
 
 // ── Logs ──────────────────────────────────────────────────────────
 export const logsApi = {
-  list: (params?: { page?: number; limit?: number; userId?: string; action?: string; tableName?: string }) =>
+  list: (params?: { page?: number; limit?: number; userId?: string; action?: string; tableName?: string; date?: string }) =>
     api.get<ApiResponse<Log[]>>('/logs', { params }),
   cleanup: () => api.delete<ApiResponse<{ deletedCount: number }>>('/logs/cleanup'),
 };

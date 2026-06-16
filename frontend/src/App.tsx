@@ -24,6 +24,7 @@ import AdminTransactions from './pages/admin/AdminTransactions';
 import AdminExpenses from './pages/admin/AdminExpenses';
 import AutomaticTransactionsPage from './pages/admin/AutomaticTransactionsPage';
 import UserPerformancePage from './pages/admin/UserPerformancePage';
+import AuditLogsPage from './pages/admin/AuditLogsPage';
 import BillLogsPage from './pages/logs/BillLogsPage';
 import BanksPage from './pages/banks/BanksPage';
 import BankConfig from './pages/admin/BankConfig';
@@ -164,6 +165,7 @@ export default function App() {
           <Route element={<ProtectedRoute allowedRoles={['ADMIN', 'SUPER_ADMIN']} permissionKey="allRecords" />}>
             <Route path="/admin/transactions" element={<AdminTransactions />} />
             <Route path="/admin/expenses" element={<AdminExpenses />} />
+            <Route path="/admin/audit-logs" element={<AuditLogsPage />} />
           </Route>
 
           <Route element={<ProtectedRoute allowedRoles={['ADMIN', 'SUPER_ADMIN']} permissionKey="salaryLogs" />}>

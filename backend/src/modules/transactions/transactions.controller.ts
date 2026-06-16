@@ -144,9 +144,8 @@ export async function updateTransaction(req: Request, res: Response, next: NextF
       return;
     }
 
-    // Admins can update anyone's transaction. Users can only update their own if it's today.
-    if (!isAdminOrAbove(req.user!, 'allRecords') && existing.userId !== req.user!.userId) {
-      sendForbidden(res, 'You can only edit your own records');
+    if (existing.userId !== req.user!.userId && !isAdminOrAbove(req.user!, 'allRecords')) {
+      sendForbidden(res, 'You can only edit your own transactions.');
       return;
     }
 
@@ -176,6 +175,11 @@ export async function deleteTransaction(req: Request, res: Response, next: NextF
 
     if (!isToday(existing.createdAt) && !isSuperAdmin(req.user!.role)) {
       sendForbidden(res, 'Only today\'s records can be deleted (or use Super Admin override)');
+      return;
+    }
+
+    if (existing.userId !== req.user!.userId && !isAdminOrAbove(req.user!, 'allRecords')) {
+      sendForbidden(res, 'You can only delete your own transactions.');
       return;
     }
 

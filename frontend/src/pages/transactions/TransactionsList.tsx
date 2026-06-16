@@ -113,7 +113,7 @@ export default function TransactionsList() {
                       {new Date(t.createdAt).toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit' })}
                     </td>
                     <td>
-                      {canManage && editable && (
+                      {editable && (
                         deleteId === t.id ? (
                           <span>
                             <button className="btn btn-danger btn-sm" onClick={() => handleDelete(t.id)}>Confirm</button>
