@@ -1,5 +1,5 @@
 {
-  "version": "1.0.20",
-  "apkUrl": "/Shop_RKS_v1.0.20.apk",
-  "releaseNotes": "Update 1.0.20: Easy auto-login implemented. User performance cards now intelligently filter based on shop access to simplify metrics."
+  "version": "1.0.21",
+  "apkUrl": "/Shop_RKS_v1.0.21.apk",
+  "releaseNotes": "Update 1.0.21: Fixed auto-login autofill bug. Corrected Analytics and User Performance card labels to properly represent Cash Income vs Direct Xerox Entries."
 }

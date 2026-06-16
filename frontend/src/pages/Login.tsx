@@ -7,19 +7,14 @@ import { Capacitor } from '@capacitor/core';
 export default function LoginPage() {
   const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState(() => localStorage.getItem('rks_savedUsername') || '');
+  const [password, setPassword] = useState(() => localStorage.getItem('rks_savedPassword') || '');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated) {
       navigate('/dashboard', { replace: true });
-    } else {
-      const savedUser = localStorage.getItem('rks_savedUsername');
-      const savedPass = localStorage.getItem('rks_savedPassword');
-      if (savedUser) setUsername(savedUser);
-      if (savedPass) setPassword(savedPass);
     }
   }, [isAuthenticated, navigate]);
 
