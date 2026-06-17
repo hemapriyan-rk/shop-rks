@@ -1,5 +1,5 @@
 {
-    "apkUrl":  "/Shop_RKS_v1.0.31.apk",
-    "releaseNotes":  "Update 1.0.31: Reverted in-app downloader to the old window.open mechanism.",
-    "version":  "1.0.31"
+    "apkUrl":  "/Shop_RKS_v1.0.32.apk",
+    "releaseNotes":  "Update 1.0.32: Fixed Docker build pipeline to correctly package and serve the APK file.",
+    "version":  "1.0.32"
 }
