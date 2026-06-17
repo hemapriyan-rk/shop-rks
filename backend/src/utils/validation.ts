@@ -45,14 +45,14 @@ export const positiveInt = z
 export const loginSchema = z.object({
   username: z.string().min(1, 'Username is required'),
   password: z.string().min(1, 'Password is required'),
-}).strict();
+});
 
 export const changePasswordSchema = z.object({
   currentPassword: z.string().min(1, 'Current password is required'),
   newPassword: z
     .string()
     .min(6, 'New password must be at least 6 characters'),
-}).strict();
+});
 
 // ─── User schemas ───────────────────────────────────────────────────
 
@@ -68,7 +68,7 @@ export const createUserSchema = z.object({
   isActive: z.boolean().optional().default(true),
   isSuspended: z.boolean().optional().default(false),
   shopAccess: z.array(z.enum(['SHOP_COMPUTER', 'SHOP_XEROX'])).optional(),
-}).strict();
+});
 
 export const updateUserSchema = createUserSchema
   .partial()
@@ -85,7 +85,7 @@ export const createServiceSchema = z.object({
   price: nonNegativeDecimal,
   isActive: z.boolean().optional().default(true),
   shop: z.enum(['SHOP_COMPUTER', 'SHOP_XEROX']).optional(),
-}).strict();
+});
 
 export const updateServiceSchema = createServiceSchema.partial();
 
@@ -99,7 +99,7 @@ export const createTransactionSchema = z.object({
   unitPrice: nonNegativeDecimal.optional(),
   paymentMethod: z.enum(['CASH', 'ONLINE', 'OTHER', 'SHOP_XEROX']),
   shop: z.enum(['SHOP_COMPUTER', 'SHOP_XEROX']).optional(),
-}).strict().refine(data => data.serviceId || data.serviceName, {
+}).refine(data => data.serviceId || data.serviceName, {
   message: "Either serviceId or serviceName must be provided",
 });
 
@@ -117,7 +117,7 @@ export const createExpenseSchema = z.object({
   note: z.string().max(500).optional(),
   bankId: z.string().uuid('Invalid bank ID').optional(),
   shop: z.enum(['SHOP_COMPUTER', 'SHOP_XEROX']).optional(),
-}).strict();
+});
 
 export const updateExpenseSchema = z.object({
   amount: positiveDecimal.optional(),
@@ -130,7 +130,7 @@ export const updateExpenseSchema = z.object({
 export const approveExpenseSchema = z.object({
   status: z.enum(['APPROVED', 'REJECTED']),
   bankId: z.string().uuid('Invalid bank ID').optional(),
-}).strict().refine(
+}).refine(
   (data) => data.status === 'REJECTED' || data.bankId !== undefined,
   { message: 'bankId is required when approving an expense', path: ['bankId'] }
 );
@@ -142,7 +142,7 @@ export const dailyAnalyticsQuerySchema = z.object({
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be YYYY-MM-DD')
     .optional(),
-}).strict();
+});
 
 export const monthlyAnalyticsQuerySchema = z.object({
   year: z
@@ -155,7 +155,7 @@ export const monthlyAnalyticsQuerySchema = z.object({
     .regex(/^(0?[1-9]|1[0-2])$/, 'Month must be 1-12')
     .transform(Number)
     .optional(),
-}).strict();
+});
 
 
 
@@ -197,4 +197,5 @@ export function validateParams(schema: ZodSchema<any>) {
     next();
   };
 }
+
 
