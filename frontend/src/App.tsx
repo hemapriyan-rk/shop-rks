@@ -38,6 +38,7 @@ import IncomeManagementPage from './pages/admin/IncomeManagementPage';
 import RenderMaintenancePage from './pages/admin/RenderMaintenancePage';
 import RoleManagementPage from './pages/admin/RoleManagementPage';
 import SystemAlertsPage from './pages/admin/SystemAlertsPage';
+import RestrictedAccessPage from './pages/RestrictedAccessPage';
 import DownloadAppPage from './pages/DownloadAppPage';
 import AppUpdater from './components/AppUpdater';
 
@@ -177,6 +178,7 @@ export default function App() {
           <Route element={<ProtectedRoute allowedRoles={['ADMIN', 'SUPER_ADMIN']} permissionKey="analytics" />}>
             <Route path="/analytics" element={<AnalyticsPage />} />
             <Route path="/admin/exports" element={<DataExports />} />
+            <Route path="/admin/user-performance" element={<UserPerformancePage />} />
           </Route>
 
           {/* Super Admin only */}
@@ -187,12 +189,12 @@ export default function App() {
             <Route path="/admin/render" element={<RenderMaintenancePage />} />
             <Route path="/admin/storage" element={<StorageManagement />} />
             <Route path="/admin/auto-transactions" element={<AutomaticTransactionsPage />} />
-            <Route path="/admin/user-performance" element={<UserPerformancePage />} />
             <Route path="/admin/income-management" element={<IncomeManagementPage />} />
             <Route path="/admin/alerts" element={<SystemAlertsPage />} />
           </Route>
 
           <Route path="/maintenance" element={<MaintenancePage />} />
+          <Route path="/restricted" element={<RestrictedAccessPage />} />
 
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>

@@ -55,7 +55,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         { icon: <FcBriefcase size={18} />, labelKey: 'nav.salary', path: '/admin/salary', permKey: 'salaryLogs' },
         { icon: <FcLibrary size={18} />, labelKey: 'nav.banks', path: '/banks', permKey: 'banks' },
         { icon: <FcServices size={18} />, labelKey: 'nav.bankConfig', path: '/admin/bank-config', permKey: 'banks' },
-        { icon: <FcLineChart size={18} />, labelKey: 'User Perf', path: '/admin/user-performance', adminOnly: true },
+        { icon: <FcLineChart size={18} />, labelKey: 'User Performance', path: '/admin/user-performance', adminOnly: true },
       ]
     },
     {
@@ -71,7 +71,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         { icon: <FcTimeline size={18} />, labelKey: 'Transaction Logs', path: '/admin/audit-logs', permKey: 'allRecords' },
         { icon: <FcKindle size={18} />, labelKey: 'nav.auditLogs', path: '/logs', permKey: 'salaryLogs' },
         { icon: <FcNews size={18} />, labelKey: 'nav.billLogs', path: '/admin/bill-logs', permKey: 'salaryLogs' },
-        { icon: <FcProcess size={18} />, labelKey: 'Auto Tx', path: '/admin/auto-transactions', adminOnly: true },
+        { icon: <FcProcess size={18} />, labelKey: 'Automatic Transactions', path: '/admin/auto-transactions', adminOnly: true },
         { icon: <FcPackage size={18} />, labelKey: 'nav.dataExports', path: '/admin/exports', permKey: 'analytics' },
       ]
     },

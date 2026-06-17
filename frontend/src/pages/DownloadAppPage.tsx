@@ -46,7 +46,7 @@ export default function DownloadAppPage() {
       // Trigger download
       const a = document.createElement('a');
       a.href = data.data.apkUrl;
-      a.download = 'Shop_RKS_v1.0.25.apk';
+      a.download = 'Shop_RKS_v1.0.26.apk';
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -171,7 +171,7 @@ export default function DownloadAppPage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ color: 'var(--text-muted)', fontSize: '14px' }}>Version</span>
-              <span style={{ fontWeight: 600, color: 'var(--color-primary)', background: 'rgba(99, 102, 241, 0.1)', padding: '4px 12px', borderRadius: '8px', fontSize: '13px' }}>v1.0.25</span>
+              <span style={{ fontWeight: 600, color: 'var(--color-primary)', background: 'rgba(99, 102, 241, 0.1)', padding: '4px 12px', borderRadius: '8px', fontSize: '13px' }}>v1.0.26</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ color: 'var(--text-muted)', fontSize: '14px' }}>Size</span>
@@ -189,6 +189,7 @@ export default function DownloadAppPage() {
     </div>
   );
 }
+
 
 
 

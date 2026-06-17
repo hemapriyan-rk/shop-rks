@@ -29,7 +29,7 @@ export default function ProtectedRoute({ allowedRoles, permissionKey }: Protecte
         return <Outlet />;
       }
     }
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/restricted" replace />;
   }
 
   return <Outlet />;

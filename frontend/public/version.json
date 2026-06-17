@@ -1,8 +1,9 @@
 {
-  "version": "1.0.25",
-  "apkUrl": "/Shop_RKS_v1.0.25.apk",
-  "releaseNotes": "Update 1.0.25: Fixed auto-login autofill bug. Corrected Analytics and User Performance card labels to properly represent Cash Income vs Direct Xerox Entries."
+  "version": "1.0.26",
+  "apkUrl": "/Shop_RKS_v1.0.26.apk",
+  "releaseNotes": "Update 1.0.26: Fixed auto-login autofill bug. Corrected Analytics and User Performance card labels to properly represent Cash Income vs Direct Xerox Entries."
 }
+
 
 
 
