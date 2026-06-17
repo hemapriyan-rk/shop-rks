@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
 
-const CURRENT_VERSION = '1.0.29';
+const CURRENT_VERSION = '1.0.30';
 
 export default function AppUpdater() {
   const [updateAvailable, setUpdateAvailable] = useState(false);
@@ -84,7 +84,7 @@ export default function AppUpdater() {
       // Open the download URL in the external device browser so the system can download it properly
       const secureApkUrl = data.data?.apkUrl || apkUrl;
       const urlToOpen = secureApkUrl.startsWith('http') ? secureApkUrl : `https://shop-rks.onrender.com${secureApkUrl}`;
-      window.open(urlToOpen, '_system');
+      await Browser.open({ url: urlToOpen });
       
     } catch (err: any) {
       setError(err.message || 'Network error.');
@@ -203,6 +203,8 @@ export default function AppUpdater() {
     </div>
   );
 }
+
+
 
 
 

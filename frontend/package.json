@@ -1,6 +1,6 @@
 {
   "name": "rks-frontend",
-  "version": "1.0.29",
+  "version": "1.0.30",
   "private": true,
   "type": "module",
   "scripts": {
@@ -41,5 +41,6 @@
     "vite": "^5.3.3"
   }
 }
+
 
 
