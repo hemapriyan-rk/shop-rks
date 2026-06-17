@@ -1,5 +1,5 @@
 {
-    "apkUrl":  "/Shop_RKS_v1.0.30.apk",
-    "releaseNotes":  "Update 1.0.30: Fixed Android WebView download bug. Updates will now trigger seamlessly in your system browser.",
-    "version":  "1.0.30"
+    "apkUrl":  "/Shop_RKS_v1.0.31.apk",
+    "releaseNotes":  "Update 1.0.31: Reverted in-app downloader to the old window.open mechanism.",
+    "version":  "1.0.31"
 }
