@@ -35,7 +35,7 @@ export default function AuditLogsPage() {
           <div className="page-header-title">Audit Logs</div>
           <div className="page-header-sub">Track transaction updates and deletions</div>
         </div>
-        <div className="page-actions" style={{ display: 'flex', gap: 12 }}>
+        <div className="page-actions" style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
           <input type="date" className="form-input" style={{ width: 160 }} value={date} onChange={e => setDate(e.target.value)} max={new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' })} />
           
           <select className="form-select" value={userId} onChange={e => setUserId(e.target.value)} style={{ minWidth: 150 }}>

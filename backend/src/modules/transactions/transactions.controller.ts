@@ -10,7 +10,7 @@ import {
 
 const TX_SELECT = {
   id: true, quantity: true, unitPrice: true, totalPrice: true,
-  paymentMethod: true, notes: true, createdAt: true, updatedAt: true,
+  paymentMethod: true, notes: true, createdAt: true, updatedAt: true, shop: true,
   user: { select: { id: true, name: true, username: true } },
   service: { select: { id: true, name: true, category: true } },
 };
