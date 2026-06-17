@@ -11,13 +11,13 @@ import {
 
 const router = Router();
 
-// All user routes require SUPER_ADMIN
-router.use(authenticate, requireRole(['SUPER_ADMIN']));
+// Base authentication
+router.use(authenticate);
 
-router.get('/', getAllUsers);
-router.get('/:id', getUserById);
-router.post('/', validate(createUserSchema), createUser);
-router.patch('/:id', validate(updateUserSchema), updateUser);
-router.delete('/:id', deleteUser);
+router.get('/', requireRole(['ADMIN', 'SUPER_ADMIN']), getAllUsers);
+router.get('/:id', requireRole(['SUPER_ADMIN']), getUserById);
+router.post('/', requireRole(['SUPER_ADMIN']), validate(createUserSchema), createUser);
+router.patch('/:id', requireRole(['SUPER_ADMIN']), validate(updateUserSchema), updateUser);
+router.delete('/:id', requireRole(['SUPER_ADMIN']), deleteUser);
 
 export default router;

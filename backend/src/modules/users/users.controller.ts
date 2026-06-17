@@ -6,7 +6,13 @@ import { sendSuccess, sendCreated, sendNotFound, sendError } from '../../utils/r
 
 export async function getAllUsers(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
+    let where = {};
+    if (req.user!.role !== 'SUPER_ADMIN') {
+      where = { role: { notIn: ['SUPER_ADMIN', 'ADMIN'] } };
+    }
+
     const users = await prisma.user.findMany({
+      where,
       select: {
         id: true, name: true, username: true, role: true,
         isActive: true, isSuspended: true, createdAt: true, updatedAt: true, shopAccess: true,
