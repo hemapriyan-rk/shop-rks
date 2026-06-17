@@ -1,5 +1,5 @@
 {
-    "apkUrl":  "/Shop_RKS_v1.0.28.apk",
-    "releaseNotes":  "Security Hardening Update 1.0.28: JWT Rotation, Strict API Rate Limiting, DDoS Protection, Android Traffic Encryption.",
-    "version":  "1.0.28"
+    "apkUrl":  "/Shop_RKS_v1.0.29.apk",
+    "releaseNotes":  "Hotfix Update 1.0.29: Fixes login database error and removes unrecognized key schema blockage.",
+    "version":  "1.0.29"
 }
