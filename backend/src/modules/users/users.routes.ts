@@ -7,12 +7,18 @@ import {
   updateUser,
   deleteUser,
   getUserById,
+  getPasswordRequests,
+  resolvePasswordRequest
 } from './users.controller';
 
 const router = Router();
 
 // Base authentication
 router.use(authenticate);
+
+// Password requests routes (SUPER_ADMIN only)
+router.get('/password-requests', requireRole(['SUPER_ADMIN']), getPasswordRequests);
+router.post('/password-requests/:id/resolve', requireRole(['SUPER_ADMIN']), resolvePasswordRequest);
 
 router.get('/', requireRole(['ADMIN', 'SUPER_ADMIN']), getAllUsers);
 router.get('/:id', requireRole(['SUPER_ADMIN']), getUserById);

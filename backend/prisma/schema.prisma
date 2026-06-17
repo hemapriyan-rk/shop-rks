@@ -78,10 +78,22 @@ model User {
   logs         Log[]
   sessions     Session[]
   dailySnapshots UserDailyAnalyticsSnapshot[]
+  passwordResetRequests PasswordResetRequest[]
 
   @@map("users")
   @@index([username])
   @@index([role])
+}
+
+model PasswordResetRequest {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  status    String   @default("PENDING") // PENDING, RESOLVED
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("password_reset_requests")
 }
 
 // ─────────────────────────────────────────────────────────

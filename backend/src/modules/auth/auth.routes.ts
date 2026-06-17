@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { login, getMe, changePassword, verifyDownload } from './auth.controller';
+import { login, getMe, changePassword, verifyDownload, forgotPassword } from './auth.controller';
 import { authenticate } from '../../middleware/auth';
 import { validate, loginSchema, changePasswordSchema } from '../../utils/validation';
 
@@ -7,6 +7,9 @@ const router = Router();
 
 // POST /api/auth/login — public
 router.post('/login', validate(loginSchema), login);
+
+// POST /api/auth/forgot-password - public
+router.post('/forgot-password', forgotPassword);
 
 // POST /api/auth/verify-download - public (with basic auth body)
 router.post('/verify-download', verifyDownload);
@@ -35,3 +38,4 @@ router.post('/logout', authenticate, (req, res, next) => {
 router.post('/change-password', authenticate, validate(changePasswordSchema), changePassword);
 
 export default router;
+

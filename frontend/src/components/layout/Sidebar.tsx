@@ -6,7 +6,7 @@ import {
   FcHome, FcPlus, FcFile, FcRules, FcList, FcMoneyTransfer, 
   FcComboChart, FcOpenedFolder, FcSurvey, FcBriefcase, FcLibrary, 
   FcServices, FcBookmark, FcKindle, FcNews, FcProcess, FcPackage, 
-  FcAdvertising, FcConferenceCall, FcPrivacy, FcGlobe, FcDatabase, 
+  FcAdvertising, FcKey, FcConferenceCall, FcPrivacy, FcGlobe, FcDatabase, 
   FcDataBackup, FcUpRight, FcLineChart, FcMindMap, FcImport, FcTimeline
 } from 'react-icons/fc';
 
@@ -79,6 +79,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       title: 'System & Users',
       items: [
         { icon: <FcAdvertising size={18} />, labelKey: 'System Alerts', path: '/admin/alerts', superOnly: true },
+          { icon: <FcKey size={18} />, labelKey: 'Password Requests', path: '/admin/password-requests', superOnly: true },
         { icon: <FcConferenceCall size={18} />, labelKey: 'nav.users', path: '/users', superOnly: true },
         { icon: <FcPrivacy size={18} />, labelKey: 'Roles', path: '/admin/roles', superOnly: true },
         { icon: <FcGlobe size={18} />, labelKey: 'nav.serverMgmt', path: '/admin/system', superOnly: true },
@@ -168,3 +169,4 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     </aside>
   );
 }
+

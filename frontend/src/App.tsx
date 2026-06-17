@@ -7,6 +7,7 @@ import ProtectedRoute from './routes/ProtectedRoute';
 
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/Login';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import Dashboard from './pages/Dashboard';
 import NewTransaction from './pages/transactions/NewTransaction';
 import TransactionsList from './pages/transactions/TransactionsList';
@@ -38,6 +39,7 @@ import IncomeManagementPage from './pages/admin/IncomeManagementPage';
 import RenderMaintenancePage from './pages/admin/RenderMaintenancePage';
 import RoleManagementPage from './pages/admin/RoleManagementPage';
 import SystemAlertsPage from './pages/admin/SystemAlertsPage';
+import PasswordRequestsPage from './pages/admin/PasswordRequestsPage';
 import RestrictedAccessPage from './pages/RestrictedAccessPage';
 import DownloadAppPage from './pages/DownloadAppPage';
 import AppUpdater from './components/AppUpdater';
@@ -132,6 +134,7 @@ export default function App() {
         <BrowserRouter>
           <Routes>
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/developer" element={<DeveloperPage />} />
           <Route path="/open" element={<LandingPage />} />
@@ -191,6 +194,7 @@ export default function App() {
             <Route path="/admin/auto-transactions" element={<AutomaticTransactionsPage />} />
             <Route path="/admin/income-management" element={<IncomeManagementPage />} />
             <Route path="/admin/alerts" element={<SystemAlertsPage />} />
+            <Route path="/admin/password-requests" element={<PasswordRequestsPage />} />
           </Route>
 
           <Route path="/maintenance" element={<MaintenancePage />} />

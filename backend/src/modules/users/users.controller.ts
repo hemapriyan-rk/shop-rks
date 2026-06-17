@@ -248,3 +248,51 @@ export async function deleteUser(req: Request, res: Response, next: NextFunction
     }
   } catch (err) { next(err); }
 }
+
+export async function getPasswordRequests(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const requests = await prisma.passwordResetRequest.findMany({
+      where: { status: 'PENDING' },
+      include: {
+        user: {
+          select: { id: true, name: true, username: true, role: true }
+        }
+      },
+      orderBy: { createdAt: 'asc' }
+    });
+    sendSuccess(res, requests);
+  } catch (err) { next(err); }
+}
+
+export async function resolvePasswordRequest(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { id } = req.params;
+    const { newPassword } = req.body;
+    
+    if (!newPassword || newPassword.length < 6) {
+      sendError(res, 'New password must be at least 6 characters long', 400);
+      return;
+    }
+
+    const request = await prisma.passwordResetRequest.findUnique({ where: { id } });
+    if (!request) {
+      sendNotFound(res, 'Password Reset Request');
+      return;
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+
+    await prisma.$transaction([
+      prisma.user.update({
+        where: { id: request.userId },
+        data: { passwordHash }
+      }),
+      prisma.passwordResetRequest.update({
+        where: { id },
+        data: { status: 'RESOLVED' }
+      })
+    ]);
+
+    sendSuccess(res, null, 200, undefined, 'Password successfully updated.');
+  } catch (err) { next(err); }
+}

@@ -310,7 +310,7 @@ export async function verifyDownload(req: Request, res: Response, next: NextFunc
       console.error('[verifyDownload] Failed to log download event:', logErr);
     }
 
-    sendSuccess(res, { apkUrl: '/Shop_RKS_v1.0.26.apk' }, 200, undefined, 'Verification successful. Download started.');
+    sendSuccess(res, { apkUrl: '/Shop_RKS_v1.0.27.apk' }, 200, undefined, 'Verification successful. Download started.');
   } catch (err) {
     next(err);
   }
@@ -319,4 +319,35 @@ export async function verifyDownload(req: Request, res: Response, next: NextFunc
 
 
 
+
+
+export async function forgotPassword(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { username } = req.body;
+    if (!username) {
+      sendError(res, 'Username is required', 400);
+      return;
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { username: username.toLowerCase().trim() }
+    });
+
+    if (!user) {
+      // Don't leak if user exists or not
+      sendSuccess(res, null, 200, undefined, 'If the username exists, a request has been sent.');
+      return;
+    }
+
+    await prisma.passwordResetRequest.create({
+      data: {
+        userId: user.id
+      }
+    });
+
+    sendSuccess(res, null, 200, undefined, 'Password reset request sent to administrators.');
+  } catch (err) {
+    next(err);
+  }
+}
 
