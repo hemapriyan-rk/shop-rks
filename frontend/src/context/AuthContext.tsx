@@ -35,6 +35,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = useCallback(() => {
     authApi.logout().catch(() => {}); // Notify backend, ignore errors
     localStorage.removeItem('rks_token');
+    localStorage.removeItem('rks_refreshToken');
     localStorage.removeItem('rks_user');
     setState({ user: null, token: null, isAuthenticated: false, isLoading: false, activeShop: null });
   }, []);
@@ -72,7 +73,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (username: string, password: string) => {
     const res = await authApi.login(username, password);
-    const { token, user } = res.data.data!;
+    const { token, refreshToken, user } = res.data.data!;
     const castUser = user as unknown as User;
     const shopAccess = castUser.shopAccess || ['SHOP_COMPUTER'];
     let shop = localStorage.getItem('rks_activeShop') as Shop;
@@ -81,6 +82,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     localStorage.setItem('rks_token', token);
+    if (refreshToken) localStorage.setItem('rks_refreshToken', refreshToken);
     localStorage.setItem('rks_user', JSON.stringify(castUser));
     localStorage.setItem('rks_activeShop', shop);
     
@@ -129,3 +131,5 @@ export function useAuth() {
   if (!ctx) throw new Error('useAuth must be used within AuthProvider');
   return ctx;
 }
+
+

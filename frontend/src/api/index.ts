@@ -5,7 +5,7 @@ import type { ApiResponse, User, Service, Transaction, Expense, Log, DailyAnalyt
 // ── Auth ────────────────────────────────────────────────────────
 export const authApi = {
   login: (username: string, password: string) =>
-    api.post<ApiResponse<{ token: string; user: User }>>('/auth/login', { username, password }),
+    api.post<ApiResponse<{ token: string; refreshToken?: string; user: User }>>('/auth/login', { username, password }),
   me: () => api.get<ApiResponse<User & { totalRevenue: number; todayStats: { transactions: number; revenue: number }; recentActivity: unknown[] }>>('/auth/me'),
   logout: () => api.post<ApiResponse<null>>('/auth/logout'),
   changePassword: (currentPassword: string, newPassword: string) =>
@@ -132,3 +132,4 @@ export const exportsApi = {
   list: () => api.get<ApiResponse<any[]>>('/system/exports'),
   downloadUrl: (id: string) => `${api.defaults.baseURL}/system/exports/${id}/download`,
 };
+

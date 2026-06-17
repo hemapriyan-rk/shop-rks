@@ -12,6 +12,7 @@ import helmet from 'helmet';
 import cors from 'cors';
 import compression from 'compression';
 import morgan from 'morgan';
+import { stream, logger } from './utils/logger';
 import rateLimit from 'express-rate-limit';
 
 import { env } from './config/env';
@@ -97,7 +98,8 @@ const limiter = rateLimit({
 app.use('/api/', limiter);
 
 // ── Middleware ─────────────────────────────────────────────────────
-app.use(compression());
+app.use(compression({ filter: (req, res) => { if (req.url.endsWith('.apk')) return false; return compression.filter(req, res); } }));
+app.use(morgan('combined', { stream }));
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 app.use(morgan(env.NODE_ENV === 'production' ? 'combined' : 'dev'));
@@ -182,3 +184,6 @@ process.on('SIGINT', () => {
 });
 
 export default app;
+
+
+

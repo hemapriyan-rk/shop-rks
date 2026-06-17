@@ -1,11 +1,5 @@
 {
-  "version": "1.0.27",
-  "apkUrl": "/Shop_RKS_v1.0.27.apk",
-  "releaseNotes": "Update 1.0.27: Fixed auto-login autofill bug. Corrected Analytics and User Performance card labels to properly represent Cash Income vs Direct Xerox Entries."
+    "apkUrl":  "/Shop_RKS_v1.0.28.apk",
+    "releaseNotes":  "Security Hardening Update 1.0.28: JWT Rotation, Strict API Rate Limiting, DDoS Protection, Android Traffic Encryption.",
+    "version":  "1.0.28"
 }
-
-
-
-
-
-

@@ -4,6 +4,7 @@ const config: CapacitorConfig = {
   appId: 'com.shoprks.app',
   appName: 'Shop RKS',
   webDir: 'dist',
+  server: { cleartext: false },
   plugins: {
     SplashScreen: {
       launchShowDuration: 100,
@@ -19,3 +20,4 @@ const config: CapacitorConfig = {
 };
 
 export default config;
+

@@ -128,7 +128,18 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
     }
 
     const token = jwt.sign(payload, env.JWT_SECRET, {
-      expiresIn: env.JWT_EXPIRES_IN as `${number}${'s'|'m'|'h'|'d'}`,
+      expiresIn: '15m', // Phase 2: Short-lived access token
+    });
+
+    // Phase 2: Generate Refresh Token
+    const refreshToken = jwt.sign({ sessionId: session.id }, env.JWT_SECRET, {
+      expiresIn: '7d',
+    });
+
+    // Update session with refresh token
+    await prisma.session.update({
+      where: { id: session.id },
+      data: { refreshToken }
     });
 
     // Reset login attempts on success
@@ -138,8 +149,8 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
 
     sendSuccess(res, {
       token,
-      user: {
-        id: user.id,
+      refreshToken,
+      user: {        id: user.id,
         name: user.name,
         username: user.username,
         role: user.role,
@@ -310,7 +321,7 @@ export async function verifyDownload(req: Request, res: Response, next: NextFunc
       console.error('[verifyDownload] Failed to log download event:', logErr);
     }
 
-    sendSuccess(res, { apkUrl: '/Shop_RKS_v1.0.27.apk' }, 200, undefined, 'Verification successful. Download started.');
+    sendSuccess(res, { apkUrl: '/Shop_RKS_v1.0.28.apk' }, 200, undefined, 'Verification successful. Download started.');
   } catch (err) {
     next(err);
   }
@@ -346,6 +357,67 @@ export async function forgotPassword(req: Request, res: Response, next: NextFunc
     });
 
     sendSuccess(res, null, 200, undefined, 'Password reset request sent to administrators.');
+  } catch (err) {
+    next(err);
+  }
+}
+
+
+
+export async function refreshToken(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { token } = req.body;
+    if (!token) {
+      sendUnauthorized(res, 'Refresh token required');
+      return;
+    }
+
+    let decoded: any;
+    try {
+      decoded = jwt.verify(token, env.JWT_SECRET);
+    } catch (e) {
+      sendUnauthorized(res, 'Invalid or expired refresh token');
+      return;
+    }
+
+    const sessionId = decoded.sessionId;
+    const session = await prisma.session.findUnique({
+      where: { id: sessionId },
+      include: { user: { include: { customRole: true } } }
+    });
+
+    if (!session || session.refreshToken !== token || session.logoutTime || session.isKicked) {
+      sendUnauthorized(res, 'Session invalid or expired');
+      return;
+    }
+
+    const user = session.user;
+    if (!user || !user.isActive || user.isSuspended) {
+      sendUnauthorized(res, 'User invalid or suspended');
+      return;
+    }
+
+    const payload: any = {
+      userId: user.id,
+      username: user.username,
+      role: user.role,
+      name: user.name,
+      sessionId: session.id,
+    };
+
+    if (user.role === 'CUSTOM' && user.customRole) {
+      payload.customPermissions = user.customRole.permissions;
+    }
+
+    const newAccessToken = jwt.sign(payload, env.JWT_SECRET, { expiresIn: '15m' });
+    const newRefreshToken = jwt.sign({ sessionId: session.id }, env.JWT_SECRET, { expiresIn: '7d' });
+
+    await prisma.session.update({
+      where: { id: session.id },
+      data: { refreshToken: newRefreshToken, lastSeen: new Date() }
+    });
+
+    sendSuccess(res, { token: newAccessToken, refreshToken: newRefreshToken }, 200, undefined, 'Token refreshed');
   } catch (err) {
     next(err);
   }

@@ -217,8 +217,9 @@ model Session {
   logoutTime DateTime? @map("logout_time") @db.Timestamptz
   lastSeen   DateTime  @default(now()) @map("last_seen") @db.Timestamptz
   isKicked   Boolean   @default(false) @map("is_kicked")
-  ipAddress  String?   @map("ip_address")
-  userAgent  String?   @map("user_agent")
+  ipAddress    String?   @map("ip_address")
+  userAgent    String?   @map("user_agent")
+  refreshToken String?   @unique @map("refresh_token")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 

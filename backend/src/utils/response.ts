@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { logger } from './logger';
 
 /**
  * Standardized API response wrapper.
@@ -91,3 +92,4 @@ export function globalErrorHandler(
       : err.message,
   });
 }
+
