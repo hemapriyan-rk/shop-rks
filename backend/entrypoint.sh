@@ -10,8 +10,8 @@ echo " RKS – Computer Centre and Xerox"
 echo " Backend starting at $(date '+%Y-%m-%d %H:%M:%S %Z')"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-echo "[MIGRATE] Running Prisma migrations..."
-npx prisma migrate deploy
+echo "[SYNC] Pushing Prisma schema to database..."
+npx prisma db push --accept-data-loss
 
 echo "[SEED] Checking if seed is required..."
 node -e "
