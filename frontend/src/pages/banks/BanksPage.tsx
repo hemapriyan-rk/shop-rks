@@ -193,7 +193,7 @@ export default function BanksPage() {
                         <thead><tr><th>Action</th><th>Value</th><th>By</th><th>Time</th></tr></thead>
                         <tbody>
                           {bank.logs.map(log => {
-                            const val = log.newValue as any;
+                            const val = { ...(log.oldValue as any || {}), ...(log.newValue as any || {}) };
                             const isDeposit = val?.action === 'DEPOSIT';
                             const isExpenseDeduct = val?.action === 'EXPENSE_DEDUCTION';
                             const isAdjustDown = val?.action === 'ADJUST_DOWN';

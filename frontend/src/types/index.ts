@@ -53,7 +53,7 @@ export interface BankAccount {
   updatedAt: string;
   totalDeducted?: number;
   expenses?: Array<{ id: string; amount: number; category: string; note?: string; createdAt: string; user: { name: string } }>;
-  logs?: Array<{ id: string; action: string; newValue: any; createdAt: string; user: { name: string } }>;
+  logs?: Array<{ id: string; action: string; newValue: any; oldValue?: any; createdAt: string; user: { name: string } }>;
   _count?: { expenses: number };
 }
 

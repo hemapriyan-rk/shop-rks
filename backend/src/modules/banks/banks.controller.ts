@@ -66,7 +66,7 @@ export async function getBankAnalytics(req: Request, res: Response, next: NextFu
             ...(action && action !== 'EXPENSE' && { action: action as any }),
           },
           select: {
-            id: true, action: true, newValue: true, createdAt: true,
+            id: true, action: true, newValue: true, oldValue: true, createdAt: true,
             user: { select: { name: true } },
           },
           orderBy: { createdAt: 'desc' },
