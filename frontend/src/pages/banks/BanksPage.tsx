@@ -19,6 +19,11 @@ export default function BanksPage() {
   const [note, setNote] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
+  const [createModal, setCreateModal] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [newBalance, setNewBalance] = useState('');
+  const [newIsCash, setNewIsCash] = useState(false);
+
   const load = () => {
     setLoading(true);
     banksApi.analytics({ date, action })
@@ -86,6 +91,21 @@ export default function BanksPage() {
     } finally { setSubmitting(false); }
   };
 
+  const handleCreateBank = async () => {
+    if (!newName.trim()) return;
+    setSubmitting(true);
+    try {
+      await banksApi.create({
+        name: newName.trim(),
+        balance: parseFloat(newBalance) || 0,
+        isCash: newIsCash
+      });
+      setCreateModal(false); setNewName(''); setNewBalance(''); setNewIsCash(false); load();
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Create bank failed');
+    } finally { setSubmitting(false); }
+  };
+
   return (
     <Layout title="Bank Accounts">
       <div className="page-header">
@@ -103,6 +123,9 @@ export default function BanksPage() {
             <option value="EXPENSE">Expenses Only</option>
           </select>
           <button className="btn btn-ghost" onClick={load}>Refresh</button>
+          {isSuperAdmin && (
+            <button className="btn btn-primary" onClick={() => setCreateModal(true)}>+ New Account</button>
+          )}
         </div>
       </div>
 
@@ -311,6 +334,38 @@ export default function BanksPage() {
               <button className="btn btn-ghost" onClick={() => setDeductMiscModal(null)}>Cancel</button>
               <button className="btn btn-warning" disabled={submitting || !amount} onClick={handleDeductMisc}>
                 {submitting ? 'Processing...' : 'Confirm Misc Deduction'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Create Modal */}
+      {createModal && (
+        <div className="modal-overlay" onClick={() => setCreateModal(false)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <span className="modal-title">Create New Account</span>
+              <button className="btn btn-ghost btn-sm" onClick={() => setCreateModal(false)}>✕</button>
+            </div>
+            <div className="modal-body">
+              <div className="form-group">
+                <label className="form-label">Account Name</label>
+                <input className="form-input" placeholder="e.g. HDFC Bank, GPay..." value={newName} onChange={e => setNewName(e.target.value)} autoFocus />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Initial Balance (₹)</label>
+                <input className="form-input" type="number" placeholder="0.00" value={newBalance} onChange={e => setNewBalance(e.target.value)} />
+              </div>
+              <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12 }}>
+                <input type="checkbox" id="isCashCheck" checked={newIsCash} onChange={e => setNewIsCash(e.target.checked)} />
+                <label htmlFor="isCashCheck" className="form-label" style={{ margin: 0, cursor: 'pointer' }}>Is this a Cash account?</label>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-ghost" onClick={() => setCreateModal(false)}>Cancel</button>
+              <button className="btn btn-primary" disabled={submitting || !newName.trim()} onClick={handleCreateBank}>
+                {submitting ? 'Creating...' : 'Create Account'}
               </button>
             </div>
           </div>
