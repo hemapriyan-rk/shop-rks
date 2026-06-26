@@ -175,8 +175,8 @@ export async function depositToBank(req: Request, res: Response, next: NextFunct
     const updated = await withAuditLog(
       prisma, req.user!.userId, 'UPDATE', 'bank_accounts',
       (b) => b.id,
-      { balance: bank.balance, action: 'DEPOSIT', amount, note },
-      (b) => ({ balance: b.balance }),
+      { balance: Number(bank.balance), action: 'DEPOSIT', amount, note },
+      (b) => ({ balance: Number(b.balance) }),
       (tx) => tx.bankAccount.update({
         where: { id },
         data: { balance: { increment: amount } },
@@ -205,8 +205,8 @@ export async function adjustBalance(req: Request, res: Response, next: NextFunct
     const updated = await withAuditLog(
       prisma, req.user!.userId, 'UPDATE', 'bank_accounts',
       (b) => b.id,
-      { balance: bank.balance, action: amount >= 0 ? 'ADJUST_UP' : 'ADJUST_DOWN', amount, note },
-      (b) => ({ balance: b.balance }),
+      { balance: Number(bank.balance), action: amount >= 0 ? 'ADJUST_UP' : 'ADJUST_DOWN', amount, note },
+      (b) => ({ balance: Number(b.balance) }),
       (tx) => tx.bankAccount.update({
         where: { id },
         data: { balance: newBalance },
@@ -234,8 +234,8 @@ export async function setBalance(req: Request, res: Response, next: NextFunction
     const updated = await withAuditLog(
       prisma, req.user!.userId, 'UPDATE', 'bank_accounts',
       (b) => b.id,
-      { balance: bank.balance, action: 'SET_BALANCE', note },
-      (b) => ({ balance: b.balance }),
+      { balance: Number(bank.balance), action: 'SET_BALANCE', note },
+      (b) => ({ balance: Number(b.balance) }),
       (tx) => tx.bankAccount.update({
         where: { id },
         data: { balance },
@@ -258,8 +258,8 @@ export async function hardResetBalance(req: Request, res: Response, next: NextFu
     const updated = await withAuditLog(
       prisma, req.user!.userId, 'UPDATE', 'bank_accounts',
       (b) => b.id,
-      { balance: bank.balance, action: 'HARD_RESET', note },
-      (b) => ({ balance: b.balance }),
+      { balance: Number(bank.balance), action: 'HARD_RESET', note },
+      (b) => ({ balance: Number(b.balance) }),
       (tx) => tx.bankAccount.update({
         where: { id },
         data: { balance: 0 },
@@ -289,7 +289,7 @@ export async function deleteBank(req: Request, res: Response, next: NextFunction
     await withAuditLog(
       prisma, req.user!.userId, 'DELETE', 'bank_accounts',
       () => id,
-      { name: bank.name, balance: bank.balance, isCash: bank.isCash },
+      { name: bank.name, balance: Number(bank.balance), isCash: bank.isCash },
       () => null,
       (tx) => tx.bankAccount.delete({ where: { id } })
     );
