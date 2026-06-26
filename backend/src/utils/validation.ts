@@ -138,6 +138,8 @@ export const approveExpenseSchema = z.object({
 // ─── Analytics query schemas ────────────────────────────────────────
 
 export const dailyAnalyticsQuerySchema = z.object({
+  userId: z.string().uuid().optional(),
+  shop: z.enum(['SHOP_COMPUTER', 'SHOP_XEROX']).optional(),
   date: z
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be YYYY-MM-DD')
@@ -145,6 +147,8 @@ export const dailyAnalyticsQuerySchema = z.object({
 });
 
 export const monthlyAnalyticsQuerySchema = z.object({
+  userId: z.string().uuid().optional(),
+  shop: z.enum(['SHOP_COMPUTER', 'SHOP_XEROX']).optional(),
   year: z
     .string()
     .regex(/^\d{4}$/, 'Year must be YYYY')

@@ -118,6 +118,12 @@ export default function ServicesPage() {
     catch (err: any) { setError(err.response?.data?.error || 'Update failed'); }
   };
 
+  const handleDelete = async (s: Service) => {
+    if (!window.confirm('Are you sure you want to delete this service?')) return;
+    try { await servicesApi.delete(s.id); load(); }
+    catch (err: any) { setError(err.response?.data?.error || 'Delete failed'); }
+  };
+
   return (
     <Layout title={t('services.title' as any)}>
       {showModal && (
@@ -162,6 +168,7 @@ export default function ServicesPage() {
                           <button className={`btn btn-sm ${s.isActive ? 'btn-danger' : 'btn-success'}`} onClick={() => handleToggle(s)}>
                             {s.isActive ? t('services.deactivate' as any) : t('services.activate' as any)}
                           </button>
+                          <button className="btn btn-ghost btn-sm text-red" onClick={() => handleDelete(s)} title="Delete">🗑</button>
                         </div>
                       </td>
                     </tr>
