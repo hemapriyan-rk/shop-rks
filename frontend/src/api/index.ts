@@ -83,8 +83,8 @@ export const banksApi = {
 // ── Analytics ──────────────────────────────────────────────────────
 export const analyticsApi = {
   todaySummary: () => api.get<ApiResponse<TodaySummary>>('/analytics/today-summary'),
-  daily: (date?: string, userId?: string, shop?: string) => api.get<ApiResponse<DailyAnalytics>>('/analytics/daily', { params: { date, userId, shop } }),
-  monthly: (year?: number, month?: number, userId?: string, shop?: string) => api.get<ApiResponse<MonthlyAnalytics>>('/analytics/monthly', { params: { year, month, userId, shop } }),
+  daily: (date?: string, userId?: string, shop?: string) => api.get<ApiResponse<DailyAnalytics>>('/analytics/daily', { params: { date: date || undefined, userId: userId || undefined, shop: shop || undefined } }),
+  monthly: (year?: number, month?: number, userId?: string, shop?: string) => api.get<ApiResponse<MonthlyAnalytics>>('/analytics/monthly', { params: { year, month, userId: userId || undefined, shop: shop || undefined } }),
   manualAdjust: (data: { date: string, type: 'INCOME' | 'EXPENSE', amount: number, note?: string }) =>
     api.post<ApiResponse<any>>('/analytics/adjust', data),
 };
