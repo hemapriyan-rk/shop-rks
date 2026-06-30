@@ -15,60 +15,10 @@ function isToday(dateStr: string) {
   return dateStr.startsWith(new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' }));
 }
 
-interface ApproveModalProps {
-  expense: Expense;
-  onClose: () => void;
-  onConfirm: (bankId: string) => void;
-}
 
-function ApproveModal({ expense, onClose, onConfirm }: ApproveModalProps) {
-  const [banks, setBanks] = useState<BankAccount[]>([]);
-  const [bankId, setBankId] = useState('');
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    banksApi.list().then(r => {
-      setBanks(r.data.data ?? []);
-      setLoading(false);
-    });
-  }, []);
-
-  return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" onClick={e => e.stopPropagation()}>
-        <div className="modal-header">
-          <span className="modal-title">Approve Expense</span>
-          <button className="btn btn-ghost btn-sm" onClick={onClose}>✕</button>
-        </div>
-        <div className="modal-body">
-          <div className="mb-16">
-            <div style={{ fontSize: 14, color: 'var(--text-muted)' }}>Amount</div>
-            <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--red)' }}>₹{Number(expense.amount).toFixed(2)}</div>
-            <div style={{ fontSize: 14, marginTop: 8 }}>{expense.category} — {expense.note || 'No note'}</div>
-          </div>
-          <div className="form-group">
-            <label className="form-label">Deduct from Bank</label>
-            {loading ? <div className="spinner spinner-sm" /> : (
-              <select className="form-select" value={bankId} onChange={e => setBankId(e.target.value)}>
-                <option value="">Select bank...</option>
-                {banks.map(b => (
-                  <option key={b.id} value={b.id}>{b.name} (₹{Number(b.balance).toLocaleString('en-IN')})</option>
-                ))}
-              </select>
-            )}
-          </div>
-        </div>
-        <div className="modal-footer">
-          <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
-          <button className="btn btn-primary" disabled={!bankId} onClick={() => onConfirm(bankId)}>Confirm Approval</button>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 export default function ExpensesList() {
-  const { hasPermission } = useAuth();
+  const { hasPermission, user } = useAuth();
   const canManage = hasPermission('allRecords');
   const navigate = useNavigate();
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -77,11 +27,10 @@ export default function ExpensesList() {
   const [date, setDate] = useState(new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' }));
   const [shop, setShop] = useState('');
   const [error, setError] = useState('');
-  const [approveExpense, setApproveExpense] = useState<Expense | null>(null);
 
   const load = () => {
     setLoading(true);
-    const promises: Promise<any>[] = [expensesApi.list({ date, ...(shop && { shop }) })];
+    const promises: Promise<any>[] = [expensesApi.list({ date, userId: user?.id, ...(shop && { shop }) })];
     // Only users with permission can access the banks API
     if (canManage) promises.push(banksApi.list());
 
@@ -93,14 +42,7 @@ export default function ExpensesList() {
 
   useEffect(() => { load(); }, [date, shop]);
 
-  const handleApprove = async (id: string, status: 'APPROVED' | 'REJECTED', bankId?: string) => {
-    try { 
-      await expensesApi.approve(id, status, bankId); 
-      setApproveExpense(null);
-      load(); 
-    }
-    catch (err: any) { setError(err.response?.data?.error || 'Action failed'); }
-  };
+
 
   const handleDelete = async (id: string) => {
     if (!confirm('Delete this expense?')) return;
@@ -114,13 +56,6 @@ export default function ExpensesList() {
 
   return (
     <Layout title="Expenses">
-      {approveExpense && (
-        <ApproveModal
-          expense={approveExpense}
-          onClose={() => setApproveExpense(null)}
-          onConfirm={(bankId) => handleApprove(approveExpense.id, 'APPROVED', bankId)}
-        />
-      )}
       <div className="page-header">
         <div>
           <div className="page-header-title">Expenses</div>
@@ -144,9 +79,6 @@ export default function ExpensesList() {
       </div>
 
       {error && <div className="alert alert-error mb-16">{error}</div>}
-      {canManage && pending.length > 0 && (
-        <div className="alert alert-warning mb-16">⚠️ {pending.length} expense(s) pending your approval</div>
-      )}
 
       <div className="card" style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
         <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{expenses.length} records — {pending.length} pending</span>
@@ -202,10 +134,6 @@ export default function ExpensesList() {
                   {canManage && (
                     <td>
                       <div style={{ display: 'flex', gap: 6 }}>
-                        {e.status === 'PENDING' && <>
-                          <button className="btn btn-success btn-sm" onClick={() => setApproveExpense(e)}>✓ Approve</button>
-                          <button className="btn btn-danger btn-sm" onClick={() => handleApprove(e.id, 'REJECTED')}>✕ Reject</button>
-                        </>}
                         {isToday(e.createdAt) && <button className="btn btn-ghost btn-sm" onClick={() => handleDelete(e.id)}>🗑</button>}
                       </div>
                     </td>
