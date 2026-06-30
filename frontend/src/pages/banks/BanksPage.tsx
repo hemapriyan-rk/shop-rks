@@ -175,9 +175,9 @@ export default function BanksPage() {
           </div>
 
           {/* Activity section — only real banks show activity */}
-          <div className="page-header-title" style={{ fontSize: 20, marginBottom: 16, marginTop: 40 }}>Recent Activity</div>
+          <div className="page-header-title" style={{ fontSize: 20, marginBottom: 16 }}>Recent Activity</div>
           {banks.map(bank => (
-            <div key={`activity-${bank.id}`} className="activity-card mb-32">
+            <div key={`activity-${bank.id}`} className="card mb-32">
               <div className="bank-activity-header">
                 <span className="bank-name-tag">
                   {bank.isCash ? '💵' : '🏦'} {bank.name}
@@ -402,71 +402,21 @@ export default function BanksPage() {
       )}
 
       <style>{`
-        .bank-card { 
-          padding: 28px; 
-          text-align: center; 
-          transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-          background: linear-gradient(145deg, rgba(255,255,255,0.03) 0%, rgba(0,0,0,0.1) 100%);
-          border: 1px solid rgba(255,255,255,0.05);
-          border-radius: 20px;
-          position: relative;
-          overflow: hidden;
-          backdrop-filter: blur(10px);
-        }
-        .bank-card::before {
-          content: '';
-          position: absolute;
-          top: 0; left: -100%;
-          width: 50%; height: 100%;
-          background: linear-gradient(to right, transparent, rgba(255,255,255,0.03), transparent);
-          transform: skewX(-25deg);
-          transition: all 0.7s;
-        }
-        .bank-card:hover::before {
-          left: 150%;
-        }
-        .bank-card:hover { 
-          transform: translateY(-8px) scale(1.02); 
-          box-shadow: 0 15px 35px rgba(0,0,0,0.2), 0 0 20px rgba(255,215,0,0.05);
-          border-color: rgba(255,255,255,0.1);
-        }
-        .cash-card { border: 1px dashed rgba(251,191,36,0.5); background: linear-gradient(145deg, rgba(251,191,36,0.05) 0%, rgba(0,0,0,0.02) 100%); }
-        .bank-card-icon { font-size: 42px; margin-bottom: 16px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2)); transition: transform 0.3s; }
-        .bank-card:hover .bank-card-icon { transform: scale(1.1) rotate(5deg); }
-        .bank-card-name { font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; font-size: 11px; margin-bottom: 12px; opacity: 0.8; }
-        .bank-card-balance { font-size: 32px; font-weight: 900; color: var(--color-accent); margin-bottom: 20px; text-shadow: 0 2px 10px rgba(0,0,0,0.3); letter-spacing: -0.5px; }
-        .cash-label { font-size: 13px; font-weight: 800; color: #f59e0b; background: rgba(245,158,11,0.15); padding: 6px 18px; border-radius: 30px; display: inline-block; margin-bottom: 20px; border: 1px solid rgba(245,158,11,0.2); }
-        .bank-card-meta { font-size: 12px; color: var(--text-muted); margin-bottom: 24px; padding-top: 16px; border-top: 1px dashed rgba(255,255,255,0.1); }
-        .bank-card-actions .btn { border-radius: 12px; font-weight: 600; transition: all 0.2s; }
-        .bank-card-actions .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.15); }
+        .bank-card { padding: 24px; text-align: center; transition: transform 0.2s; }
+        .bank-card:hover { transform: translateY(-4px); }
+        .cash-card { border: 2px dashed rgba(251,191,36,0.5); }
+        .bank-card-icon { font-size: 32px; margin-bottom: 12px; }
+        .bank-card-name { font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-size: 12px; margin-bottom: 8px; }
+        .bank-card-balance { font-size: 28px; font-weight: 900; color: var(--color-accent); margin-bottom: 16px; }
+        .cash-label { font-size: 13px; font-weight: 700; color: #d97706; background: rgba(251,191,36,0.12); padding: 4px 14px; border-radius: 20px; display: inline-block; margin-bottom: 16px; }
+        .bank-card-meta { font-size: 12px; color: var(--text-muted); margin-bottom: 20px; padding-top: 12px; border-top: 1px dashed var(--border-color); }
         .mt-8 { margin-top: 8px; }
         .mb-32 { margin-bottom: 32px; }
-        
-        .activity-card {
-          background: rgba(20,20,20, 0.4);
-          backdrop-filter: blur(16px);
-          -webkit-backdrop-filter: blur(16px);
-          border: 1px solid rgba(255,255,255,0.05);
-          border-radius: 24px;
-          padding: 28px;
-          transition: all 0.3s;
-        }
-        .activity-card:hover {
-          border-color: rgba(255,255,255,0.1);
-          box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-        }
-        .bank-activity-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .bank-name-tag { background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.02)); border: 1px solid rgba(255,255,255,0.05); padding: 6px 16px; border-radius: 12px; font-weight: 800; font-size: 15px; color: var(--color-accent); box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        .activity-section-title { font-size: 14px; font-weight: 800; margin-bottom: 16px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; }
-        
-        .table-compact { border-collapse: separate; border-spacing: 0; width: 100%; }
-        .table-compact th { background: rgba(0,0,0,0.2); padding: 12px 16px; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .table-compact th:first-child { border-top-left-radius: 12px; border-bottom-left-radius: 12px; }
-        .table-compact th:last-child { border-top-right-radius: 12px; border-bottom-right-radius: 12px; }
-        .table-compact td { padding: 12px 16px; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.02); transition: background 0.2s; }
-        .table-compact tbody tr:hover td { background: rgba(255,255,255,0.03); }
-        
-        .empty-sub { padding: 24px; text-align: center; color: var(--text-muted); font-size: 14px; background: rgba(0,0,0,0.1); border-radius: 16px; border: 1px dashed rgba(255,255,255,0.1); }
+        .bank-activity-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border-color); }
+        .bank-name-tag { background: var(--bg-secondary); padding: 4px 12px; border-radius: 6px; font-weight: 800; font-size: 14px; color: var(--color-accent); }
+        .activity-section-title { font-size: 13px; font-weight: 700; margin-bottom: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .table-compact th, .table-compact td { padding: 8px 12px; font-size: 13px; }
+        .empty-sub { padding: 16px; text-align: center; color: var(--text-muted); font-size: 13px; background: var(--bg-secondary); border-radius: 8px; border: 1px dashed var(--border-color); }
       `}</style>
     </Layout>
   );
