@@ -1,6 +1,6 @@
 {
   "name": "rks-backend",
-  "version": "1.0.33",
+  "version": "1.0.37",
   "description": "RKS Computer Centre — Backend API",
   "main": "dist/app.js",
   "scripts": {

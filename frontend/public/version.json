@@ -1,5 +1,5 @@
 {
-    "apkUrl": "/Shop_RKS_v1.0.36.apk",
-    "releaseNotes": "Fix logical issue in My Expenses and update version.",
-    "version": "1.0.36"
+    "apkUrl": "/Shop_RKS_v1.0.37.apk",
+    "releaseNotes": "Fix duplicate reconciliation cron job and clean up duplicate balance issues.",
+    "version": "1.0.37"
 }
