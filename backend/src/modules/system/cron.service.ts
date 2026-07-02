@@ -191,58 +191,47 @@ async function seedSystemUser() {
   }
 }
 
-async function fixDuplicateReconciliations() {
+async function recalculateBankBalances() {
   try {
-    const duplicatesQuery = await prisma.$queryRaw`
-      SELECT date, type, COUNT(*), MIN(id) as keep_id, SUM(amount) as total_amt
-      FROM auto_transactions
-      GROUP BY date, type
-      HAVING COUNT(*) > 1
-    `;
-    
-    const duplicates = duplicatesQuery as any[];
-    for (const dup of duplicates) {
-      const records = await prisma.autoTransaction.findMany({
-        where: { date: dup.date, type: dup.type },
-        orderBy: { createdAt: 'asc' }
+    const startDate = new Date('2026-07-01T00:00:00+05:30');
+
+    const cashBank = await prisma.bankAccount.findUnique({ where: { name: 'CASH-BALANCE' } });
+    if (cashBank) {
+      const autoTxs = await prisma.autoTransaction.aggregate({
+        where: { bankName: 'CASH-BALANCE', date: { gte: startDate } },
+        _sum: { amount: true }
       });
-      
-      if (records.length > 1) {
-        const keep = records[0];
-        const toDelete = records.slice(1);
-        
-        let excessAmount = 0;
-        for (const r of toDelete) {
-          excessAmount += Number(r.amount);
-        }
-        
-        if (keep.bankName) {
-          await prisma.bankAccount.updateMany({
-            where: { name: keep.bankName },
-            data: { balance: { decrement: excessAmount } }
-          });
-        }
-        
-        const duplicateIds = toDelete.map(r => r.id);
-        await prisma.log.deleteMany({
-          where: { recordId: { in: duplicateIds }, tableName: 'auto_transactions' }
-        });
-        
-        await prisma.autoTransaction.deleteMany({
-          where: { id: { in: duplicateIds } }
-        });
-        
-        console.log(`🔧 Fixed duplicate reconciliation for ${keep.type} on ${keep.date}. Refunded ${excessAmount} from ${keep.bankName}`);
-      }
+      const exps = await prisma.expense.aggregate({
+        where: { bankId: cashBank.id, status: 'APPROVED', createdAt: { gte: startDate } },
+        _sum: { amount: true }
+      });
+      const newBal = Number(autoTxs._sum.amount || 0) - Number(exps._sum.amount || 0);
+      await prisma.bankAccount.update({ where: { id: cashBank.id }, data: { balance: newBal } });
+      console.log(`✅ CASH-BALANCE reset to ${newBal} from 01/07/2026`);
+    }
+
+    const canaraBank = await prisma.bankAccount.findUnique({ where: { name: 'CANARA BANK' } });
+    if (canaraBank) {
+      const autoTxs = await prisma.autoTransaction.aggregate({
+        where: { bankName: 'CANARA BANK', date: { gte: startDate } },
+        _sum: { amount: true }
+      });
+      const exps = await prisma.expense.aggregate({
+        where: { bankId: canaraBank.id, status: 'APPROVED', createdAt: { gte: startDate } },
+        _sum: { amount: true }
+      });
+      const newBal = Number(autoTxs._sum.amount || 0) - Number(exps._sum.amount || 0);
+      await prisma.bankAccount.update({ where: { id: canaraBank.id }, data: { balance: newBal } });
+      console.log(`✅ CANARA BANK reset to ${newBal} from 01/07/2026`);
     }
   } catch (err) {
-    console.error('Error fixing duplicate reconciliations:', err);
+    console.error('Failed to recalculate balances:', err);
   }
 }
 
 export function initCronJobs() {
   seedSystemUser();
-  fixDuplicateReconciliations();
+  recalculateBankBalances();
 
   // ── Render Anti-Sleep Ping ──
   // Runs every 10 minutes ONLY between 6 AM and 11:59 PM (IST), Monday through Saturday
